@@ -1,488 +1,141 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QCM Objets Techniques & Matériaux - Évaluations</title>
-<style>
-    :root {
-        --bg: #F8F9FA;
-        --card-bg: #FFFFFF;
-        --primary: #1A3C6E;
-        --secondary: #2E86AB;
-        --success: #28A745;
-        --danger: #DC3545;
-        --warning: #FFC107;
-        --text: #212529;
-        --border: #DEE2E6;
-        --shadow: 0 2px 10px rgba(0,0,0,0.08);
-        --radius: 12px;
-        --transition: 0.3s ease;
-    }
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--bg);
-        color: var(--text);
-        line-height: 1.7;
-        font-size: 16px;
-    }
-
-    /* ============ HEADER ============ */
-    header {
-        background: var(--primary);
-        color: white;
-        padding: 20px 0;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.2);
-    }
-    .header-container {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 20px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 15px;
-    }
-    .logo h1 { font-size: 1.5rem; font-weight: 700; letter-spacing: 1px; }
-    .logo p { font-size: 0.8rem; opacity: 0.85; }
-    .btn-prof {
-        background: rgba(255,255,255,0.15);
-        color: white;
-        border: 1px solid rgba(255,255,255,0.4);
-        padding: 8px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-size: 0.85rem;
-        font-weight: 600;
-        transition: var(--transition);
-    }
-    .btn-prof:hover { background: rgba(255,255,255,0.3); }
-
-    .main-container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
-
-    /* ============ ÉCRAN DE CONNEXION ============ */
-    #loginScreen {
-        max-width: 500px;
-        margin: 50px auto;
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        padding: 40px;
-        box-shadow: 0 5px 25px rgba(0,0,0,0.15);
-        text-align: center;
-    }
-    #loginScreen h2 { color: var(--primary); margin-bottom: 10px; font-size: 1.8rem; }
-    #loginScreen .subtitle { color: #6C757D; margin-bottom: 30px; font-size: 0.95rem; }
-    .form-group { margin-bottom: 20px; text-align: left; }
-    .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: var(--primary); font-size: 0.9rem; }
-    .form-group input, .form-group select {
-        width: 100%;
-        padding: 12px 15px;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        font-size: 1rem;
-        transition: var(--transition);
-        background: #F8F9FA;
-    }
-    .form-group input:focus, .form-group select:focus {
-        outline: none;
-        border-color: var(--secondary);
-        background: white;
-    }
-    .btn-login {
-        width: 100%;
-        background: var(--secondary);
-        color: white;
-        border: none;
-        padding: 15px;
-        border-radius: 8px;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: var(--transition);
-        margin-top: 10px;
-    }
-    .btn-login:hover { background: var(--primary); transform: translateY(-2px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-    .btn-login:disabled { background: #ADB5BD; cursor: not-allowed; transform: none; }
-    .error-message {
-        background: #F8D7DA;
-        color: #721C24;
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 15px;
-        display: none;
-        border-left: 4px solid var(--danger);
-        text-align: left;
-    }
-    .error-message.active { display: block; }
-
-    /* ============ MENU DE SÉLECTION DU QCM ============ */
-    #menuScreen {
-        display: none;
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        padding: 40px;
-        box-shadow: var(--shadow);
-        text-align: center;
-    }
-    .menu-title { color: var(--primary); font-size: 1.6rem; margin: 25px 0; }
-    .menu-buttons { display: flex; flex-direction: column; gap: 18px; max-width: 420px; margin: 0 auto; }
-    .btn-quiz {
-        background: var(--card-bg); border: 3px solid var(--secondary); border-radius: var(--radius);
-        padding: 20px; font-size: 1.1rem; font-weight: 700; color: var(--primary);
-        cursor: pointer; transition: var(--transition); text-align: center;
-    }
-    .btn-quiz:hover:not(.completed) { background: var(--secondary); color: white; transform: translateY(-3px); box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
-    .btn-quiz.completed { border-color: var(--success); background: #D4EDDA; color: #155724; cursor: default; }
-
-    /* ============ BARRE D'INFOS ÉLÈVE ============ */
-    .student-info {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        padding: 20px;
-        margin-bottom: 25px;
-        box-shadow: var(--shadow);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 15px;
-        border-left: 5px solid var(--secondary);
-    }
-    .student-name { font-weight: 700; color: var(--primary); font-size: 1.1rem; }
-    .student-class { background: #E7F3FF; padding: 5px 15px; border-radius: 20px; color: var(--secondary); font-weight: 600; font-size: 0.9rem; }
-    .btn-logout {
-        background: #6C757D;
-        color: white;
-        border: none;
-        padding: 8px 20px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: var(--transition);
-        font-size: 0.85rem;
-    }
-    .btn-logout:hover { background: var(--danger); }
-    .ppa-badge { background: var(--warning); color: #856404; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; }
-
-    /* ============ CHRONOMÈTRE ============ */
-    .timer-container {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        padding: 15px 25px;
-        margin-bottom: 25px;
-        box-shadow: var(--shadow);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 20px;
-        flex-wrap: wrap;
-    }
-    .timer-display {
-        font-size: 2rem;
-        font-weight: 700;
-        font-family: 'Courier New', monospace;
-        color: var(--primary);
-        min-width: 80px;
-        text-align: center;
-    }
-    .timer-display.urgent { color: var(--danger); animation: pulse 1s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
-    .timer-label { font-size: 0.9rem; color: #6C757D; }
-
-    /* ============ QUESTION CARD ============ */
-    .question-card {
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        padding: 25px;
-        margin-bottom: 20px;
-        box-shadow: var(--shadow);
-        border-left: 5px solid var(--secondary);
-        transition: var(--transition);
-        display: none;
-    }
-    .question-card.active { display: block; }
-    .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px; }
-    .question-number { background: var(--secondary); color: white; padding: 5px 15px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
-    .question-text { font-size: 1.05rem; font-weight: 600; margin-bottom: 15px; color: var(--primary); }
-
-    /* ============ OPTIONS ============ */
-    .options { display: flex; flex-direction: column; gap: 10px; }
-    .option {
-        display: flex;
-        align-items: center;
-        padding: 12px 15px;
-        border: 2px solid var(--border);
-        border-radius: 8px;
-        cursor: pointer;
-        transition: var(--transition);
-        background: #F8F9FA;
-    }
-    .option:hover:not(.disabled) { border-color: var(--secondary); background: #E7F3FF; }
-    .option input[type="radio"] { margin-right: 15px; width: 18px; height: 18px; cursor: pointer; accent-color: var(--secondary); }
-    .option label { cursor: pointer; flex: 1; font-size: 0.95rem; }
-    .option.selected { border-color: var(--secondary); background: #E7F3FF; }
-    .option.correct-answer { border-color: var(--success); background: #D4EDDA; }
-    .option.wrong-answer { border-color: var(--danger); background: #F8D7DA; }
-    .option.disabled { cursor: not-allowed; opacity: 0.85; }
-
-    .explanation {
-        margin-top: 12px;
-        padding: 12px 15px;
-        background: #E7F3FF;
-        border-left: 4px solid var(--secondary);
-        border-radius: 6px;
-        font-size: 0.9rem;
-        display: none;
-    }
-    .explanation.active { display: block; }
-
-    .btn-next {
-        background: var(--secondary);
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 25px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: var(--transition);
-        font-size: 1rem;
-        margin-top: 20px;
-        display: none;
-    }
-    .btn-next:hover { background: var(--primary); transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-    .btn-next.active { display: inline-block; }
-
-    /* ============ RÉSULTAT FINAL ============ */
-    .resultat-final {
-        display: none;
-        background: var(--card-bg);
-        border-radius: var(--radius);
-        padding: 40px;
-        margin-top: 30px;
-        box-shadow: var(--shadow);
-        text-align: center;
-    }
-    .resultat-final.active { display: block; }
-    .resultat-final h3 { color: var(--primary); font-size: 1.8rem; margin-bottom: 20px; }
-    .score-circle {
-        width: 180px;
-        height: 180px;
-        border-radius: 50%;
-        background: var(--primary);
-        color: white;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin: 20px auto;
-        flex-direction: column;
-        line-height: 1.2;
-    }
-    .score-circle span { font-size: 1rem; font-weight: 400; }
-    .mention { font-size: 1.5rem; font-weight: 700; margin: 20px 0; }
-    .mention.excellent { color: var(--success); }
-    .mention.bien { color: var(--secondary); }
-    .mention.moyen { color: var(--warning); }
-    .mention.insuffisant { color: var(--danger); }
-
-    .btn-menu, .btn-secondary {
-        background: #6C757D;
-        color: white;
-        border: none;
-        padding: 12px 25px;
-        border-radius: 25px;
-        cursor: pointer;
-        font-weight: 600;
-        margin-top: 20px;
-        font-size: 0.95rem;
-        transition: var(--transition);
-    }
-    .btn-menu:hover, .btn-secondary:hover { background: var(--primary); }
-
-    /* ============ ESPACE PROFESSEUR (modale) ============ */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: rgba(0,0,0,0.5);
-        z-index: 1000;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-    .modal-overlay.active { display: flex; }
-    .modal-box {
-        background: white;
-        border-radius: var(--radius);
-        padding: 30px;
-        max-width: 550px;
-        width: 100%;
-        max-height: 85vh;
-        overflow-y: auto;
-    }
-    .modal-box h3 { color: var(--primary); margin-bottom: 15px; }
-    .btn-close-modal {
-        background: #6C757D;
-        color: white;
-        border: none;
-        padding: 8px 18px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: 600;
-        margin-top: 15px;
-    }
-    .btn-close-modal:hover { background: var(--danger); }
-    table.results-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.8rem; }
-    table.results-table th, table.results-table td { border: 1px solid var(--border); padding: 6px 8px; text-align: left; }
-    table.results-table th { background: #E7F3FF; color: var(--primary); }
-
-    /* ============ FOOTER ============ */
-    footer { background: var(--primary); color: white; text-align: center; padding: 30px 20px; margin-top: 50px; }
-    footer p { margin-bottom: 10px; font-size: 0.9rem; }
-
-    /* ============ RESPONSIVE ============ */
-    @media (max-width: 768px) {
-        .header-container { flex-direction: column; text-align: center; }
-        #loginScreen { padding: 25px; margin: 20px auto; }
-        .question-card { padding: 18px; }
-        .timer-display { font-size: 1.5rem; }
-        .student-info { flex-direction: column; text-align: center; }
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site-Techno – Portail & Évaluations Technologie Collège</title>
+    <!-- Styles unifiés du projet -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- ==================== HEADER ==================== -->
+<!-- ==================== HEADER UNIFIÉ ==================== -->
 <header>
     <div class="header-container">
-        <div class="logo">
-            <h1>QCM OBJETS TECHNIQUES & MATÉRIAUX</h1>
-            <p>Évaluations - Technologie 4ème</p>
+        <div class="logo" onclick="if(currentStudent) showDashboard();">
+            <span class="logo-icon">⚙️</span>
+            <div>
+                <h1>SITE-TECHNO</h1>
+                <p>Technologie Collège – 5ème | 4ème | 3ème</p>
+            </div>
         </div>
-        <button class="btn-prof" onclick="openProfModal()">🔐 Espace professeur</button>
+        <div class="header-actions">
+            <button class="btn-prof" onclick="openProfModal()">🔐 Espace professeur</button>
+        </div>
     </div>
 </header>
 
 <div class="main-container">
 
-    <!-- ============ ÉCRAN DE CONNEXION ============ -->
+    <!-- ============ ÉCRAN 1 : CONNEXION ÉLÈVE ============ -->
     <div id="loginScreen">
-        <h2>🔐 Connexion</h2>
-        <p class="subtitle">Veuillez vous identifier pour accéder aux évaluations</p>
+        <h2>🔐 Identification Élève</h2>
+        <p class="subtitle">Sélectionnez vos identifiants pour accéder à vos activités</p>
 
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="form-group">
-                <label for="selectNom">👤 Votre nom :</label>
+                <label for="selectNom">👤 Nom de famille :</label>
                 <select id="selectNom" required onchange="onNomChange()">
-                    <option value="">-- Choisir --</option>
+                    <option value="">-- Choisir votre nom --</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="selectPrenom">👤 Votre prénom :</label>
+                <label for="selectPrenom">👤 Prénom :</label>
                 <select id="selectPrenom" required disabled onchange="onPrenomChange()">
                     <option value="">-- Sélectionnez d'abord votre nom --</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="selectClasse">🏫 Votre classe :</label>
+                <label for="selectClasse">🏫 Classe :</label>
                 <select id="selectClasse" required disabled>
                     <option value="">-- Sélectionnez d'abord votre prénom --</option>
                 </select>
             </div>
 
             <div class="form-group">
-                <label for="codeSecret">🔑 Mot de passe :</label>
-                <input type="password" id="codeSecret" placeholder="Mot de passe donné par le professeur" required>
+                <label for="codeSecret">🔑 Mot de passe élève :</label>
+                <input type="password" id="codeSecret" placeholder="Mot de passe transmis par le professeur" required>
             </div>
 
             <div id="loginError" class="error-message"></div>
-            <div id="loginInfo" class="error-message" style="background:#E7F3FF; color:var(--primary); border-left-color:var(--secondary);"></div>
 
             <button type="submit" class="btn-login" id="btnLogin">Se connecter</button>
         </form>
 
-        <p style="margin-top: 20px; font-size: 0.85rem; color: #6C757D;">
-            📋 Un seul passage compté par QCM. Contactez votre professeur en cas de problème.
+        <p style="margin-top: 20px; font-size: 0.85rem; color: var(--text-muted);">
+            📋 Vos accès et temps d'évaluation sont personnalisés selon votre profil.
         </p>
     </div>
 
-    <!-- ============ MENU DE SÉLECTION DU QCM ============ -->
-    <div id="menuScreen">
-        <div class="student-info" id="studentInfoMenu">
-            <div>
-                <span class="student-name" id="displayNameMenu"></span>
-                <span class="student-class" id="displayClassMenu" style="margin-left: 10px;"></span>
-                <span class="ppa-badge" id="displayPPAMenu" style="display: none; margin-left: 10px;">🎓 PPA</span>
+    <!-- ============ ÉCRAN 2 : TABLEAU DE BORD (DASHBOARD PAR NIVEAU) ============ -->
+    <div id="dashboardScreen">
+        <!-- Barre d'information de l'élève connecté -->
+        <div class="student-bar">
+            <div class="student-bar-info">
+                <span class="student-name" id="displayNameBar"></span>
+                <span class="student-class" id="displayClassBar"></span>
+                <span class="level-badge" id="displayLevelBar"></span>
+                <span class="ppa-badge" id="displayPPABar" style="display: none;">🎓 PPA (+15% temps)</span>
             </div>
             <button class="btn-logout" onclick="logout()">🚪 Déconnexion</button>
         </div>
-        <h2 class="menu-title">📚 Choisissez votre QCM</h2>
-        <div class="menu-buttons">
-            <button class="btn-quiz" id="btnQuiz1" onclick="handleQuizButtonClick(1)">Score 1 – QCM Type Objets</button>
-            <button class="btn-quiz" id="btnQuiz2" onclick="handleQuizButtonClick(2)">Score 2 – QCM Objets & Matériaux 1</button>
-            <button class="btn-quiz" id="btnQuiz3" onclick="handleQuizButtonClick(3)">Score 3 – QCM Objets & Matériaux 2</button>
+
+        <div class="dashboard-header">
+            <h2 class="dashboard-title">📚 Espaces d'apprentissage & Activités</h2>
+            <p class="dashboard-subtitle">Sélectionnez une activité disponible ou choisissez votre niveau</p>
         </div>
+
+        <!-- Onglets de sélection des niveaux (5ème, 4ème, 3ème) -->
+        <div class="level-tabs">
+            <button class="tab-btn" data-level="5eme" onclick="switchLevelTab('5eme')">📗 Niveau 5ème</button>
+            <button class="tab-btn active" data-level="4eme" onclick="switchLevelTab('4eme')">📘 Niveau 4ème</button>
+            <button class="tab-btn" data-level="3eme" onclick="switchLevelTab('3eme')">📙 Niveau 3ème</button>
+        </div>
+
+        <!-- Grille dynamique des activités -->
+        <div class="activities-grid" id="activitiesGrid"></div>
     </div>
 
-    <!-- ============ ÉCRAN DU QCM ============ -->
-    <div id="quizScreen" style="display: none;">
-
-        <div class="student-info" id="studentInfo">
-            <div>
-                <span class="student-name" id="displayName"></span>
-                <span class="student-class" id="displayClass" style="margin-left: 10px;"></span>
-                <span class="ppa-badge" id="displayPPA" style="display: none; margin-left: 10px;">🎓 PPA</span>
-            </div>
-            <button class="btn-logout" onclick="abandonQuiz()">🚪 Abandonner</button>
-        </div>
-
-        <div class="timer-container">
-            <span class="timer-label">⏱️ Temps restant :</span>
-            <span class="timer-display" id="timerDisplay">00:00</span>
-            <span class="timer-label" id="timerInfo"></span>
-        </div>
-
-        <div id="quizContainer"></div>
-
-        <div class="resultat-final" id="resultatFinal">
-            <h3>📊 Résultat final</h3>
-            <div class="score-circle" id="scoreCircle">
-                <span id="finalScore">0</span>
-                <span id="scoreTotal">/ 10</span>
-            </div>
-            <p class="mention" id="mention"></p>
-            <p id="messageResultat"></p>
-            <p id="saveStatus" style="margin-top: 15px; font-weight: 600;"></p>
-            <button class="btn-menu" onclick="backToMenu()">↩️ Retour au menu</button>
-        </div>
-
+    <!-- ============ ÉCRAN 3 : VISIONNEUSE / ACTIVITÉ EN COURS ============ -->
+    <div id="activityScreen">
+        <button class="btn-back-dashboard" onclick="showDashboard(currentStudent ? currentStudent.niveau : '4eme')">
+            ⬅️ Retour au tableau de bord
+        </button>
+        <div id="activityContent"></div>
     </div>
 
 </div>
 
-<!-- ============ MODALE ESPACE PROFESSEUR ============ -->
+<!-- ============ MODALE : ESPACE PROFESSEUR ============ -->
 <div class="modal-overlay" id="profModalOverlay">
     <div class="modal-box">
+        <!-- Connexion Professeur -->
         <div id="profLoginView">
-            <h3>🔐 Accès professeur</h3>
+            <h3>🔐 Accès Espace Professeur</h3>
             <div class="form-group">
-                <label for="profPassword">Mot de passe :</label>
-                <input type="password" id="profPassword" placeholder="Mot de passe professeur">
+                <label for="profPassword">Mot de passe enseignant :</label>
+                <input type="password" id="profPassword" placeholder="Entrez le mot de passe professeur">
             </div>
             <div id="profError" class="error-message"></div>
             <button class="btn-login" onclick="checkProfPassword()">Valider</button>
             <button class="btn-close-modal" onclick="closeProfModal()">Fermer</button>
         </div>
+
+        <!-- Espace de Gestion Professeur -->
         <div id="profResultsView" style="display:none;">
-            <h3>📊 Résultats enregistrés (sauvegarde locale)</h3>
+            <h3>⚙️ Déverrouillage des Activités & Évaluations</h3>
+
+            <div id="profUnlockContent" style="margin-bottom: 25px;"></div>
+
+            <h3>📊 Résultats des Évaluations (Sauvegarde Locale)</h3>
             <div id="profResultsContent"></div>
-            <button class="btn-login" onclick="exportCSV()">⬇️ Exporter en CSV</button>
-            <button class="btn-secondary" onclick="clearAllResults()" style="background: var(--danger);">🗑️ Effacer tous les résultats</button>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn-login" onclick="exportCSV()" style="flex: 1;">⬇️ Exporter CSV</button>
+                <button class="btn-secondary" onclick="clearAllResults()" style="background: var(--danger); border:none; padding:12px; border-radius:8px; color:white; font-weight:600; cursor:pointer;">🗑️ Effacer résultats</button>
+            </div>
             <button class="btn-close-modal" onclick="closeProfModal()">Fermer</button>
         </div>
     </div>
@@ -490,937 +143,17 @@
 
 <!-- ==================== FOOTER ==================== -->
 <footer>
-    <p>Outil pédagogique - Technologie cycle 4</p>
-    <p style="opacity: 0.7; font-size: 0.85rem;">📶 Connexion internet requise (vérification annuaire et enregistrement des résultats)</p>
+    <p>Portail Pédagogique - Technologie Collège Cycle 4</p>
+    <p style="opacity: 0.75; font-size: 0.82rem;">📶 Connexion internet requise pour la synchronisation annuaire et résultats</p>
 </footer>
 
-<!-- ==================== JAVASCRIPT ==================== -->
-<script>
-    // =====================================================
-    // CONFIGURATION
-    // =====================================================
-    const PROF_PASSWORD = "prof2024";
-    const TEMPS_PAR_QUESTION = 60; // secondes, par question (10 questions par QCM)
-    const PPA_BONUS_PERCENTAGE = 15;
-    const STORAGE_KEY = "qcm_materiaux_resultats";
-
-    // 📌 Annuaire 4ème : lu automatiquement depuis le Google Sheet.
-    //    Le Sheet doit être partagé au minimum en "Toute personne
-    //    disposant du lien : Lecteur" pour que l'export CSV fonctionne.
-    const ANNUAIRE_CSV_URL = 'https://docs.google.com/spreadsheets/d/1-u2cr0GIEheeC4C4aSozYghTIE-H_EtsPt9ZGmdict4/export?format=csv';
-
-    // 📌 Lecture du Sheet résultats (pour vérifier si un élève a déjà
-    //    passé un QCM donné). Colonnes attendues, dans cet ordre :
-    //    Nom ; Prenom ; Classe ; Score 1 ; Score 2 ; Score 3 ; pourcentage ; Date
-    const RESULTS_CSV_URL = 'https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/export?format=csv';
-
-    // 📌 URL de l'Apps Script Web App déployé sur le Sheet résultats
-    //    (à coller une fois le déploiement fait — voir instructions fournies).
-    const RESULTS_WEB_APP_URL = 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE';
-
-    // Annuaire chargé dynamiquement au démarrage
-    let annuaireEleves = [];
-
-    // =====================================================
-    // DONNÉES DES QCM
-    // =====================================================
-    const questionsScore1 = [
-        {
-            question: "Quel est le principal avantage d'un objet en acier inoxydable par rapport à un objet en acier ordinaire ?",
-            options: ["Il est plus léger", "Il résiste mieux à la corrosion", "Il conduit mieux l'électricité", "Il est moins cher à produire"],
-            correct: 1,
-            explanation: "L'acier inoxydable contient du chrome (au moins 10,5%) qui forme une couche protectrice d'oxyde de chrome en surface, empêchant la corrosion."
-        },
-        {
-            question: "Quel matériau est le meilleur isolant thermique ?",
-            options: ["L'aluminium", "Le cuivre", "La laine de verre", "L'acier"],
-            correct: 2,
-            explanation: "La laine de verre est un excellent isolant thermique car elle emprisonne de l'air dans ses fibres. L'air immobile est un très mauvais conducteur de chaleur."
-        },
-        {
-            question: "La masse volumique d'un matériau s'exprime en :",
-            options: ["kg/m³", "N/m²", "W/(m·K)", "m/s²"],
-            correct: 0,
-            explanation: "La masse volumique (ρ) est le rapport de la masse d'un corps à son volume. Elle s'exprime en kilogrammes par mètre cube (kg/m³)."
-        },
-        {
-            question: "Quel procédé permet d'améliorer la dureté superficielle d'une pièce en acier ?",
-            options: ["Le recuit", "La trempe superficielle", "Le laminage à froid", "Le soudage"],
-            correct: 1,
-            explanation: "La trempe superficielle chauffe rapidement la surface de la pièce puis la refroidit brutalement, durcissant la couche externe."
-        },
-        {
-            question: "Le coefficient de dilatation thermique caractérise :",
-            options: ["La variation de dimension avec la température", "La résistance à la traction", "La conductivité électrique", "La résistance aux chocs"],
-            correct: 0,
-            explanation: "Le coefficient de dilatation thermique (α) mesure la variation relative de longueur ou de volume d'un matériau en fonction de la température."
-        },
-        {
-            question: "Quelle est la principale différence entre un matériau ductile et un matériau fragile ?",
-            options: ["Le matériau ductile se déforme avant de rompre", "Le matériau fragile est plus lourd", "Le matériau ductile est transparent", "Le matériau fragile conduit mieux la chaleur"],
-            correct: 0,
-            explanation: "Un matériau ductile subit une déformation plastique importante avant de rompre, contrairement à un matériau fragile qui rompt sans déformation significative."
-        },
-        {
-            question: "Dans un diagramme de traction, la limite d'élasticité correspond :",
-            options: ["À la fin de la zone élastique", "Au point de rupture", "Au début de l'essai", "À la charge maximale"],
-            correct: 0,
-            explanation: "La limite d'élasticité (Re) marque la transition entre le domaine élastique (déformations réversibles) et le domaine plastique (déformations permanentes)."
-        },
-        {
-            question: "Quel est le rôle principal d'un traitement de surface par galvanisation ?",
-            options: ["Protéger contre la corrosion", "Augmenter la conductivité électrique", "Réduire le poids de la pièce", "Améliorer la transparence"],
-            correct: 0,
-            explanation: "La galvanisation consiste à recouvrir l'acier d'une couche de zinc qui s'oxyde à la place de l'acier (protection sacrificielle)."
-        },
-        {
-            question: "La conductivité thermique d'un matériau indique :",
-            options: ["Sa capacité à transmettre la chaleur", "Sa résistance mécanique", "Sa couleur", "Son magnétisme"],
-            correct: 0,
-            explanation: "La conductivité thermique (λ) mesure la capacité d'un matériau à conduire la chaleur. Elle s'exprime en W/(m·K)."
-        },
-        {
-            question: "Parmi ces matériaux, lequel est un matériau composite ?",
-            options: ["Le verre trempé", "La fibre de carbone / époxy", "Le laiton", "L'aluminium pur"],
-            correct: 1,
-            explanation: "Un matériau composite est constitué d'une matrice (époxy) et d'un renfort (fibres de carbone), offrant des propriétés supérieures combinées."
-        }
-    ];
-
-    const questionsScore2 = [
-        {
-            question: "Quelle est l'unité de la résistance à la traction ?",
-            options: ["Pascal (Pa)", "Newton (N)", "Joule (J)", "Watt (W)"],
-            correct: 0,
-            explanation: "La résistance à la traction (Rm) est une contrainte, c'est-à-dire une force rapportée à une surface ; elle s'exprime donc en pascals (Pa)."
-        },
-        {
-            question: "Lequel de ces matériaux est le plus léger ?",
-            options: ["L'acier", "L'aluminium", "Le cuivre", "Le titane"],
-            correct: 1,
-            explanation: "L'aluminium a une masse volumique d'environ 2700 kg/m³, nettement inférieure à celle de l'acier, du cuivre ou du titane."
-        },
-        {
-            question: "Qu'est-ce que la ténacité d'un matériau ?",
-            options: ["Sa capacité à résister aux chocs", "Sa résistance à la compression", "Sa dureté superficielle", "Sa conductivité thermique"],
-            correct: 0,
-            explanation: "La ténacité caractérise la capacité d'un matériau à résister à la propagation de fissures et donc aux chocs, sans se rompre brutalement."
-        },
-        {
-            question: "La corrosion est un phénomène :",
-            options: ["Chimique", "Mécanique", "Électrique uniquement", "Optique"],
-            correct: 0,
-            explanation: "La corrosion résulte d'une réaction chimique, souvent électrochimique, entre le matériau et son environnement (ex : oxydation du fer)."
-        },
-        {
-            question: "Quel matériau est utilisé pour les filaments d'ampoules à incandescence ?",
-            options: ["Le tungstène", "Le fer", "Le zinc", "Le nickel"],
-            correct: 0,
-            explanation: "Le tungstène possède la température de fusion la plus élevée de tous les métaux (environ 3400°C), idéale pour un filament chauffé."
-        },
-        {
-            question: "Le module d'Young (E) mesure :",
-            options: ["La rigidité d'un matériau", "Sa densité", "Sa conductivité électrique", "Son point de fusion"],
-            correct: 0,
-            explanation: "Le module d'Young relie la contrainte à la déformation élastique : plus il est élevé, plus le matériau est rigide."
-        },
-        {
-            question: "Quel traitement thermique rend l'acier plus dur mais plus fragile ?",
-            options: ["La trempe", "Le recuit", "Le revenu", "La normalisation"],
-            correct: 0,
-            explanation: "La trempe refroidit rapidement l'acier chauffé, augmentant sa dureté mais diminuant sa ténacité."
-        },
-        {
-            question: "Laquelle de ces matières plastiques est thermodurcissable ?",
-            options: ["Le polyéthylène", "Le PVC", "La bakélite", "Le polystyrène"],
-            correct: 2,
-            explanation: "La bakélite, une fois moulée et polymérisée, ne peut plus être refondue, contrairement aux thermoplastiques comme le PVC."
-        },
-        {
-            question: "Quel est le principal composant du verre ?",
-            options: ["Le sable (silice)", "Le calcaire", "L'argile", "Le gypse"],
-            correct: 0,
-            explanation: "Le verre est obtenu en fondant du sable siliceux (silice, SiO2), généralement avec de la soude et de la chaux."
-        },
-        {
-            question: "Quelle est la propriété principale d'un matériau réfractaire ?",
-            options: ["Résister aux hautes températures", "Conduire l'électricité", "Être transparent", "Être magnétique"],
-            correct: 0,
-            explanation: "Un matériau réfractaire conserve ses propriétés mécaniques à très haute température, utile dans les fours industriels."
-        }
-    ];
-
-    const questionsScore3 = [
-        {
-            question: "Lequel de ces matériaux est un alliage ?",
-            options: ["Le fer pur", "L'aluminium pur", "Le laiton", "Le cuivre pur"],
-            correct: 2,
-            explanation: "Le laiton est un alliage de cuivre et de zinc, contrairement aux métaux purs proposés dans les autres réponses."
-        },
-        {
-            question: "La résilience d'un matériau caractérise :",
-            options: ["Sa résistance aux chocs", "Sa conductivité thermique", "Sa masse volumique", "Sa couleur"],
-            correct: 0,
-            explanation: "La résilience mesure l'énergie qu'un matériau peut absorber avant de se rompre sous un choc (essai de résilience Charpy)."
-        },
-        {
-            question: "Qu'est-ce que le fluage ?",
-            options: ["Déformation lente sous charge constante", "Rupture brutale", "Corrosion", "Dilatation thermique"],
-            correct: 0,
-            explanation: "Le fluage est une déformation progressive et lente d'un matériau soumis à une contrainte constante, souvent à température élevée."
-        },
-        {
-            question: "Quel métal est le meilleur conducteur électrique ?",
-            options: ["L'argent", "Le cuivre", "L'or", "L'aluminium"],
-            correct: 0,
-            explanation: "L'argent possède la meilleure conductivité électrique de tous les métaux, même si le cuivre lui est souvent préféré pour son coût."
-        },
-        {
-            question: "Le PVC est un matériau :",
-            options: ["Thermoplastique", "Thermodurcissable", "Métallique", "Céramique"],
-            correct: 0,
-            explanation: "Le PVC est un thermoplastique : il se ramollit sous l'effet de la chaleur et peut être remis en forme plusieurs fois."
-        },
-        {
-            question: "Quelle est la température de fusion approximative de l'aluminium ?",
-            options: ["660°C", "1000°C", "1500°C", "2000°C"],
-            correct: 0,
-            explanation: "L'aluminium fond à environ 660°C, une température bien inférieure à celle de l'acier (environ 1500°C)."
-        },
-        {
-            question: "Lequel de ces matériaux est un bon isolant électrique ?",
-            options: ["Le caoutchouc", "Le cuivre", "L'aluminium", "Le fer"],
-            correct: 0,
-            explanation: "Le caoutchouc est un isolant électrique couramment utilisé pour la gaine des câbles, contrairement aux métaux qui sont conducteurs."
-        },
-        {
-            question: "Qu'est-ce que l'écrouissage ?",
-            options: ["Durcissement par déformation plastique", "Traitement thermique", "Corrosion", "Polissage"],
-            correct: 0,
-            explanation: "L'écrouissage est le durcissement d'un métal provoqué par une déformation plastique à froid (martelage, laminage)."
-        },
-        {
-            question: "Quel matériau est utilisé pour les aimants permanents ?",
-            options: ["Le fer doux", "L'acier au cobalt", "L'aluminium", "Le cuivre"],
-            correct: 1,
-            explanation: "Les aimants permanents utilisent des alliages comme l'acier au cobalt, qui conservent leur aimantation, contrairement au fer doux."
-        },
-        {
-            question: "La fatigue d'un matériau est due à :",
-            options: ["Des sollicitations cycliques", "Une surchauffe", "Un choc unique", "Une corrosion"],
-            correct: 0,
-            explanation: "La fatigue résulte de sollicitations répétées (cycliques), même d'intensité modérée, pouvant conduire à une rupture progressive."
-        }
-    ];
-
-    const allQuizData = {
-        1: { questions: questionsScore1, nom: "Score 1 – QCM Type Objets" },
-        2: { questions: questionsScore2, nom: "Score 2 – QCM Objets & Matériaux 1" },
-        3: { questions: questionsScore3, nom: "Score 3 – QCM Objets & Matériaux 2" }
-    };
-
-    // =====================================================
-    // VARIABLES GLOBALES
-    // =====================================================
-    let currentStudent = null;
-    let currentQuizType = null; // 1, 2 ou 3
-    let currentQuestionIndex = 0;
-    let score = 0;
-    let timerInterval = null;
-    let timeRemaining = 0;
-    let totalTime = 0;
-    let answers = [];
-    let quizFinished = false;
-
-    // =====================================================
-    // OUTILS DE STOCKAGE LOCAL (résultats + anti-doublon)
-    // =====================================================
-    function getStoredResults() {
-        try {
-            return JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        } catch (e) {
-            return [];
-        }
-    }
-
-    function saveResultLocally(result) {
-        const results = getStoredResults();
-        results.push(result);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(results));
-    }
-
-    function quizAlreadyDoneLocally(nom, prenom, classe, quizType) {
-        const results = getStoredResults();
-        return results.some(r => r.nom === nom && r.prenom === prenom && r.classe === classe && r.quizType === quizType);
-    }
-
-    // Vérifie côté Sheet résultats si le QCM a déjà été enregistré pour
-    // cet élève (colonne Score 1 / 2 / 3 déjà renseignée). Best-effort :
-    // si le Sheet n'est pas accessible, on se rabat sur la vérification locale.
-    async function quizAlreadyDoneOnline(nom, prenom, classe, quizType) {
-        try {
-            const response = await fetch(RESULTS_CSV_URL);
-            if (!response.ok) return false;
-            const csvData = await response.text();
-            const lines = csvData.split('\n').filter(l => l.trim() !== '');
-            const scoreColIndex = 2 + quizType; // Nom=0 Prenom=1 Classe=2 Score1=3 Score2=4 Score3=5
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(/[;,]/).map(v => v.trim());
-                if (values[0] === nom && values[1] === prenom && values[2] === classe) {
-                    return values[scoreColIndex] !== undefined && values[scoreColIndex] !== '';
-                }
-            }
-            return false;
-        } catch (e) {
-            console.warn('⚠️ Vérification en ligne impossible, on se base sur le stockage local.', e);
-            return false;
-        }
-    }
-
-    // =====================================================
-    // CHARGEMENT DE L'ANNUAIRE DEPUIS GOOGLE SHEETS
-    // =====================================================
-    async function loadAnnuaire() {
-        const btnLogin = document.getElementById('btnLogin');
-        btnLogin.disabled = true;
-        btnLogin.textContent = "Chargement de l'annuaire...";
-
-        try {
-            const response = await fetch(ANNUAIRE_CSV_URL);
-            if (!response.ok) throw new Error('Réponse HTTP ' + response.status);
-            const csvData = await response.text();
-
-            const lines = csvData.split('\n').filter(l => l.trim() !== '');
-            const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
-
-            const nomIndex = headers.findIndex(h => h === 'nom');
-            const prenomIndex = headers.findIndex(h => h === 'prénom' || h === 'prenom');
-            const classeIndex = headers.findIndex(h => h === 'classe');
-            const pwdIndex = headers.findIndex(h => h === 'mot_de_passe' || h === 'mot de passe' || h === 'code_secret' || h === 'password');
-            const ppaIndex = headers.findIndex(h => h === 'ppa');
-
-            if (nomIndex === -1 || prenomIndex === -1 || classeIndex === -1 || pwdIndex === -1) {
-                throw new Error('Colonnes attendues introuvables (nom / prénom / classe / mot_de_passe)');
-            }
-
-            annuaireEleves = [];
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
-                if (values[nomIndex]) {
-                    annuaireEleves.push({
-                        nom: values[nomIndex],
-                        prenom: values[prenomIndex],
-                        classe: values[classeIndex],
-                        motDePasse: values[pwdIndex],
-                        ppa: ppaIndex !== -1 ? ['oui', 'true', '1'].includes((values[ppaIndex] || '').toLowerCase()) : false
-                    });
-                }
-            }
-
-            console.log(`✅ ${annuaireEleves.length} élèves chargés depuis l'annuaire`);
-            fillNomSelect();
-            btnLogin.disabled = false;
-            btnLogin.textContent = 'Se connecter';
-
-        } catch (error) {
-            console.error("❌ Erreur lors du chargement de l'annuaire:", error);
-            showLoginError("⚠️ Impossible de charger l'annuaire en ligne. Vérifiez la connexion internet ou contactez votre professeur.");
-            btnLogin.disabled = false;
-            btnLogin.textContent = 'Se connecter';
-        }
-    }
-
-    // =====================================================
-    // SÉLECTION EN CASCADE : NOM → PRÉNOM → CLASSE
-    // =====================================================
-    function fillNomSelect() {
-        const select = document.getElementById('selectNom');
-        select.innerHTML = '<option value="">-- Choisir --</option>';
-        const noms = [...new Set(annuaireEleves.map(e => e.nom))].sort();
-        noms.forEach(nom => {
-            const option = document.createElement('option');
-            option.value = nom;
-            option.textContent = nom;
-            select.appendChild(option);
-        });
-    }
-
-    function onNomChange() {
-        const nom = document.getElementById('selectNom').value;
-        const selectPrenom = document.getElementById('selectPrenom');
-        const selectClasse = document.getElementById('selectClasse');
-
-        selectClasse.innerHTML = '<option value="">-- Sélectionnez d\'abord votre prénom --</option>';
-        selectClasse.disabled = true;
-
-        if (!nom) {
-            selectPrenom.innerHTML = '<option value="">-- Sélectionnez d\'abord votre nom --</option>';
-            selectPrenom.disabled = true;
-            return;
-        }
-
-        const prenoms = [...new Set(annuaireEleves.filter(e => e.nom === nom).map(e => e.prenom))].sort();
-        selectPrenom.innerHTML = '<option value="">-- Choisir --</option>';
-        prenoms.forEach(prenom => {
-            const option = document.createElement('option');
-            option.value = prenom;
-            option.textContent = prenom;
-            selectPrenom.appendChild(option);
-        });
-        selectPrenom.disabled = false;
-
-        if (prenoms.length === 1) {
-            selectPrenom.value = prenoms[0];
-            onPrenomChange();
-        }
-    }
-
-    function onPrenomChange() {
-        const nom = document.getElementById('selectNom').value;
-        const prenom = document.getElementById('selectPrenom').value;
-        const selectClasse = document.getElementById('selectClasse');
-
-        if (!prenom) {
-            selectClasse.innerHTML = '<option value="">-- Sélectionnez d\'abord votre prénom --</option>';
-            selectClasse.disabled = true;
-            return;
-        }
-
-        const classes = [...new Set(annuaireEleves.filter(e => e.nom === nom && e.prenom === prenom).map(e => e.classe))].sort();
-        selectClasse.innerHTML = '<option value="">-- Choisir --</option>';
-        classes.forEach(classe => {
-            const option = document.createElement('option');
-            option.value = classe;
-            option.textContent = classe;
-            selectClasse.appendChild(option);
-        });
-        selectClasse.disabled = false;
-
-        if (classes.length === 1) {
-            selectClasse.value = classes[0];
-        }
-    }
-
-    // =====================================================
-    // GESTION DE LA CONNEXION
-    // =====================================================
-    async function handleLogin(event) {
-        event.preventDefault();
-
-        const nom = document.getElementById('selectNom').value;
-        const prenom = document.getElementById('selectPrenom').value;
-        const classe = document.getElementById('selectClasse').value;
-        const motDePasse = document.getElementById('codeSecret').value.trim();
-
-        if (!nom || !prenom || !classe) {
-            showLoginError('⚠️ Veuillez renseigner votre nom, prénom et classe.');
-            return;
-        }
-        if (!motDePasse) {
-            showLoginError('⚠️ Veuillez entrer le mot de passe donné par votre professeur.');
-            return;
-        }
-
-        const eleve = annuaireEleves.find(e => e.nom === nom && e.prenom === prenom && e.classe === classe);
-
-        if (!eleve) {
-            showLoginError("❌ Élève introuvable dans l'annuaire.");
-            return;
-        }
-        if (eleve.motDePasse !== motDePasse) {
-            showLoginError('❌ Mot de passe incorrect. Veuillez réessayer.');
-            return;
-        }
-
-        currentStudent = eleve;
-        showMenu();
-    }
-
-    function showLoginError(message) {
-        const errorDiv = document.getElementById('loginError');
-        document.getElementById('loginInfo').classList.remove('active');
-        errorDiv.textContent = message;
-        errorDiv.classList.add('active');
-        setTimeout(() => errorDiv.classList.remove('active'), 4000);
-    }
-
-    function showLoginInfo(message) {
-        const infoDiv = document.getElementById('loginInfo');
-        infoDiv.textContent = message;
-        infoDiv.classList.add('active');
-    }
-
-    // =====================================================
-    // MENU DE SÉLECTION DU QCM
-    // =====================================================
-    function showMenu() {
-        document.getElementById('loginScreen').style.display = 'none';
-        document.getElementById('quizScreen').style.display = 'none';
-        document.getElementById('menuScreen').style.display = 'block';
-
-        document.getElementById('displayNameMenu').textContent = `${currentStudent.nom} ${currentStudent.prenom}`;
-        document.getElementById('displayClassMenu').textContent = `Classe : ${currentStudent.classe}`;
-        document.getElementById('displayPPAMenu').style.display = currentStudent.ppa ? 'inline-block' : 'none';
-
-        refreshMenuButtonsState();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    function refreshMenuButtonsState() {
-        [1, 2, 3].forEach(quizType => {
-            const btn = document.getElementById(`btnQuiz${quizType}`);
-            const done = quizAlreadyDoneLocally(currentStudent.nom, currentStudent.prenom, currentStudent.classe, quizType);
-            if (done) {
-                btn.classList.add('completed');
-                btn.textContent = `✅ ${allQuizData[quizType].nom} — Terminé`;
-            } else {
-                btn.classList.remove('completed');
-                btn.textContent = allQuizData[quizType].nom;
-            }
-        });
-    }
-
-    async function handleQuizButtonClick(quizType) {
-        const btn = document.getElementById(`btnQuiz${quizType}`);
-        if (btn.classList.contains('completed')) return;
-
-        if (quizAlreadyDoneLocally(currentStudent.nom, currentStudent.prenom, currentStudent.classe, quizType)) {
-            refreshMenuButtonsState();
-            return;
-        }
-
-        const originalText = btn.textContent;
-        btn.textContent = '🔎 Vérification...';
-
-        const dejaFaitEnLigne = await quizAlreadyDoneOnline(currentStudent.nom, currentStudent.prenom, currentStudent.classe, quizType);
-        if (dejaFaitEnLigne) {
-            btn.classList.add('completed');
-            btn.textContent = `✅ ${allQuizData[quizType].nom} — Terminé`;
-            return;
-        }
-
-        btn.textContent = originalText;
-        startQuiz(quizType);
-    }
-
-    // =====================================================
-    // DÉMARRAGE D'UN QCM
-    // =====================================================
-    function startQuiz(quizType) {
-        currentQuizType = quizType;
-        const quizData = allQuizData[quizType];
-        currentQuestionIndex = 0;
-        score = 0;
-        answers = new Array(quizData.questions.length).fill(null);
-        quizFinished = false;
-
-        document.getElementById('menuScreen').style.display = 'none';
-        document.getElementById('quizScreen').style.display = 'block';
-
-        document.getElementById('displayName').textContent = `${currentStudent.nom} ${currentStudent.prenom}`;
-        document.getElementById('displayClass').textContent = `Classe : ${currentStudent.classe}`;
-        document.getElementById('displayPPA').style.display = currentStudent.ppa ? 'inline-block' : 'none';
-
-        totalTime = quizData.questions.length * TEMPS_PAR_QUESTION;
-        if (currentStudent.ppa) {
-            const bonus = Math.round(totalTime * PPA_BONUS_PERCENTAGE / 100);
-            totalTime += bonus;
-            document.getElementById('timerInfo').textContent = `(+${bonus}s bonus PPA)`;
-        } else {
-            document.getElementById('timerInfo').textContent = '';
-        }
-        timeRemaining = totalTime;
-        updateTimerDisplay();
-        document.getElementById('timerDisplay').classList.remove('urgent');
-
-        document.getElementById('scoreTotal').textContent = `/ ${quizData.questions.length}`;
-
-        generateQuestions(quizData.questions);
-        startTimer();
-
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // =====================================================
-    // GÉNÉRATION DES QUESTIONS
-    // =====================================================
-    function generateQuestions(questions) {
-        const container = document.getElementById('quizContainer');
-        container.innerHTML = '';
-
-        questions.forEach((q, index) => {
-            const card = document.createElement('div');
-            card.className = 'question-card';
-            card.id = `question-${index}`;
-            if (index === 0) card.classList.add('active');
-
-            const optionsHTML = q.options.map((opt, optIndex) => `
-                <div class="option" id="opt-${index}-${optIndex}" onclick="selectOption(${index}, ${optIndex})">
-                    <input type="radio" name="q${index}" value="${optIndex}">
-                    <label>${String.fromCharCode(65 + optIndex)}. ${opt}</label>
-                </div>
-            `).join('');
-
-            card.innerHTML = `
-                <div class="question-header">
-                    <span class="question-number">Question ${index + 1} / ${questions.length}</span>
-                </div>
-                <p class="question-text">${q.question}</p>
-                <div class="options">${optionsHTML}</div>
-                <div class="explanation" id="explanation-${index}"></div>
-                <button class="btn-next" id="btnNext-${index}" onclick="nextQuestion()">
-                    ${index === questions.length - 1 ? 'Voir le résultat' : 'Question suivante →'}
-                </button>
-            `;
-
-            container.appendChild(card);
-        });
-    }
-
-    // =====================================================
-    // SÉLECTION D'UNE RÉPONSE
-    // =====================================================
-    function selectOption(questionIndex, optionIndex) {
-        if (answers[questionIndex] !== null) return;
-
-        answers[questionIndex] = optionIndex;
-        const q = allQuizData[currentQuizType].questions[questionIndex];
-
-        const card = document.getElementById(`question-${questionIndex}`);
-        const options = card.querySelectorAll('.option');
-
-        options.forEach((opt, i) => {
-            opt.classList.add('disabled');
-            if (i === optionIndex) {
-                opt.classList.add('selected');
-                opt.querySelector('input').checked = true;
-            }
-        });
-
-        if (optionIndex === q.correct) {
-            score++;
-            document.getElementById(`opt-${questionIndex}-${optionIndex}`).classList.add('correct-answer');
-        } else {
-            document.getElementById(`opt-${questionIndex}-${optionIndex}`).classList.add('wrong-answer');
-            document.getElementById(`opt-${questionIndex}-${q.correct}`).classList.add('correct-answer');
-        }
-
-        const explanationDiv = document.getElementById(`explanation-${questionIndex}`);
-        explanationDiv.textContent = `💡 ${q.explanation}`;
-        explanationDiv.classList.add('active');
-
-        document.getElementById(`btnNext-${questionIndex}`).classList.add('active');
-    }
-
-    // =====================================================
-    // PASSAGE À LA QUESTION SUIVANTE
-    // =====================================================
-    function nextQuestion() {
-        document.getElementById(`question-${currentQuestionIndex}`).classList.remove('active');
-        currentQuestionIndex++;
-
-        const questions = allQuizData[currentQuizType].questions;
-        if (currentQuestionIndex < questions.length) {
-            const nextCard = document.getElementById(`question-${currentQuestionIndex}`);
-            nextCard.classList.add('active');
-            nextCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        } else {
-            finishQuiz();
-        }
-    }
-
-    // =====================================================
-    // CHRONOMÈTRE
-    // =====================================================
-    function startTimer() {
-        clearInterval(timerInterval);
-        timerInterval = setInterval(() => {
-            timeRemaining--;
-            updateTimerDisplay();
-
-            if (timeRemaining <= 0) {
-                clearInterval(timerInterval);
-                finishQuiz();
-            }
-
-            const display = document.getElementById('timerDisplay');
-            if (timeRemaining <= 30) {
-                display.classList.add('urgent');
-            } else {
-                display.classList.remove('urgent');
-            }
-        }, 1000);
-    }
-
-    function updateTimerDisplay() {
-        const minutes = Math.floor(Math.max(timeRemaining, 0) / 60);
-        const seconds = Math.max(timeRemaining, 0) % 60;
-        document.getElementById('timerDisplay').textContent =
-            `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-    }
-
-    // =====================================================
-    // FIN DU QCM
-    // =====================================================
-    function finishQuiz() {
-        if (quizFinished) return;
-        quizFinished = true;
-
-        clearInterval(timerInterval);
-        document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active'));
-
-        showResults();
-
-        const totalQuestions = allQuizData[currentQuizType].questions.length;
-        const resultData = {
-            nom: currentStudent.nom,
-            prenom: currentStudent.prenom,
-            classe: currentStudent.classe,
-            quizType: currentQuizType,
-            score: score,
-            total: totalQuestions,
-            pourcentage: Math.round((score / totalQuestions) * 100),
-            date: new Date().toLocaleDateString('fr-FR'),
-            heure: new Date().toLocaleTimeString('fr-FR')
-        };
-
-        // Sauvegarde locale systématique (filet de sécurité)
-        saveResultLocally(resultData);
-
-        sendResultToGoogleSheets(resultData);
-    }
-
-    function showResults() {
-        const resultatFinal = document.getElementById('resultatFinal');
-        const finalScore = document.getElementById('finalScore');
-        const scoreCircle = document.getElementById('scoreCircle');
-        const mention = document.getElementById('mention');
-        const messageResultat = document.getElementById('messageResultat');
-        const totalQuestions = allQuizData[currentQuizType].questions.length;
-
-        finalScore.textContent = score;
-        const pct = score / totalQuestions;
-
-        if (pct >= 0.9) {
-            scoreCircle.style.background = '#28A745';
-            mention.textContent = '🏆 Excellent !';
-            mention.className = 'mention excellent';
-            messageResultat.textContent = "Félicitations ! Vous maîtrisez parfaitement les notions abordées.";
-        } else if (pct >= 0.7) {
-            scoreCircle.style.background = '#2E86AB';
-            mention.textContent = '👍 Très bien !';
-            mention.className = 'mention bien';
-            messageResultat.textContent = "Bon travail ! Quelques révisions vous permettront d'atteindre l'excellence.";
-        } else if (pct >= 0.5) {
-            scoreCircle.style.background = '#FFC107';
-            mention.textContent = '📖 Moyen';
-            mention.className = 'mention moyen';
-            messageResultat.textContent = "Vous avez des bases, mais il est conseillé de revoir le cours.";
-        } else {
-            scoreCircle.style.background = '#DC3545';
-            mention.textContent = '📚 Insuffisant';
-            mention.className = 'mention insuffisant';
-            messageResultat.textContent = "Il est nécessaire de reprendre le cours avant de retenter ce QCM.";
-        }
-
-        resultatFinal.classList.add('active');
-        resultatFinal.scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // =====================================================
-    // ENVOI DU RÉSULTAT AU GOOGLE SHEET (Apps Script Web App)
-    // =====================================================
-    async function sendResultToGoogleSheets(resultData) {
-        const saveStatus = document.getElementById('saveStatus');
-
-        if (!RESULTS_WEB_APP_URL || RESULTS_WEB_APP_URL.includes('COLLER_ICI')) {
-            saveStatus.textContent = '⚠️ Envoi en ligne non configuré — résultat conservé localement uniquement.';
-            saveStatus.style.color = '#856404';
-            return;
-        }
-
-        saveStatus.textContent = '📤 Envoi du résultat en cours...';
-        saveStatus.style.color = '#6C757D';
-
-        try {
-            await fetch(RESULTS_WEB_APP_URL, {
-                method: 'POST',
-                mode: 'no-cors',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(resultData)
-            });
-            // Avec no-cors, la réponse n'est pas lisible : on suppose que ça a fonctionné.
-            saveStatus.textContent = '✅ Résultat envoyé et enregistré (sauvegarde locale également conservée).';
-            saveStatus.style.color = '#28A745';
-        } catch (error) {
-            console.error("❌ Erreur lors de l'envoi en ligne:", error);
-            saveStatus.textContent = '⚠️ Envoi en ligne impossible — résultat conservé localement. Préviens ton professeur.';
-            saveStatus.style.color = '#DC3545';
-        }
-    }
-
-    // =====================================================
-    // RETOUR AU MENU / ABANDON
-    // =====================================================
-    function backToMenu() {
-        document.getElementById('quizScreen').style.display = 'none';
-        document.getElementById('resultatFinal').classList.remove('active');
-        document.getElementById('saveStatus').textContent = '';
-        showMenu();
-    }
-
-    function abandonQuiz() {
-        if (confirm('Voulez-vous vraiment abandonner ce QCM ? Vos réponses seront perdues et il ne sera pas comptabilisé comme terminé.')) {
-            clearInterval(timerInterval);
-            document.getElementById('quizScreen').style.display = 'none';
-            document.getElementById('resultatFinal').classList.remove('active');
-            showMenu();
-        }
-    }
-
-    // =====================================================
-    // DÉCONNEXION
-    // =====================================================
-    function logout() {
-        if (confirm('Voulez-vous vraiment vous déconnecter ?')) {
-            clearInterval(timerInterval);
-            currentStudent = null;
-            currentQuizType = null;
-
-            document.getElementById('quizScreen').style.display = 'none';
-            document.getElementById('menuScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'block';
-            document.getElementById('codeSecret').value = '';
-            document.getElementById('selectNom').value = '';
-            document.getElementById('resultatFinal').classList.remove('active');
-            document.getElementById('timerDisplay').classList.remove('urgent');
-
-            onNomChange();
-        }
-    }
-
-    // =====================================================
-    // ESPACE PROFESSEUR
-    // =====================================================
-    function openProfModal() {
-        document.getElementById('profModalOverlay').classList.add('active');
-        document.getElementById('profLoginView').style.display = 'block';
-        document.getElementById('profResultsView').style.display = 'none';
-        document.getElementById('profPassword').value = '';
-        document.getElementById('profError').classList.remove('active');
-    }
-
-    function closeProfModal() {
-        document.getElementById('profModalOverlay').classList.remove('active');
-    }
-
-    function checkProfPassword() {
-        const pwd = document.getElementById('profPassword').value;
-        if (pwd !== PROF_PASSWORD) {
-            const err = document.getElementById('profError');
-            err.textContent = '❌ Mot de passe incorrect.';
-            err.classList.add('active');
-            return;
-        }
-        showProfResults();
-    }
-
-    // Regroupe les entrées locales (une par QCM passé) en une ligne par élève,
-    // au format Nom / Prenom / Classe / Score1 / Score2 / Score3 / pourcentage / Date
-    function aggregateLocalResults() {
-        const results = getStoredResults();
-        const map = {};
-
-        results.forEach(r => {
-            const key = `${r.nom}|${r.prenom}|${r.classe}`;
-            if (!map[key]) {
-                map[key] = { nom: r.nom, prenom: r.prenom, classe: r.classe, score1: '', score2: '', score3: '', lastDate: r.date };
-            }
-            map[key][`score${r.quizType}`] = r.score;
-            map[key].lastDate = r.date;
-        });
-
-        return Object.values(map).map(row => {
-            const scores = [row.score1, row.score2, row.score3].filter(s => s !== '');
-            const total = scores.reduce((a, b) => a + Number(b), 0);
-            const pourcentage = scores.length > 0 ? Math.round((total / (scores.length * 10)) * 100) : 0;
-            return { ...row, pourcentage };
-        });
-    }
-
-    function showProfResults() {
-        document.getElementById('profLoginView').style.display = 'none';
-        document.getElementById('profResultsView').style.display = 'block';
-
-        const rows = aggregateLocalResults();
-        const content = document.getElementById('profResultsContent');
-
-        if (rows.length === 0) {
-            content.innerHTML = '<p style="margin-top:15px;">Aucun résultat enregistré pour le moment.</p>';
-            return;
-        }
-
-        let tableRows = rows.map(r => `
-            <tr>
-                <td>${r.nom}</td>
-                <td>${r.prenom}</td>
-                <td>${r.classe}</td>
-                <td>${r.score1 !== '' ? r.score1 + '/10' : '—'}</td>
-                <td>${r.score2 !== '' ? r.score2 + '/10' : '—'}</td>
-                <td>${r.score3 !== '' ? r.score3 + '/10' : '—'}</td>
-                <td>${r.pourcentage}%</td>
-                <td>${r.lastDate}</td>
-            </tr>
-        `).join('');
-
-        content.innerHTML = `
-            <p style="margin-top:10px; font-size:0.85rem; color:#6C757D;">${rows.length} élève(s) avec au moins un résultat enregistré localement dans ce navigateur.</p>
-            <table class="results-table">
-                <thead>
-                    <tr><th>Nom</th><th>Prénom</th><th>Classe</th><th>Score 1</th><th>Score 2</th><th>Score 3</th><th>%</th><th>Date</th></tr>
-                </thead>
-                <tbody>${tableRows}</tbody>
-            </table>
-        `;
-    }
-
-    function exportCSV() {
-        const rows = aggregateLocalResults();
-        if (rows.length === 0) {
-            alert('Aucun résultat à exporter.');
-            return;
-        }
-
-        let csv = 'Nom;Prenom;Classe;Score 1;Score 2;Score 3;pourcentage;Date\n';
-        rows.forEach(r => {
-            csv += `${r.nom};${r.prenom};${r.classe};${r.score1};${r.score2};${r.score3};${r.pourcentage};${r.lastDate}\n`;
-        });
-
-        const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `resultats_qcm_materiaux_${new Date().toISOString().slice(0,10)}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-    }
-
-    function clearAllResults() {
-        if (confirm('⚠️ Effacer définitivement tous les résultats enregistrés dans ce navigateur ? Cette action est irréversible.')) {
-            localStorage.removeItem(STORAGE_KEY);
-            showProfResults();
-        }
-    }
-
-    // =====================================================
-    // INITIALISATION
-    // =====================================================
-    document.addEventListener('DOMContentLoaded', function() {
-        loadAnnuaire();
-    });
-</script>
+<!-- Scripts Javascript Modulaires -->
+<script src="js/config.js"></script>
+<script src="js/annuaire.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/media.js"></script>
+<script src="js/prof.js"></script>
+<script src="js/app.js"></script>
 
 </body>
 </html>
