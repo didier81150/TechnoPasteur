@@ -150,5 +150,15 @@ const ACTIVITIES_DATABASE = [
         badgeClass: "badge-stage",
         description: "Espace Rapport de Stage : documents ressource, dépôt du rapport PDF et gestion des évaluations.",
         defaultUnlocked: true
+    },
+    {
+        id: "3_eval_competences",
+        niveau: "3eme",
+        titre: "Évaluation des compétences",
+        type: "eval_competences",
+        badgeText: "QCM Évaluation compétences",
+        badgeClass: "badge-qcm",
+        description: "Évaluation globale des compétences Technologie 3ème (90 questions).",
+        defaultUnlocked: false
     }
 ];

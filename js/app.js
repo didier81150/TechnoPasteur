@@ -124,5 +124,7 @@ function launchActivity(activityId) {
         openVideoPlayer(act);
     } else if (act.type === 'stage') {
         openStageModule(act);
+    } else if (act.type === 'eval_competences') {
+        openEvalCompetencesModule();
     }
 }
