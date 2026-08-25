@@ -230,6 +230,28 @@ function switchStageTab(name, btn) {
     btn.classList.add('active');
 }
 
+// Helper: Obtenir le dictionnaire des élèves de 3ème depuis annuaireEleves ou STAGE_STUDENTS_DATA fallback
+function get3emeStudentsData() {
+    if (typeof annuaireEleves !== 'undefined' && Array.isArray(annuaireEleves) && annuaireEleves.length > 0) {
+        const eleves3eme = annuaireEleves.filter(e => e.niveau === '3eme' || (e.classe && (e.classe.startsWith('3') || e.classe.includes('30'))));
+        if (eleves3eme.length > 0) {
+            const data = {};
+            eleves3eme.forEach(e => {
+                const classeKey = e.classe || '302';
+                if (!data[classeKey]) data[classeKey] = [];
+                const fullName = `${e.nom} ${e.prenom}`;
+                if (!data[classeKey].includes(fullName)) {
+                    data[classeKey].push(fullName);
+                }
+            });
+            // Trier les classes et les élèves
+            Object.keys(data).forEach(c => data[c].sort());
+            return data;
+        }
+    }
+    return STAGE_STUDENTS_DATA;
+}
+
 // ── Initialisation des listes déroulantes (Saisie et Visualisation) ──
 function initStageSelects() {
     const stageClasse = document.getElementById('stageClasse');
@@ -237,7 +259,11 @@ function initStageSelects() {
 
     if (!stageClasse || !stageViewClasse) return;
 
-    const classesList = Object.keys(STAGE_STUDENTS_DATA);
+    stageClasse.innerHTML = '<option value="">— Choisir une classe —</option>';
+    stageViewClasse.innerHTML = '<option value="">— Toutes les classes —</option>';
+
+    const studentsDataMap = get3emeStudentsData();
+    const classesList = Object.keys(studentsDataMap).sort();
 
     classesList.forEach(c => {
         const opt1 = document.createElement('option');
@@ -297,10 +323,12 @@ function prefillStudentData() {
 }
 
 function findMatchingClasseKey(studentClasse) {
-    if (!studentClasse) return Object.keys(STAGE_STUDENTS_DATA)[0];
+    const dataMap = get3emeStudentsData();
+    if (!studentClasse) return Object.keys(dataMap)[0];
+    if (dataMap[studentClasse]) return studentClasse;
     const digits = studentClasse.replace(/\D/g, '');
-    if (STAGE_STUDENTS_DATA[digits]) return digits;
-    return Object.keys(STAGE_STUDENTS_DATA)[0];
+    if (dataMap[digits]) return digits;
+    return Object.keys(dataMap)[0];
 }
 
 function sanitizeString(str) {
@@ -312,8 +340,10 @@ function onStageClasseChange() {
     const eleveSelect = document.getElementById('stageEleve');
     eleveSelect.innerHTML = '<option value="">— Choisir un élève —</option>';
 
-    if (classeSelect.value && STAGE_STUDENTS_DATA[classeSelect.value]) {
-        STAGE_STUDENTS_DATA[classeSelect.value].forEach(e => {
+    const dataMap = get3emeStudentsData();
+
+    if (classeSelect.value && dataMap[classeSelect.value]) {
+        dataMap[classeSelect.value].forEach(e => {
             const o = document.createElement('option');
             o.value = e; o.textContent = e;
             eleveSelect.appendChild(o);
@@ -329,8 +359,10 @@ function onStageViewClasseChange() {
     const viewEleve = document.getElementById('stageViewEleve');
     viewEleve.innerHTML = '<option value="">— Tous les élèves —</option>';
 
-    if (viewClasse.value && STAGE_STUDENTS_DATA[viewClasse.value]) {
-        STAGE_STUDENTS_DATA[viewClasse.value].forEach(e => {
+    const dataMap = get3emeStudentsData();
+
+    if (viewClasse.value && dataMap[viewClasse.value]) {
+        dataMap[viewClasse.value].forEach(e => {
             const o = document.createElement('option');
             o.value = e; o.textContent = e;
             viewEleve.appendChild(o);

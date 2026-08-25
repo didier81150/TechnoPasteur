@@ -5,7 +5,7 @@
 let annuaireEleves = [];
 let currentStudent = null;
 
-// Charge l'annuaire depuis le Google Sheet (avec secours démo en cas de problème réseau)
+// Charge l'annuaire depuis les Google Sheets pour tous les niveaux (avec secours démo en cas de problème réseau)
 async function loadAnnuaire() {
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
@@ -13,55 +13,69 @@ async function loadAnnuaire() {
         btnLogin.textContent = "Chargement de l'annuaire...";
     }
 
-    try {
-        const response = await fetch(CONFIG.ANNUAIRE_CSV_URL);
-        if (!response.ok) throw new Error('Réponse HTTP ' + response.status);
-        const csvData = await response.text();
+    const urls = CONFIG.ANNUAIRE_CSV_URLS || { '4eme': CONFIG.ANNUAIRE_CSV_URL };
+    let loadedStudents = [];
 
-        const lines = csvData.split('\n').filter(l => l.trim() !== '');
-        const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+    for (const [defaultNiveau, url] of Object.entries(urls)) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) continue;
+            const csvData = await response.text();
 
-        const nomIndex = headers.findIndex(h => h === 'nom');
-        const prenomIndex = headers.findIndex(h => h === 'prénom' || h === 'prenom');
-        const classeIndex = headers.findIndex(h => h === 'classe');
-        const pwdIndex = headers.findIndex(h => h === 'mot_de_passe' || h === 'mot de passe' || h === 'code_secret' || h === 'password');
-        const ppaIndex = headers.findIndex(h => h === 'ppa');
+            // Remplacement des sauts de ligne Windows \r\n et \r
+            const cleanCsv = csvData.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+            const lines = cleanCsv.split('\n').filter(l => l.trim() !== '');
+            if (lines.length < 2) continue;
 
-        if (nomIndex === -1 || prenomIndex === -1 || classeIndex === -1 || pwdIndex === -1) {
-            throw new Error('Colonnes attendues introuvables dans l\'annuaire');
-        }
+            const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
 
-        annuaireEleves = [];
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
-            if (values[nomIndex]) {
-                const classeVal = values[classeIndex] || '';
-                let niveauVal = '4eme';
-                if (classeVal.includes('5')) niveauVal = '5eme';
-                else if (classeVal.includes('3')) niveauVal = '3eme';
-                else if (classeVal.includes('4')) niveauVal = '4eme';
+            const nomIndex = headers.findIndex(h => h === 'nom');
+            const prenomIndex = headers.findIndex(h => h === 'prénom' || h === 'prenom');
+            const classeIndex = headers.findIndex(h => h === 'classe');
+            const pwdIndex = headers.findIndex(h => h === 'mot_de_passe' || h === 'mot de passe' || h === 'code_secret' || h === 'password');
+            const ppaIndex = headers.findIndex(h => h === 'ppa');
 
-                annuaireEleves.push({
-                    nom: values[nomIndex],
-                    prenom: values[prenomIndex],
-                    classe: classeVal,
-                    niveau: niveauVal,
-                    motDePasse: values[pwdIndex],
-                    ppa: ppaIndex !== -1 ? ['oui', 'true', '1'].includes((values[ppaIndex] || '').toLowerCase()) : false
-                });
+            if (nomIndex === -1 || prenomIndex === -1 || classeIndex === -1 || pwdIndex === -1) {
+                console.warn(`Colonnes introuvables pour la feuille ${defaultNiveau}`);
+                continue;
             }
-        }
 
-        console.log(`✅ ${annuaireEleves.length} élèves chargés depuis l'annuaire`);
-    } catch (error) {
-        console.warn("⚠️ Utilisation de l'annuaire démo de secours (problème réseau ou Sheet distant non accessible):", error);
-        loadDemoAnnuaire();
-    } finally {
-        fillNomSelect();
-        if (btnLogin) {
-            btnLogin.disabled = false;
-            btnLogin.textContent = 'Se connecter';
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
+                if (values[nomIndex]) {
+                    const classeVal = values[classeIndex] || '';
+                    let niveauVal = defaultNiveau;
+                    if (classeVal.startsWith('5') || classeVal.includes('5è')) niveauVal = '5eme';
+                    else if (classeVal.startsWith('3') || classeVal.includes('3è')) niveauVal = '3eme';
+                    else if (classeVal.startsWith('4') || classeVal.includes('4è')) niveauVal = '4eme';
+
+                    loadedStudents.push({
+                        nom: values[nomIndex].toUpperCase(),
+                        prenom: values[prenomIndex],
+                        classe: classeVal,
+                        niveau: niveauVal,
+                        motDePasse: values[pwdIndex],
+                        ppa: ppaIndex !== -1 ? ['oui', 'true', '1', 'o'].includes((values[ppaIndex] || '').toLowerCase()) : false
+                    });
+                }
+            }
+        } catch (err) {
+            console.warn(`⚠️ Erreur de chargement pour le niveau ${defaultNiveau}:`, err);
         }
+    }
+
+    if (loadedStudents.length > 0) {
+        annuaireEleves = loadedStudents;
+        console.log(`✅ ${annuaireEleves.length} élèves chargés depuis les annuaires (5ème, 4ème, 3ème)`);
+    } else {
+        console.warn("⚠️ Utilisation de l'annuaire démo de secours");
+        loadDemoAnnuaire();
+    }
+
+    fillNomSelect();
+    if (btnLogin) {
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Se connecter';
     }
 }
 
