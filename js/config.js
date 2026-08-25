@@ -16,7 +16,7 @@ const CONFIG = {
     RESULTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/export?format=csv',
 
     // Apps Script Web App pour enregistrement des résultats
-    RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE'
+    RESULTS_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbyK-jpEmdTMKGDvBq5yrtU606qXe7tU2mScvbSB41ElXxn1MVg99DPg_4eniFa-p9cVGg/exec'
 };
 
 // Base de données unifiée des activités par niveau

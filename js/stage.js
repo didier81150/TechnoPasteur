@@ -33,7 +33,7 @@ const STAGE_STUDENTS_DATA = {
     "307": ["ABDAOUI Abdelmoughith","AFKIR Amine","AMPONSAH Emmanuel","AZOUGAGH Saoussen","AZRAGUE Manal","BELLIERES Cassandra","CHANCELLE Enzo","CNUDDE LECLER Cerise","DANDINE Maxime","FERREIRA Dynis","KESSEIRI Fatma","LOPEZ Lucie","LOPEZ Raphaël","MANSOURI Rehanna","MARCUS Diego","MASSON Eunice","MAZANIELLO Nino","PAU Louise","PEREZ-MICOULAS Alyzée","RODRIGUES VALERIO Alyssia","SALVAN Quentin","TORRES JARIA Leonor","VIVES Chloé"]
 };
 
-const STAGE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyCN_XHE6kFDqMGMsT0AXeVmieUt2TjqzekMaZOM8nx1yqmpN8SCF9XfVLL6x7bRIyN/exec';
+const STAGE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyK-jpEmdTMKGDvBq5yrtU606qXe7tU2mScvbSB41ElXxn1MVg99DPg_4eniFa-p9cVGg/exec';
 
 function openStageModule(activity) {
     document.getElementById('dashboardScreen').style.display = 'none';

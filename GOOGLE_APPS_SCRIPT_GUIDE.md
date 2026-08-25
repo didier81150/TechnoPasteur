@@ -32,8 +32,8 @@ Ce guide vous explique pas à pas comment installer le script dans votre compte 
 // GOOGLE APPS SCRIPT - GESTION DES DÉPÔTS DE RAPPORTS PDF & NOTES
 // =================================================================
 
-// ⚠️ REMPLACEZ CET ID PAR L'ID DE VOTRE DOSSIER GOOGLE DRIVE
-const DRIVE_FOLDER_ID = "VOTRE_ID_DE_DOSSIER_GOOGLE_DRIVE_ICI";
+// Votre ID de dossier Google Drive configuré
+const DRIVE_FOLDER_ID = "1HbNXzVpaTZjcI9cu6ac4jcbmNaIGLrO5";
 
 function doPost(e) {
   try {
