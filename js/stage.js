@@ -121,69 +121,95 @@ function openStageModule(activity) {
                 <div id="stage-tab-saisie" class="stage-tab-panel">
                     <h3 class="stage-card-title">Enregistrer une note</h3>
 
-                    <form id="stageNoteForm" onsubmit="handleStageNoteSubmit(event)">
-                        <div class="form-group">
-                            <label for="stageClasse">Classe</label>
-                            <select id="stageClasse" required onchange="onStageClasseChange()">
-                                <option value="">— Choisir une classe —</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="stageEleve">Élève</label>
-                            <select id="stageEleve" required disabled>
-                                <option value="">— Choisir un élève —</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="stageNote">Note sur 20</label>
-                            <input type="number" id="stageNote" min="0" max="20" step="0.25" placeholder="Ex : 15.5" required>
-                        </div>
-
-                        <button type="submit" class="btn-primary" id="stageSubmitBtn" style="background: var(--accent); color: white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">
-                            Enregistrer la note
+                    <div id="stage-prof-lock-msg" style="display:${typeof isProfLoggedIn !== 'undefined' && isProfLoggedIn ? 'none' : 'block'}; text-align:center; padding:2rem; background:var(--bg-main); border-radius:10px;">
+                        <div style="font-size:2.5rem; margin-bottom:0.5rem;">🔒</div>
+                        <h4 style="margin-bottom:0.5rem;">Réservé aux enseignants</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.2rem;">
+                            Seuls les enseignants connectés peuvent saisir et modifier les notes des devoirs de stage.
+                        </p>
+                        <button onclick="openProfModal()" class="btn-primary" style="background:var(--accent); color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:600; cursor:pointer;">
+                            🔐 Se connecter comme enseignant
                         </button>
-                    </form>
+                    </div>
 
-                    <div id="stageMessage" class="message" style="display:none; margin-top:1rem; padding:0.8rem; border-radius:8px;"></div>
+                    <div id="stage-prof-form-container" style="display:${typeof isProfLoggedIn !== 'undefined' && isProfLoggedIn ? 'block' : 'none'};">
+                        <form id="stageNoteForm" onsubmit="handleStageNoteSubmit(event)">
+                            <div class="form-group">
+                                <label for="stageClasse">Classe</label>
+                                <select id="stageClasse" required onchange="onStageClasseChange()">
+                                    <option value="">— Choisir une classe —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stageEleve">Élève</label>
+                                <select id="stageEleve" required disabled>
+                                    <option value="">— Choisir un élève —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stageNote">Note sur 20</label>
+                                <input type="number" id="stageNote" min="0" max="20" step="0.25" placeholder="Ex : 15.5" required>
+                            </div>
+
+                            <button type="submit" class="btn-primary" id="stageSubmitBtn" style="background: var(--accent); color: white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">
+                                Enregistrer la note
+                            </button>
+                        </form>
+
+                        <div id="stageMessage" class="message" style="display:none; margin-top:1rem; padding:0.8rem; border-radius:8px;"></div>
+                    </div>
                 </div>
 
                 <!-- ONGLET 4 : VISUALISATION DES NOTES -->
                 <div id="stage-tab-visualisation" class="stage-tab-panel">
                     <h3 class="stage-card-title">Notes enregistrées</h3>
 
-                    <div class="view-controls" style="display:flex; gap:0.75rem; margin-bottom:1.5rem; flex-wrap:wrap;">
-                        <select id="stageViewClasse" onchange="onStageViewClasseChange()" style="flex:1; min-width:140px;">
-                            <option value="">— Toutes les classes —</option>
-                        </select>
-                        <select id="stageViewEleve" disabled style="flex:1; min-width:140px;">
-                            <option value="">— Tous les élèves —</option>
-                        </select>
-                        <button class="btn-load" id="stageLoadBtn" onclick="loadStageNotes()" style="padding:0.7rem 1.2rem; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
-                            Charger
+                    <div id="stage-prof-view-lock-msg" style="display:${typeof isProfLoggedIn !== 'undefined' && isProfLoggedIn ? 'none' : 'block'}; text-align:center; padding:2rem; background:var(--bg-main); border-radius:10px;">
+                        <div style="font-size:2.5rem; margin-bottom:0.5rem;">🔒</div>
+                        <h4 style="margin-bottom:0.5rem;">Réservé aux enseignants</h4>
+                        <p style="color:var(--text-muted); font-size:0.9rem; margin-bottom:1.2rem;">
+                            La consultation des notes de stage enregistrées est réservée aux enseignants.
+                        </p>
+                        <button onclick="openProfModal()" class="btn-primary" style="background:var(--accent); color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:600; cursor:pointer;">
+                            🔐 Se connecter comme enseignant
                         </button>
                     </div>
 
-                    <div id="stage-stats-bar" class="stats-bar" style="display:none; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
-                        <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <div class="stat-value" id="stage-stat-count" style="font-weight:bold; font-size:1.4rem;">—</div>
-                            <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Notes</div>
+                    <div id="stage-prof-view-container" style="display:${typeof isProfLoggedIn !== 'undefined' && isProfLoggedIn ? 'block' : 'none'};">
+                        <div class="view-controls" style="display:flex; gap:0.75rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+                            <select id="stageViewClasse" onchange="onStageViewClasseChange()" style="flex:1; min-width:140px;">
+                                <option value="">— Toutes les classes —</option>
+                            </select>
+                            <select id="stageViewEleve" disabled onchange="loadStageNotes()" style="flex:1; min-width:140px;">
+                                <option value="">— Tous les élèves —</option>
+                            </select>
+                            <button class="btn-load" id="stageLoadBtn" onclick="loadStageNotes()" style="padding:0.7rem 1.2rem; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+                                Charger
+                            </button>
                         </div>
-                        <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <div class="stat-value" id="stage-stat-avg" style="font-weight:bold; font-size:1.4rem;">—</div>
-                            <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Moyenne</div>
-                        </div>
-                        <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <div class="stat-value" id="stage-stat-max" style="font-weight:bold; font-size:1.4rem;">—</div>
-                            <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Max</div>
-                        </div>
-                    </div>
 
-                    <div id="stage-notes-container">
-                        <div class="state-placeholder" style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
-                            <div class="icon" style="font-size:2rem; margin-bottom:0.5rem;">🔍</div>
-                            Sélectionnez une classe et cliquez sur <strong>Charger</strong>
+                        <div id="stage-stats-bar" class="stats-bar" style="display:none; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
+                            <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
+                                <div class="stat-value" id="stage-stat-count" style="font-weight:bold; font-size:1.4rem;">—</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Notes</div>
+                            </div>
+                            <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
+                                <div class="stat-value" id="stage-stat-avg" style="font-weight:bold; font-size:1.4rem;">—</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Moyenne</div>
+                            </div>
+                            <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
+                                <div class="stat-value" id="stage-stat-max" style="font-weight:bold; font-size:1.4rem;">—</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Max</div>
+                            </div>
+                        </div>
+
+                        <div id="stage-notes-container">
+                            <div class="state-placeholder" style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
+                                <div class="icon" style="font-size:2rem; margin-bottom:0.5rem;">🔍</div>
+                                Sélectionnez une classe et cliquez sur <strong>Charger</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -313,6 +339,9 @@ function onStageViewClasseChange() {
     } else {
         viewEleve.disabled = true;
     }
+
+    // Charger automatiquement les notes dès que la classe est sélectionnée
+    loadStageNotes();
 }
 
 // ── Validation et Dépôt PDF ──

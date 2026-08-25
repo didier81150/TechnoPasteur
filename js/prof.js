@@ -25,11 +25,29 @@ function checkProfPassword() {
     showProfDashboardView();
 }
 
+let isProfLoggedIn = false;
+
 function showProfDashboardView() {
+    isProfLoggedIn = true;
     document.getElementById('profLoginView').style.display = 'none';
     document.getElementById('profResultsView').style.display = 'block';
     renderUnlockManagement();
     renderLocalResultsTable();
+
+    // Si le module rapport de stage est ouvert, déverrouiller la saisie et la visualisation des notes
+    const lockMsg = document.getElementById('stage-prof-lock-msg');
+    const formContainer = document.getElementById('stage-prof-form-container');
+    if (lockMsg && formContainer) {
+        lockMsg.style.display = 'none';
+        formContainer.style.display = 'block';
+    }
+
+    const viewLockMsg = document.getElementById('stage-prof-view-lock-msg');
+    const viewContainer = document.getElementById('stage-prof-view-container');
+    if (viewLockMsg && viewContainer) {
+        viewLockMsg.style.display = 'none';
+        viewContainer.style.display = 'block';
+    }
 }
 
 // Gestion des verrous d'activités
