@@ -105,5 +105,7 @@ function launchActivity(activityId) {
         openPdfViewer(act);
     } else if (act.type === 'video') {
         openVideoPlayer(act);
+    } else if (act.type === 'stage') {
+        openStageModule(act);
     }
 }

@@ -135,5 +135,15 @@ const ACTIVITIES_DATABASE = [
         description: "Vidéo de présentation des techniques de fabrication additive et CFAO.",
         defaultUnlocked: false,
         videoUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4"
+    },
+    {
+        id: "3_rapport_stage",
+        niveau: "3eme",
+        titre: "Rapport de Stage",
+        type: "stage",
+        badgeText: "Stage",
+        badgeClass: "badge-stage",
+        description: "Espace Rapport de Stage : documents ressource, dépôt du rapport PDF et gestion des évaluations.",
+        defaultUnlocked: true
     }
 ];
