@@ -177,6 +177,20 @@ function handleLogin(event) {
     showDashboard(eleve.niveau);
 }
 
+function togglePasswordVisibility() {
+    const pwdInput = document.getElementById('codeSecret');
+    const toggleBtn = document.querySelector('.btn-toggle-pwd');
+    if (!pwdInput) return;
+
+    if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        if (toggleBtn) toggleBtn.textContent = '🙈';
+    } else {
+        pwdInput.type = 'password';
+        if (toggleBtn) toggleBtn.textContent = '👁️';
+    }
+}
+
 function showLoginError(message) {
     const errorDiv = document.getElementById('loginError');
     if (!errorDiv) return;

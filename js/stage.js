@@ -358,20 +358,65 @@ function handleDepotSubmit(e) {
     }
 
     const file = input.files[0];
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = "⏳ Transmission du rapport...";
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+        alert("⚠️ Le fichier doit impérativement être au format PDF.");
+        return;
+    }
 
-    // Simulation de sauvegarde / stockage local des informations du rapport déposé
-    setTimeout(() => {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
-        msgDiv.style.display = 'block';
-        msgDiv.style.background = '#ecfdf5';
-        msgDiv.style.color = '#065f46';
-        msgDiv.style.border = '1px solid #a7f3d0';
-        msgDiv.innerHTML = `✅ Le rapport PDF <strong>${file.name}</strong> a été transmis et enregistré avec succès !`;
-        input.value = '';
-    }, 1200);
+    // Nom de fichier attendu : nom-prenom-classe.pdf
+    let expectedFilename = "";
+    if (currentStudent) {
+        const cleanNom = sanitizeString(currentStudent.nom);
+        const cleanPrenom = sanitizeString(currentStudent.prenom);
+        const cleanClasse = sanitizeString(currentStudent.classe);
+        expectedFilename = `${cleanNom}-${cleanPrenom}-${cleanClasse}.pdf`;
+    }
+
+    btnSubmit.disabled = true;
+    btnSubmit.textContent = "⏳ Conversion & Envoi sur Google Drive...";
+    msgDiv.style.display = 'none';
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+        const base64Data = evt.target.result.split(',')[1];
+        const payload = {
+            action: 'upload_pdf',
+            filename: file.name,
+            expectedFilename: expectedFilename,
+            nom: currentStudent ? currentStudent.nom : '',
+            prenom: currentStudent ? currentStudent.prenom : '',
+            classe: currentStudent ? currentStudent.classe : '',
+            fileData: base64Data
+        };
+
+        fetch(STAGE_WEB_APP_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            msgDiv.style.display = 'block';
+            msgDiv.style.background = '#ecfdf5';
+            msgDiv.style.color = '#065f46';
+            msgDiv.style.border = '1px solid #a7f3d0';
+            msgDiv.innerHTML = `✅ Le rapport PDF <strong>${file.name}</strong> a été transmis vers votre Google Drive avec succès !`;
+            input.value = '';
+        })
+        .catch(err => {
+            msgDiv.style.display = 'block';
+            msgDiv.style.background = '#fef2f2';
+            msgDiv.style.color = '#7f1d1d';
+            msgDiv.style.border = '1px solid #fca5a5';
+            msgDiv.textContent = '❌ Erreur lors de l\'envoi vers Google Drive.';
+        })
+        .finally(() => {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
+        });
+    };
+
+    reader.readAsDataURL(file);
 }
 
 // ── Submission de la Note ──

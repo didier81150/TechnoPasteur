@@ -39,13 +39,30 @@ function updateStudentBar() {
 }
 
 function switchLevelTab(level) {
+    // Si un élève est connecté, restreindre strictly à son niveau
+    if (currentStudent && currentStudent.niveau) {
+        if (level !== currentStudent.niveau) {
+            level = currentStudent.niveau;
+        }
+    }
+
     currentActiveLevel = level;
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        if (btn.dataset.level === level) {
+        const btnLevel = btn.dataset.level;
+        if (btnLevel === level) {
             btn.classList.add('active');
+            btn.classList.remove('disabled');
+            btn.disabled = false;
         } else {
             btn.classList.remove('active');
+            if (currentStudent && currentStudent.niveau) {
+                btn.classList.add('disabled');
+                btn.disabled = true;
+            } else {
+                btn.classList.remove('disabled');
+                btn.disabled = false;
+            }
         }
     });
 
