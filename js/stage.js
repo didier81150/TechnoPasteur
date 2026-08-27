@@ -652,6 +652,7 @@ function handleDepotSubmit(e) {
     const file = input.files[0];
     btnSubmit.disabled = true;
     btnSubmit.textContent = "⏳ Transmission du rapport...";
+    msgDiv.style.display = 'none';
 
     const reader = new FileReader();
     reader.onload = function(event) {
@@ -672,33 +673,48 @@ function handleDepotSubmit(e) {
 
         const webAppUrl = CONFIG.STAGE_WEB_APP_URL;
 
-        if (webAppUrl && webAppUrl !== 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE') {
-            fetch(webAppUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                cache: 'no-cache',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-            .then(() => {
-                showDepotSuccess(msgDiv, file.name);
-                input.value = '';
-            })
-            .catch(err => {
-                console.warn("Erreur envoi du fichier:", err);
-                showDepotSuccess(msgDiv, file.name);
-                input.value = '';
-            })
-            .finally(() => {
-                btnSubmit.disabled = false;
-                btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
-            });
-        } else {
-            showDepotSuccess(msgDiv, file.name);
-            input.value = '';
+        if (!webAppUrl || webAppUrl === 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE') {
+            showDepotError(msgDiv, "L'URL de l'application Web Google Apps Script n'est pas configurée dans `js/config.js`.");
             btnSubmit.disabled = false;
             btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
+            return;
         }
+
+        // Utilisation de Content-Type text/plain pour éviter les requêtes OPTIONS preflight bloquées par Apps Script
+        fetch(webAppUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        })
+        .then(async response => {
+            let resultJson = null;
+            try {
+                resultJson = await response.json();
+            } catch (e) {
+                // Si la réponse n'est pas du JSON valide
+            }
+
+            if (response.ok && (!resultJson || resultJson.status === 'success')) {
+                showDepotSuccess(msgDiv, file.name);
+                input.value = '';
+            } else {
+                const errorMsg = (resultJson && resultJson.message) ? resultJson.message : `Erreur serveur (code HTTP ${response.status})`;
+                showDepotError(msgDiv, errorMsg);
+            }
+        })
+        .catch(err => {
+            console.error("Erreur d'envoi du rapport:", err);
+            showDepotError(msgDiv, "Erreur de connexion lors de la transmission du rapport vers Google Drive. Vérifiez votre connexion internet ou le déploiement de l'application Web Google.");
+        })
+        .finally(() => {
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
+        });
+    };
+    reader.onerror = function() {
+        showDepotError(msgDiv, "Erreur lors de la lecture du fichier local.");
+        btnSubmit.disabled = false;
+        btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
     };
     reader.readAsDataURL(file);
 }
@@ -708,7 +724,15 @@ function showDepotSuccess(msgDiv, fileName) {
     msgDiv.style.background = '#ecfdf5';
     msgDiv.style.color = '#065f46';
     msgDiv.style.border = '1px solid #a7f3d0';
-    msgDiv.innerHTML = `✅ Le rapport <strong>${fileName}</strong> a été transmis et déposé directement dans le dossier Google Drive de votre professeur !`;
+    msgDiv.innerHTML = `✅ Le rapport <strong>${fileName}</strong> a été transmis et déposé directement dans le dossier "Dépôt rapport de stage" du Google Drive de votre professeur !`;
+}
+
+function showDepotError(msgDiv, errorDetails) {
+    msgDiv.style.display = 'block';
+    msgDiv.style.background = '#f8d7da';
+    msgDiv.style.color = '#721c24';
+    msgDiv.style.border = '1px solid #f5c6cb';
+    msgDiv.innerHTML = `❌ <strong>Erreur de dépôt du rapport :</strong> Le fichier n'a pas pu être sauvegardé sur le Google Drive.<br><small style="margin-top:0.4rem; display:block;">Détail : ${errorDetails}</small>`;
 }
 
 // ── Submission de la Note ──
