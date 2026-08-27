@@ -25,21 +25,21 @@ Le site **`site-techno`** intègre désormais l'intégralité des fonctionnalit�
 
 ---
 
-## 📝 Configuration Google Apps Script — Saisie des Notes du Rapport de Stage
+## 📝 Configuration Google Apps Script — Dépôt des Rapports PDF sur Drive & Saisie des Notes
 
-Pour enregistrer automatiquement les notes directement dans votre Google Sheet (`https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c`), suivez ces étapes :
+Pour enregistrer automatiquement les rapports PDF dans le sous-dossier **`Dépôt rapport de stage`** de votre Google Drive et enregistrer les notes dans votre Google Sheet, suivez cette procédure pas-à-pas :
 
-### 1. Code Google Apps Script
-Ouvrez votre Google Sheet, allez dans **Extensions > Apps Script** et collez le code suivant :
+### 1. Code Google Apps Script mis à jour
+Ouvrez votre Google Sheet associatrice, allez dans **Extensions > Apps Script** et remplacez le code existant dans `Code.gs` par le suivant :
 
 ```javascript
 function doPost(e) {
   try {
     var data = JSON.parse(e.postData.contents);
 
-    // ACTION 1 : Dépôt du rapport PDF dans Google Drive
+    // ACTION 1 : Dépôt du rapport PDF dans le sous-dossier Google Drive "Dépôt rapport de stage"
     if (data.action === "upload_stage_report") {
-      var folderName = "Rapports de Stage 3ème";
+      var folderName = "Dépôt rapport de stage";
       var folders = DriveApp.getFoldersByName(folderName);
       var folder;
       if (folders.hasNext()) {
@@ -77,10 +77,22 @@ function doPost(e) {
 }
 ```
 
-### 2. Procédure de déploiement
-1. Cliquez sur **Déployer > Nouveau déploiement**.
-2. Sélectionnez le type **Application Web**.
-3. **Exécuter en tant que** : *Moi*.
-4. **Qui a accès** : *Tout le monde* (Anyone).
-5. Cliquez sur **Déployer** et copiez l'URL de l'application Web générée.
-6. Reportez cette URL dans `js/config.js` au niveau du champ `STAGE_WEB_APP_URL`.
+### 2. Procédure claire et pas-à-pas pour la mise à jour sur Google Apps Script
+
+1. **Ouvrir le projet Apps Script :**
+   - Accédez à votre Google Sheet et cliquez sur le menu **Extensions** > **Apps Script**.
+2. **Mettre à jour le code :**
+   - Collez le code ci-dessus dans le fichier `Code.gs` et cliquez sur l'icône de **Disquette (Enregistrer)**.
+3. **Mettre à jour le déploiement de la Web App :**
+   - Cliquez sur le bouton bleu **Déployer** (en haut à droite), puis sélectionnez **Gérer les déploiements**.
+   - Cliquez sur l'icône de **Crayon (Modifier)** à côté de la version actuelle.
+   - Dans le menu déroulant **Version**, sélectionnez **Nouvelle version**.
+   - Vérifiez que :
+     - **Exécuter en tant que** : *Moi* (`me@gmail.com` ou votre adresse académique).
+     - **Qui a accès** : *Tout le monde* (*Anyone*).
+   - Cliquez sur **Déployer**.
+4. **Accorder les autorisations Google Drive (si demandé) :**
+   - Si Google demande d'autoriser l'accès aux fichiers Drive, cliquez sur **Autoriser l'accès**, choisissez votre compte, cliquez sur **Paramètres avancés**, puis sur **Accéder à (nom du projet)** et validez les permissions.
+5. **Report de l'URL dans le code du site :**
+   - Copiez l'URL de l'application Web générée (`https://script.google.com/macros/s/.../exec`).
+   - Assurez-vous qu'elle est bien renseignée dans `js/config.js` pour la clé `STAGE_WEB_APP_URL`.
