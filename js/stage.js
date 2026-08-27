@@ -36,8 +36,8 @@ let stageElevesMap = {}; // Classe -> [{nom, prenom, fullText}]
 
 // Données de secours des enseignants si réseau indisponible
 const DEMO_ENSEIGNANTS = [
-    { nom: "DUPONT", prenom: "Jean", motDePasse: "prof2024" },
-    { nom: "MARTIN", prenom: "Sophie", motDePasse: "prof2024" }
+    { nom: "BOIVIN", prenom: "DIDIER", motDePasse: "DB" },
+    { nom: "MONASSON", prenom: "SYLVIE", motDePasse: "MS" }
 ];
 
 // Données des élèves par classe (fallback si non connecté ou sheet distant non chargé)
@@ -76,6 +76,11 @@ async function loadEnseignants() {
                 });
             }
         }
+        DEMO_ENSEIGNANTS.forEach(de => {
+            if (!enseignantsList.some(e => e.nom.toUpperCase() === de.nom.toUpperCase())) {
+                enseignantsList.push(de);
+            }
+        });
         console.log(`✅ ${enseignantsList.length} enseignants chargés.`);
     } catch (err) {
         console.warn("⚠️ Utilisation de la liste enseignants démo de secours :", err);
@@ -462,7 +467,10 @@ function handleTeacherLogin(e) {
         return;
     }
 
-    if (prof.motDePasse && prof.motDePasse !== pwd && pwd !== CONFIG.PROF_PASSWORD) {
+    const inputPwdClean = pwd.toUpperCase().trim();
+    const profPwdClean = (prof.motDePasse || '').toUpperCase().trim();
+
+    if (profPwdClean && profPwdClean !== inputPwdClean && pwd !== CONFIG.PROF_PASSWORD) {
         errDiv.textContent = '❌ Mot de passe incorrect.';
         errDiv.style.display = 'block';
         return;
