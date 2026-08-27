@@ -569,6 +569,10 @@ function sanitizeString(str) {
     return str ? str.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") : "";
 }
 
+function sanitizeStringKeepCase(str) {
+    return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-zA-Z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "") : "";
+}
+
 function onStageClasseChange() {
     const classeSelect = document.getElementById('stageClasse');
     const eleveSelect = document.getElementById('stageEleve');
@@ -625,15 +629,15 @@ function validatePdfUpload(input) {
         const cleanNom = sanitizeString(currentStudent.nom);
         const cleanPrenom = sanitizeString(currentStudent.prenom);
         const cleanClasse = sanitizeString(currentStudent.classe);
-        const expectedName = `${cleanNom}-${cleanPrenom}-${cleanClasse}.pdf`;
-        const fileNameSanitized = sanitizeString(file.name.replace(/\.pdf$/i, '')) + '.pdf';
+        const expectedNameLower = `${cleanNom}-${cleanPrenom}-${cleanClasse}.pdf`;
+        const fileNameSanitizedLower = sanitizeString(file.name.replace(/\.pdf$/i, '')) + '.pdf';
 
-        if (fileNameSanitized !== expectedName) {
+        if (fileNameSanitizedLower !== expectedNameLower) {
             msgDiv.style.display = 'block';
             msgDiv.style.background = 'var(--warning-bg, #fffbe6)';
             msgDiv.style.color = 'var(--warning-text, #856404)';
             msgDiv.style.border = '1px solid #ffeba1';
-            msgDiv.innerHTML = `⚠️ Attention : Nom de fichier suggéré : <strong>${expectedName}</strong> (Fichier actuel : <code>${file.name}</code>)`;
+            msgDiv.innerHTML = `⚠️ Attention : Nom de fichier suggéré : <strong>${expectedNameLower}</strong> (Fichier actuel : <code>${file.name}</code>)`;
         }
     }
 }
