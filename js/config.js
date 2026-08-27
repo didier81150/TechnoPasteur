@@ -18,13 +18,13 @@ const CONFIG = {
     ANNUAIRE_CSV_URL: 'https://docs.google.com/spreadsheets/d/1-u2cr0GIEheeC4C4aSozYghTIE-H_EtsPt9ZGmdict4/export?format=csv',
 
     // Annuaire Enseignants (pour la saisie des notes du rapport de stage)
-    ENSEIGNANTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/1cABpA_7xuv1AmTgubnh21MnaV7XuKhM_0OVwSBWqcqI/export?format=csv',
+    ENSEIGNANTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSavhNL7HmwKMlP7ZttTOSP7cKAfI1Wt7N52P9UDlC_gsaVoxP43EbXsCGzm11bb39QQ5Yv1vqznb41/pub?output=csv',
 
     // Selection des eleves de 3eme pour le rapport de stage
-    STAGE_ELEVES_CSV_URL: 'https://docs.google.com/spreadsheets/d/12WUptiE4s0Xev6BHTKAjgqUIRhIZRv3NJ0Fe_HK7K8w/export?format=csv',
+    STAGE_ELEVES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWClG07V8mZ6eNvmURE1GE1tDBMRMT0zizYm7LsT-UbCOmQh2ScK9DRJbiUkJDR0TedBtx9KIE_oqi/pub?output=csv',
 
     // Sheet des notes du rapport de stage
-    STAGE_NOTES_CSV_URL: 'https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c/export?format=csv',
+    STAGE_NOTES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR99nXZ-5Y6l52AludzKXoOz8sHjCcOTT05qXSyj6IzoEAmBI9f57zxwrmqMwuP87JMS8F3NB2MMJIn/pub?output=csv',
 
     // Sheet résultats (vérification et export)
     RESULTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/export?format=csv',
@@ -33,7 +33,7 @@ const CONFIG = {
     RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE',
 
     // Web App URL pour la saisie des notes du rapport de stage
-    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbyDV5-exF75rFQd3N9jBYzQMFGfT1BVip3lQcaQ4sKOkYabucflwf-ziyZDLCbwmQWLFw/exec'
+    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxLTBQ2aZ8Qy5gKml1kbmF2MaRczPOX5rFe8qG1q-oCNywD9SGJW0ANRgIpVQ6XBVLcJQ/exec'
 };
 
 // Base de données unifiée des activités par niveau
