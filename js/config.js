@@ -28,7 +28,7 @@ const CONFIG = {
     RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE',
 
     // Web App URL pour la saisie des notes du rapport de stage
-    STAGE_WEB_APP_URL: ''
+    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbyDV5-exF75rFQd3N9jBYzQMFGfT1BVip3lQcaQ4sKOkYabucflwf-ziyZDLCbwmQWLFw/exec'
 };
 
 // Base de données unifiée des activités par niveau
