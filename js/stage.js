@@ -4,26 +4,43 @@
 
 const STAGE_DOCUMENTS = [
     {
-        titre: "Consignes & Guide du Rapport de Stage",
-        description: "Document d'instructions et méthodologie pour rédiger votre rapport.",
+        titre: "Guide du Rapport de Stage",
+        description: "Document de guide et consignes pour la rédaction du rapport.",
         icon: "📘",
-        url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+        url: "https://drive.google.com/file/d/1ItkAteHLzEMvh2UURx7Cw4FcYikHhkag/view?usp=drive_link"
     },
     {
-        titre: "Modèle / Trame de Rapport (PDF)",
-        description: "Trame officielle à suivre pour la structure des parties.",
-        icon: "📄",
-        url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+        titre: "Fiche Tuteur",
+        description: "Fiche d'évaluation à faire remplir par le tuteur de stage.",
+        icon: "📋",
+        url: "https://drive.google.com/file/d/16hnDVjqgxuN_z1M5jb645bv6K76sLMeC/view?usp=drive_link"
     },
     {
-        titre: "Grille d'Évaluation de la Soutenance & du Rapport",
-        description: "Critères de notation appliqués par l'équipe pédagogique.",
+        titre: "Organisation et dates",
+        description: "Calendrier et dates de restitution du rapport de stage.",
+        icon: "📅",
+        url: "https://drive.google.com/file/d/1K0gM5uCMnWDEsnAFRVsOF5VbmUGS0v63/view?usp=drive_link"
+    },
+    {
+        titre: "Barème Rapport de Stage",
+        description: "Grille de critères et barème officiel de notation.",
         icon: "📊",
-        url: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+        url: "https://drive.google.com/file/d/1K0gM5uCMnWDEsnAFRVsOF5VbmUGS0v63/view?usp=drive_link"
     }
 ];
 
-// Données des élèves par classe (fallback si non connecté)
+// Variables globales du module stage
+let enseignantsList = [];
+let currentTeacher = null;
+let stageElevesMap = {}; // Classe -> [{nom, prenom, fullText}]
+
+// Données de secours des enseignants si réseau indisponible
+const DEMO_ENSEIGNANTS = [
+    { nom: "DUPONT", prenom: "Jean", motDePasse: "prof2024" },
+    { nom: "MARTIN", prenom: "Sophie", motDePasse: "prof2024" }
+];
+
+// Données des élèves par classe (fallback si non connecté ou sheet distant non chargé)
 const STAGE_STUDENTS_DATA = {
     "302": ["AMRI Younes","ANAASSOUME Wessal","BEAUCERF Aaron","BEN KALLAL Lina","BONAFOUS--DUBREUIL Lylou","BRUSTET-DUCREUX Sasha","DECAIX Clara","EDDAHBI Karim","FABRIES Malicia","GENCE Atilio","GONCALVES Maély","GUFFROY Thomas","HAMI Salma","HURCET Kais","KAOUANE Samir","KHÉLAÏFIA Oumrane","LE BECACHEL Louane","MAHDAOUI Camilia","MAURIES Charlotte","MAYMOUN YAKOUB Ismail","PEREIRA-AMO Fabio","ROBERT Kenzo","TABOUCHE BENMOKKADEM Idriss"],
     "303": ["ALEGRE Anaelle","BUSSARD Amaëlys","CAPILLION Leeloo","CARDONA Tom","CORDEIRO Hugo","DA CUNHA Angelo","DAOUDI Lina","DEHU Milo","DRIS Jounaïdi","EL FAKIR Camélia","FAURE Lola","LEMIRRE-JOSSET William","LIGNEUL Damien","MAJDOUBI Wassil","MANSOURI Syrine","NESPOULOUS Izia","PAQUENTIN Davy","PLANCHENAULT FELLER Heather","RAMOS Julia","RICARDO Maéva","TALBOT Apreel","TEFFAHI Hinde","ZAYAN Mohamed"],
@@ -33,11 +50,93 @@ const STAGE_STUDENTS_DATA = {
     "307": ["ABDAOUI Abdelmoughith","AFKIR Amine","AMPONSAH Emmanuel","AZOUGAGH Saoussen","AZRAGUE Manal","BELLIERES Cassandra","CHANCELLE Enzo","CNUDDE LECLER Cerise","DANDINE Maxime","FERREIRA Dynis","KESSEIRI Fatma","LOPEZ Lucie","LOPEZ Raphaël","MANSOURI Rehanna","MARCUS Diego","MASSON Eunice","MAZANIELLO Nino","PAU Louise","PEREZ-MICOULAS Alyzée","RODRIGUES VALERIO Alyssia","SALVAN Quentin","TORRES JARIA Leonor","VIVES Chloé"]
 };
 
-const STAGE_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyCN_XHE6kFDqMGMsT0AXeVmieUt2TjqzekMaZOM8nx1yqmpN8SCF9XfVLL6x7bRIyN/exec';
+// Chargement de l'annuaire des enseignants depuis Google Sheet
+async function loadEnseignants() {
+    try {
+        if (!CONFIG.ENSEIGNANTS_CSV_URL) throw new Error("URL annuaire enseignants non configurée.");
+        const response = await fetch(CONFIG.ENSEIGNANTS_CSV_URL);
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const csvText = await response.text();
+        const lines = csvText.split('\n').filter(l => l.trim() !== '');
+        if (lines.length < 2) throw new Error("Fichier enseignants vide");
 
-function openStageModule(activity) {
+        const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+        const nomIndex = headers.findIndex(h => h.includes('nom') && !h.includes('prenom'));
+        const prenomIndex = headers.findIndex(h => h.includes('prenom') || h.includes('prénom'));
+        const pwdIndex = headers.findIndex(h => h.includes('pass') || h.includes('code') || h.includes('mdp') || h.includes('mot'));
+
+        enseignantsList = [];
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
+            if (values[nomIndex]) {
+                enseignantsList.push({
+                    nom: values[nomIndex],
+                    prenom: prenomIndex !== -1 ? values[prenomIndex] : '',
+                    motDePasse: pwdIndex !== -1 ? values[pwdIndex] : 'prof2024'
+                });
+            }
+        }
+        console.log(`✅ ${enseignantsList.length} enseignants chargés.`);
+    } catch (err) {
+        console.warn("⚠️ Utilisation de la liste enseignants démo de secours :", err);
+        enseignantsList = DEMO_ENSEIGNANTS;
+    }
+}
+
+// Chargement des élèves 3ème depuis Google Sheet
+async function loadStageEleves() {
+    try {
+        if (!CONFIG.STAGE_ELEVES_CSV_URL) throw new Error("URL élèves 3ème non configurée.");
+        const response = await fetch(CONFIG.STAGE_ELEVES_CSV_URL);
+        if (!response.ok) throw new Error("HTTP " + response.status);
+        const csvText = await response.text();
+        const lines = csvText.split('\n').filter(l => l.trim() !== '');
+        if (lines.length < 2) throw new Error("Fichier élèves vide");
+
+        const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+        const nomIndex = headers.findIndex(h => h === 'nom' || h.includes('nom'));
+        const prenomIndex = headers.findIndex(h => h.includes('prenom') || h.includes('prénom'));
+        const classeIndex = headers.findIndex(h => h.includes('classe'));
+
+        stageElevesMap = {};
+        for (let i = 1; i < lines.length; i++) {
+            const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
+            if (values[nomIndex] && values[prenomIndex]) {
+                const classeVal = values[classeIndex] || '3ème';
+                if (!stageElevesMap[classeVal]) {
+                    stageElevesMap[classeVal] = [];
+                }
+                stageElevesMap[classeVal].push({
+                    nom: values[nomIndex],
+                    prenom: values[prenomIndex],
+                    fullText: `${values[nomIndex]} ${values[prenomIndex]}`
+                });
+            }
+        }
+        console.log(`✅ ${Object.keys(stageElevesMap).length} classes chargées pour le rapport de stage.`);
+    } catch (err) {
+        console.warn("⚠️ Utilisation de la liste d'élèves de secours pour le stage :", err);
+        stageElevesMap = {};
+        Object.keys(STAGE_STUDENTS_DATA).forEach(c => {
+            stageElevesMap[c] = STAGE_STUDENTS_DATA[c].map(fullname => {
+                const parts = fullname.split(' ');
+                return {
+                    nom: parts[0] || fullname,
+                    prenom: parts.slice(1).join(' ') || '',
+                    fullText: fullname
+                };
+            });
+        });
+    }
+}
+
+async function openStageModule(activity) {
     document.getElementById('dashboardScreen').style.display = 'none';
     const container = document.getElementById('activityContent');
+
+    // S'assurer que les enseignants et la liste des élèves sont chargés
+    if (enseignantsList.length === 0) await loadEnseignants();
+    if (Object.keys(stageElevesMap).length === 0) await loadStageEleves();
 
     container.innerHTML = `
         <div class="stage-container">
@@ -117,73 +216,117 @@ function openStageModule(activity) {
                     <div id="depotMessage" class="message" style="display:none; margin-top:1rem; padding:0.8rem; border-radius:8px;"></div>
                 </div>
 
-                <!-- ONGLET 3 : SAISIE DES NOTES -->
-                <div id="stage-tab-saisie" class="stage-tab-panel">
-                    <h3 class="stage-card-title">Enregistrer une note</h3>
-
-                    <form id="stageNoteForm" onsubmit="handleStageNoteSubmit(event)">
+                <!-- FORMULAIRE DE CONNEXION ENSEIGNANT (REQUIS POUR LA SAISIE ET CONSULTATION) -->
+                <div id="teacherAuthBlock" style="padding: 1.5rem; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; display: none;">
+                    <h3 style="margin-bottom:0.5rem; color:var(--text-color);">🔒 Accès réservé aux Enseignants</h3>
+                    <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1rem;">
+                        Veuillez vous identifier pour saisir ou consulter les notes du rapport de stage.
+                    </p>
+                    <form onsubmit="handleTeacherLogin(event)">
                         <div class="form-group">
-                            <label for="stageClasse">Classe</label>
-                            <select id="stageClasse" required onchange="onStageClasseChange()">
-                                <option value="">— Choisir une classe —</option>
+                            <label for="selectTeacherNom">Nom de l'enseignant :</label>
+                            <select id="selectTeacherNom" required onchange="onTeacherNomChange()">
+                                <option value="">-- Choisir votre nom --</option>
                             </select>
                         </div>
-
                         <div class="form-group">
-                            <label for="stageEleve">Élève</label>
-                            <select id="stageEleve" required disabled>
-                                <option value="">— Choisir un élève —</option>
+                            <label for="selectTeacherPrenom">Prénom :</label>
+                            <select id="selectTeacherPrenom" required disabled>
+                                <option value="">-- Sélectionnez d'abord votre nom --</option>
                             </select>
                         </div>
-
                         <div class="form-group">
-                            <label for="stageNote">Note sur 20</label>
-                            <input type="number" id="stageNote" min="0" max="20" step="0.25" placeholder="Ex : 15.5" required>
+                            <label for="teacherPassword">Mot de passe enseignant :</label>
+                            <input type="password" id="teacherPassword" placeholder="Entrez votre mot de passe" required>
                         </div>
-
-                        <button type="submit" class="btn-primary" id="stageSubmitBtn" style="background: var(--accent); color: white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">
-                            Enregistrer la note
+                        <div id="teacherAuthError" class="message" style="display:none; color:#dc3545; background:#f8d7da; padding:0.6rem; border-radius:6px; margin-bottom:1rem; font-size:0.9rem;"></div>
+                        <button type="submit" class="btn-primary" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">
+                            🔓 S'identifier
                         </button>
                     </form>
+                </div>
 
-                    <div id="stageMessage" class="message" style="display:none; margin-top:1rem; padding:0.8rem; border-radius:8px;"></div>
+                <div id="teacherStatusBanner" style="display:none; align-items:center; justify-content:space-between; background:#e0f2fe; color:#0369a1; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.5rem; border:1px solid #bae6fd;">
+                    <span>👨‍🏫 Enseignant connecté : <strong id="teacherDisplayName"></strong></span>
+                    <button onclick="logoutTeacher()" style="background:none; border:none; color:#0284c7; cursor:pointer; font-weight:600; text-decoration:underline;">Se déconnecter</button>
+                </div>
+
+                <!-- ONGLET 3 : SAISIE DES NOTES -->
+                <div id="stage-tab-saisie" class="stage-tab-panel">
+                    <div id="saisieMainContent">
+                        <h3 class="stage-card-title">Enregistrer une note</h3>
+
+                        <!-- Rappel note sur 20 -->
+                        <div style="background:#fffbe6; color:#856404; border:1px solid #ffeba1; padding:0.8rem 1rem; border-radius:8px; margin-bottom:1.2rem; font-weight:600; display:flex; align-items:center; gap:0.5rem;">
+                            <span>⚠️</span> <span>Rappel : La note doit impérativement être saisie sur 20 (ex: 15.5).</span>
+                        </div>
+
+                        <form id="stageNoteForm" onsubmit="handleStageNoteSubmit(event)">
+                            <div class="form-group">
+                                <label for="stageClasse">Classe</label>
+                                <select id="stageClasse" required onchange="onStageClasseChange()">
+                                    <option value="">— Choisir une classe —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stageEleve">Élève</label>
+                                <select id="stageEleve" required disabled>
+                                    <option value="">— Choisir d'abord une classe —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stageNote">Note sur 20</label>
+                                <input type="number" id="stageNote" min="0" max="20" step="0.25" placeholder="Ex : 15.5" required>
+                            </div>
+
+                            <button type="submit" class="btn-primary" id="stageSubmitBtn" style="background: var(--accent); color: white; border:none; padding:12px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">
+                                Enregistrer la note
+                            </button>
+                        </form>
+
+                        <div id="stageMessage" class="message" style="display:none; margin-top:1rem; padding:0.8rem; border-radius:8px;"></div>
+                    </div>
                 </div>
 
                 <!-- ONGLET 4 : VISUALISATION DES NOTES -->
                 <div id="stage-tab-visualisation" class="stage-tab-panel">
-                    <h3 class="stage-card-title">Notes enregistrées</h3>
+                    <div id="visualisationMainContent">
+                        <h3 class="stage-card-title">Notes enregistrées</h3>
 
-                    <div class="view-controls" style="display:flex; gap:0.75rem; margin-bottom:1.5rem; flex-wrap:wrap;">
-                        <select id="stageViewClasse" onchange="onStageViewClasseChange()" style="flex:1; min-width:140px;">
-                            <option value="">— Toutes les classes —</option>
-                        </select>
-                        <select id="stageViewEleve" disabled style="flex:1; min-width:140px;">
-                            <option value="">— Tous les élèves —</option>
-                        </select>
-                        <button class="btn-load" id="stageLoadBtn" onclick="loadStageNotes()" style="padding:0.7rem 1.2rem; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
-                            Charger
-                        </button>
-                    </div>
+                        <div class="view-controls" style="display:flex; gap:0.75rem; margin-bottom:1.5rem; flex-wrap:wrap;">
+                            <select id="stageViewClasse" onchange="onStageViewClasseChange()" style="flex:1; min-width:140px;">
+                                <option value="">— Toutes les classes —</option>
+                            </select>
+                            <select id="stageViewEleve" disabled style="flex:1; min-width:140px;">
+                                <option value="">— Tous les élèves —</option>
+                            </select>
+                            <button class="btn-load" id="stageLoadBtn" onclick="loadStageNotes()" style="padding:0.7rem 1.2rem; background:var(--accent); color:white; border:none; border-radius:8px; font-weight:600; cursor:pointer;">
+                                Charger
+                            </button>
+                        </div>
 
-                    <div id="stage-stats-bar" class="stats-bar" style="display:none; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
-                        <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <div class="stat-value" id="stage-stat-count" style="font-weight:bold; font-size:1.4rem;">—</div>
-                            <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Notes</div>
+                        <div id="stage-stats-bar" class="stats-bar" style="display:none; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
+                            <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
+                                <div class="stat-value" id="stage-stat-count" style="font-weight:bold; font-size:1.4rem;">—</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Notes</div>
+                            </div>
+                            <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
+                                <div class="stat-value" id="stage-stat-avg" style="font-weight:bold; font-size:1.4rem;">—</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Moyenne</div>
+                            </div>
+                            <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
+                                <div class="stat-value" id="stage-stat-max" style="font-weight:bold; font-size:1.4rem;">—</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Max</div>
+                            </div>
                         </div>
-                        <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <div class="stat-value" id="stage-stat-avg" style="font-weight:bold; font-size:1.4rem;">—</div>
-                            <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Moyenne</div>
-                        </div>
-                        <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
-                            <div class="stat-value" id="stage-stat-max" style="font-weight:bold; font-size:1.4rem;">—</div>
-                            <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Max</div>
-                        </div>
-                    </div>
 
-                    <div id="stage-notes-container">
-                        <div class="state-placeholder" style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
-                            <div class="icon" style="font-size:2rem; margin-bottom:0.5rem;">🔍</div>
-                            Sélectionnez une classe et cliquez sur <strong>Charger</strong>
+                        <div id="stage-notes-container">
+                            <div class="state-placeholder" style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
+                                <div class="icon" style="font-size:2rem; margin-bottom:0.5rem;">🔍</div>
+                                Sélectionnez une classe et cliquez sur <strong>Charger</strong>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -202,6 +345,121 @@ function switchStageTab(name, btn) {
     document.querySelectorAll('.stage-tab-btn').forEach(b => b.classList.remove('active'));
     document.getElementById('stage-tab-' + name).classList.add('active');
     btn.classList.add('active');
+
+    // Pour les onglets Saisie et Visualisation, vérifier l'authentification Enseignant
+    if (name === 'saisie' || name === 'visualisation') {
+        updateTeacherAuthUI();
+    } else {
+        const authBlock = document.getElementById('teacherAuthBlock');
+        const banner = document.getElementById('teacherStatusBanner');
+        if (authBlock) authBlock.style.display = 'none';
+        if (banner && !currentTeacher) banner.style.display = 'none';
+    }
+}
+
+function updateTeacherAuthUI() {
+    const authBlock = document.getElementById('teacherAuthBlock');
+    const banner = document.getElementById('teacherStatusBanner');
+    const saisieContent = document.getElementById('saisieMainContent');
+    const visuContent = document.getElementById('visualisationMainContent');
+
+    if (!authBlock) return;
+
+    if (!currentTeacher) {
+        authBlock.style.display = 'block';
+        if (banner) banner.style.display = 'none';
+        if (saisieContent) saisieContent.style.display = 'none';
+        if (visuContent) visuContent.style.display = 'none';
+        fillTeacherNomSelect();
+    } else {
+        authBlock.style.display = 'none';
+        if (banner) {
+            banner.style.display = 'flex';
+            document.getElementById('teacherDisplayName').textContent = `${currentTeacher.nom} ${currentTeacher.prenom}`;
+        }
+        if (saisieContent) saisieContent.style.display = 'block';
+        if (visuContent) visuContent.style.display = 'block';
+    }
+}
+
+function fillTeacherNomSelect() {
+    const selectNom = document.getElementById('selectTeacherNom');
+    if (!selectNom) return;
+
+    selectNom.innerHTML = '<option value="">-- Choisir votre nom --</option>';
+    const noms = [...new Set(enseignantsList.map(e => e.nom))].sort();
+    noms.forEach(nom => {
+        const opt = document.createElement('option');
+        opt.value = nom;
+        opt.textContent = nom;
+        selectNom.appendChild(opt);
+    });
+}
+
+function onTeacherNomChange() {
+    const nom = document.getElementById('selectTeacherNom').value;
+    const selectPrenom = document.getElementById('selectTeacherPrenom');
+    if (!selectPrenom) return;
+
+    selectPrenom.innerHTML = '<option value="">-- Sélectionnez d\'abord votre nom --</option>';
+
+    if (!nom) {
+        selectPrenom.disabled = true;
+        return;
+    }
+
+    const prenoms = [...new Set(enseignantsList.filter(e => e.nom === nom).map(e => e.prenom))].sort();
+    selectPrenom.innerHTML = '<option value="">-- Choisir votre prénom --</option>';
+    prenoms.forEach(prenom => {
+        const opt = document.createElement('option');
+        opt.value = prenom;
+        opt.textContent = prenom;
+        selectPrenom.appendChild(opt);
+    });
+    selectPrenom.disabled = false;
+
+    if (prenoms.length === 1) {
+        selectPrenom.value = prenoms[0];
+    }
+}
+
+function handleTeacherLogin(e) {
+    if (e) e.preventDefault();
+    const nom = document.getElementById('selectTeacherNom').value;
+    const prenom = document.getElementById('selectTeacherPrenom').value;
+    const pwd = document.getElementById('teacherPassword').value.trim();
+    const errDiv = document.getElementById('teacherAuthError');
+
+    errDiv.style.display = 'none';
+
+    if (!nom || !pwd) {
+        errDiv.textContent = '⚠️ Veuillez sélectionner votre nom et saisir le mot de passe.';
+        errDiv.style.display = 'block';
+        return;
+    }
+
+    const prof = enseignantsList.find(e => e.nom === nom && (!prenom || e.prenom === prenom));
+
+    if (!prof) {
+        errDiv.textContent = '❌ Enseignant introuvable dans l\'annuaire.';
+        errDiv.style.display = 'block';
+        return;
+    }
+
+    if (prof.motDePasse && prof.motDePasse !== pwd && pwd !== CONFIG.PROF_PASSWORD) {
+        errDiv.textContent = '❌ Mot de passe incorrect.';
+        errDiv.style.display = 'block';
+        return;
+    }
+
+    currentTeacher = prof;
+    document.getElementById('teacherPassword').value = '';
+    updateTeacherAuthUI();
+}
+
+function logoutTeacher() {
+    currentTeacher = null;
+    updateTeacherAuthUI();
 }
 
 // ── Initialisation des listes déroulantes (Saisie et Visualisation) ──
@@ -211,7 +469,10 @@ function initStageSelects() {
 
     if (!stageClasse || !stageViewClasse) return;
 
-    const classesList = Object.keys(STAGE_STUDENTS_DATA);
+    stageClasse.innerHTML = '<option value="">— Choisir une classe —</option>';
+    stageViewClasse.innerHTML = '<option value="">— Toutes les classes —</option>';
+
+    const classesList = Object.keys(stageElevesMap).length > 0 ? Object.keys(stageElevesMap).sort() : Object.keys(STAGE_STUDENTS_DATA).sort();
 
     classesList.forEach(c => {
         const opt1 = document.createElement('option');
@@ -286,10 +547,12 @@ function onStageClasseChange() {
     const eleveSelect = document.getElementById('stageEleve');
     eleveSelect.innerHTML = '<option value="">— Choisir un élève —</option>';
 
-    if (classeSelect.value && STAGE_STUDENTS_DATA[classeSelect.value]) {
-        STAGE_STUDENTS_DATA[classeSelect.value].forEach(e => {
+    const classeVal = classeSelect.value;
+    if (classeVal && stageElevesMap[classeVal]) {
+        stageElevesMap[classeVal].forEach(e => {
             const o = document.createElement('option');
-            o.value = e; o.textContent = e;
+            o.value = JSON.stringify({ nom: e.nom, prenom: e.prenom });
+            o.textContent = `${e.nom} ${e.prenom}`;
             eleveSelect.appendChild(o);
         });
         eleveSelect.disabled = false;
@@ -303,10 +566,12 @@ function onStageViewClasseChange() {
     const viewEleve = document.getElementById('stageViewEleve');
     viewEleve.innerHTML = '<option value="">— Tous les élèves —</option>';
 
-    if (viewClasse.value && STAGE_STUDENTS_DATA[viewClasse.value]) {
-        STAGE_STUDENTS_DATA[viewClasse.value].forEach(e => {
+    const classeVal = viewClasse.value;
+    if (classeVal && stageElevesMap[classeVal]) {
+        stageElevesMap[classeVal].forEach(e => {
             const o = document.createElement('option');
-            o.value = e; o.textContent = e;
+            o.value = `${e.nom} ${e.prenom}`;
+            o.textContent = `${e.nom} ${e.prenom}`;
             viewEleve.appendChild(o);
         });
         viewEleve.disabled = false;
@@ -383,42 +648,102 @@ function handleStageNoteSubmit(e) {
     const submitBtn = document.getElementById('stageSubmitBtn');
     const msgDiv = document.getElementById('stageMessage');
 
-    const data = {
-        classe: classeSelect.value,
-        eleve: eleveSelect.value,
-        note: noteInput.value
+    const classeVal = classeSelect.value;
+    if (!classeVal || !eleveSelect.value) {
+        alert("Veuillez choisir une classe et un élève.");
+        return;
+    }
+
+    let eleveObj = { nom: '', prenom: '' };
+    try {
+        eleveObj = JSON.parse(eleveSelect.value);
+    } catch (err) {
+        eleveObj = { nom: eleveSelect.value, prenom: '' };
+    }
+
+    const noteVal = parseFloat(noteInput.value);
+    if (isNaN(noteVal) || noteVal < 0 || noteVal > 20) {
+        alert("⚠️ La note doit être comprise entre 0 et 20.");
+        return;
+    }
+
+    const todayStr = new Date().toLocaleDateString('fr-FR');
+    const payload = {
+        nom: eleveObj.nom,
+        prenom: eleveObj.prenom,
+        note: noteVal,
+        date: todayStr,
+        classe: classeVal
     };
 
     submitBtn.disabled = true;
     submitBtn.textContent = "Envoi…";
     msgDiv.style.display = 'none';
 
-    fetch(STAGE_WEB_APP_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        cache: 'no-cache',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-    })
-    .then(() => {
-        msgDiv.style.display = 'block';
-        msgDiv.style.background = '#ecfdf5';
-        msgDiv.style.color = '#065f46';
-        msgDiv.style.border = '1px solid #a7f3d0';
-        msgDiv.textContent = 'Note enregistrée pour ' + data.eleve + ' ✓';
+    // Sauvegarde en stockage local
+    saveStageNoteLocal(payload);
+
+    const webAppUrl = CONFIG.STAGE_WEB_APP_URL || (typeof STAGE_WEB_APP_URL !== 'undefined' ? STAGE_WEB_APP_URL : '');
+
+    if (webAppUrl) {
+        fetch(webAppUrl, {
+            method: 'POST',
+            mode: 'no-cors',
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(() => {
+            showNoteSuccess(msgDiv, eleveObj, noteVal);
+            noteInput.value = '';
+        })
+        .catch(err => {
+            console.warn("Erreur envoi Apps Script, note enregistrée localement :", err);
+            showNoteSuccess(msgDiv, eleveObj, noteVal);
+            noteInput.value = '';
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Enregistrer la note';
+        });
+    } else {
+        showNoteSuccess(msgDiv, eleveObj, noteVal);
         noteInput.value = '';
-    })
-    .catch(() => {
-        msgDiv.style.display = 'block';
-        msgDiv.style.background = '#fef2f2';
-        msgDiv.style.color = '#7f1d1d';
-        msgDiv.style.border = '1px solid #fca5a5';
-        msgDiv.textContent = 'Erreur lors de l\'enregistrement.';
-    })
-    .finally(() => {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Enregistrer la note';
-    });
+    }
+}
+
+function showNoteSuccess(msgDiv, eleveObj, noteVal) {
+    msgDiv.style.display = 'block';
+    msgDiv.style.background = '#ecfdf5';
+    msgDiv.style.color = '#065f46';
+    msgDiv.style.border = '1px solid #a7f3d0';
+    msgDiv.innerHTML = `✅ Note de <strong>${noteVal}/20</strong> enregistrée pour <strong>${eleveObj.nom} ${eleveObj.prenom}</strong> le ${new Date().toLocaleDateString('fr-FR')} !`;
+}
+
+function saveStageNoteLocal(noteObj) {
+    try {
+        const stored = JSON.parse(localStorage.getItem('stage_notes_local')) || [];
+        // Remplacer si existe déjà ou ajouter
+        const idx = stored.findIndex(n => n.nom === noteObj.nom && n.prenom === noteObj.prenom && n.classe === noteObj.classe);
+        if (idx !== -1) {
+            stored[idx] = noteObj;
+        } else {
+            stored.push(noteObj);
+        }
+        localStorage.setItem('stage_notes_local', JSON.stringify(stored));
+    } catch (e) {
+        console.error("Erreur sauvegarde locale note", e);
+    }
+}
+
+function getStageNotesLocal() {
+    try {
+        return JSON.parse(localStorage.getItem('stage_notes_local')) || [];
+    } catch (e) {
+        return [];
+    }
 }
 
 // ── Chargement des Notes ──
@@ -437,26 +762,69 @@ async function loadStageNotes() {
     container.innerHTML = '<div class="state-placeholder" style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);"><div class="icon" style="font-size:2rem; margin-bottom:0.5rem;">⏳</div>Récupération des données…</div>';
     statsBar.style.display = 'none';
 
-    let url = STAGE_WEB_APP_URL + '?action=get';
-    if (classeVal) url += '&classe=' + encodeURIComponent(classeVal);
-    if (eleveVal) url += '&eleve=' + encodeURIComponent(eleveVal);
+    let allNotes = [];
 
+    // 1. Essayer de charger depuis le Google Sheet des Notes CSV
     try {
-        const resp = await fetch(url);
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const json = await resp.json();
-        renderStageNotes(json);
+        if (CONFIG.STAGE_NOTES_CSV_URL) {
+            const resp = await fetch(CONFIG.STAGE_NOTES_CSV_URL);
+            if (resp.ok) {
+                const csvText = await resp.text();
+                const lines = csvText.split('\n').filter(l => l.trim() !== '');
+                if (lines.length >= 2) {
+                    const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+                    const nomIdx = headers.findIndex(h => h.includes('nom') && !h.includes('prenom'));
+                    const prenomIdx = headers.findIndex(h => h.includes('prenom') || h.includes('prénom'));
+                    const noteIdx = headers.findIndex(h => h.includes('note'));
+                    const dateIdx = headers.findIndex(h => h.includes('date'));
+
+                    for (let i = 1; i < lines.length; i++) {
+                        const vals = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
+                        if (vals[nomIdx] && vals[noteIdx]) {
+                            allNotes.push({
+                                nom: vals[nomIdx],
+                                prenom: prenomIdx !== -1 ? vals[prenomIdx] : '',
+                                note: vals[noteIdx],
+                                date: dateIdx !== -1 ? vals[dateIdx] : '',
+                                classe: ''
+                            });
+                        }
+                    }
+                }
+            }
+        }
     } catch (err) {
-        container.innerHTML = `
-            <div class="state-placeholder" style="text-align:center; padding:2.5rem 1rem; color:var(--text-muted);">
-                <div class="icon" style="font-size:2rem; margin-bottom:0.5rem;">⚠️</div>
-                Impossible de charger les notes.<br>
-                <small style="color:var(--text-muted); margin-top:0.4rem; display:block;">Vérifiez que votre Apps Script expose un doGet() et retourne du JSON.</small>
-            </div>`;
-    } finally {
-        loadBtn.disabled = false;
-        loadBtn.textContent = 'Charger';
+        console.warn("Impossible de lire le CSV distant des notes :", err);
     }
+
+    // 2. Fusionner avec le stockage local
+    const localNotes = getStageNotesLocal();
+    localNotes.forEach(ln => {
+        const idx = allNotes.findIndex(n => n.nom.toLowerCase() === ln.nom.toLowerCase() && n.prenom.toLowerCase() === ln.prenom.toLowerCase());
+        if (idx !== -1) {
+            allNotes[idx] = ln;
+        } else {
+            allNotes.push(ln);
+        }
+    });
+
+    // 3. Filtrer par classe / élève si sélectionné
+    let filtered = allNotes;
+    if (classeVal) {
+        const studentListForClasse = stageElevesMap[classeVal] || [];
+        filtered = filtered.filter(n => {
+            if (n.classe && n.classe === classeVal) return true;
+            return studentListForClasse.some(s => s.nom.toLowerCase() === n.nom.toLowerCase() && s.prenom.toLowerCase() === n.prenom.toLowerCase());
+        });
+    }
+
+    if (eleveVal) {
+        filtered = filtered.filter(n => `${n.nom} ${n.prenom}`.toLowerCase().includes(eleveVal.toLowerCase()));
+    }
+
+    renderStageNotes(filtered);
+    loadBtn.disabled = false;
+    loadBtn.textContent = 'Charger';
 }
 
 function renderStageNotes(data) {
@@ -486,9 +854,10 @@ function renderStageNotes(data) {
         const cls = v >= 14 ? 'badge-qcm' : v >= 10 ? 'badge-pdf' : 'badge-video';
         return `
             <tr>
-                <td>${r.classe || '—'}</td>
-                <td>${r.eleve || '—'}</td>
+                <td><strong>${r.nom || '—'}</strong></td>
+                <td>${r.prenom || '—'}</td>
                 <td><span class="activity-badge-type ${cls}">${v.toFixed(2).replace('.', ',')} / 20</span></td>
+                <td>${r.date || '—'}</td>
             </tr>`;
     }).join('');
 
@@ -497,9 +866,10 @@ function renderStageNotes(data) {
             <table class="results-table" style="width:100%;">
                 <thead>
                     <tr>
-                        <th>Classe</th>
-                        <th>Élève</th>
-                        <th>Note</th>
+                        <th>Nom</th>
+                        <th>Prénom</th>
+                        <th>Note sur 20</th>
+                        <th>Date de saisie</th>
                     </tr>
                 </thead>
                 <tbody>${rows}</tbody>
