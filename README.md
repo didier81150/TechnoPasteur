@@ -35,15 +35,35 @@ Ouvrez votre Google Sheet, allez dans **Extensions > Apps Script** et collez le 
 ```javascript
 function doPost(e) {
   try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var data = JSON.parse(e.postData.contents);
 
+    // ACTION 1 : Dépôt du rapport PDF dans Google Drive
+    if (data.action === "upload_stage_report") {
+      var folderName = "Rapports de Stage 3ème";
+      var folders = DriveApp.getFoldersByName(folderName);
+      var folder;
+      if (folders.hasNext()) {
+        folder = folders.next();
+      } else {
+        folder = DriveApp.createFolder(folderName);
+      }
+
+      var contentType = data.fileType || "application/pdf";
+      var blob = Utilities.newBlob(Utilities.base64Decode(data.fileData), contentType, data.fileName);
+      var file = folder.createFile(blob);
+
+      return ContentService
+        .createTextOutput(JSON.stringify({ status: 'success', url: file.getUrl() }))
+        .setMimeType(ContentService.MimeType.JSON);
+    }
+
+    // ACTION 2 : Saisie des notes du rapport de stage
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var nom = data.nom || '';
     var prenom = data.prenom || '';
     var note = data.note !== undefined ? data.note : '';
     var dateSaisie = data.date || new Date().toLocaleDateString('fr-FR');
 
-    // Ajoute une ligne avec : nom, prenom, note, date de saisie
     sheet.appendRow([nom, prenom, note, dateSaisie]);
 
     return ContentService

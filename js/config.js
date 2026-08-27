@@ -9,7 +9,12 @@ const CONFIG = {
     STORAGE_KEY_RESULTS: "qcm_materiaux_resultats",
     STORAGE_KEY_UNLOCKS: "site_techno_unlocked_activities",
 
-    // Annuaire 4ème / 5ème / 3ème : lu automatiquement depuis le Google Sheet.
+    // Annuaires 5ème / 4ème / 3ème : lus automatiquement depuis Google Sheets.
+    ANNUAIRE_CSV_URLS: {
+        '5eme': 'https://docs.google.com/spreadsheets/d/1HRz8G2-i8Pn9dOLHWQgGrbycfJNx6BzcaLsgmA3tCks/export?format=csv',
+        '4eme': 'https://docs.google.com/spreadsheets/d/1-u2cr0GIEheeC4C4aSozYghTIE-H_EtsPt9ZGmdict4/export?format=csv',
+        '3eme': 'https://docs.google.com/spreadsheets/d/12WUptiE4s0Xev6BHTKAjgqUIRhIZRv3NJ0Fe_HK7K8w/export?format=csv'
+    },
     ANNUAIRE_CSV_URL: 'https://docs.google.com/spreadsheets/d/1-u2cr0GIEheeC4C4aSozYghTIE-H_EtsPt9ZGmdict4/export?format=csv',
 
     // Annuaire Enseignants (pour la saisie des notes du rapport de stage)

@@ -35,29 +35,35 @@
 
         <form id="loginForm" onsubmit="handleLogin(event)">
             <div class="form-group">
-                <label for="selectNom">👤 Nom de famille :</label>
-                <select id="selectNom" required onchange="onNomChange()">
-                    <option value="">-- Choisir votre nom --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="selectPrenom">👤 Prénom :</label>
-                <select id="selectPrenom" required disabled onchange="onPrenomChange()">
-                    <option value="">-- Sélectionnez d'abord votre nom --</option>
+                <label for="selectNiveau">🎓 Niveau :</label>
+                <select id="selectNiveau" required onchange="onNiveauChange()">
+                    <option value="">-- Choisir le niveau --</option>
+                    <option value="5eme">5ème</option>
+                    <option value="4eme">4ème</option>
+                    <option value="3eme">3ème</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="selectClasse">🏫 Classe :</label>
-                <select id="selectClasse" required disabled>
-                    <option value="">-- Sélectionnez d'abord votre prénom --</option>
+                <select id="selectClasse" required disabled onchange="onClasseChange()">
+                    <option value="">-- Sélectionnez d'abord le niveau --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="selectEleve">👤 Élève (Nom Prénom) :</label>
+                <select id="selectEleve" required disabled>
+                    <option value="">-- Sélectionnez d'abord la classe --</option>
                 </select>
             </div>
 
             <div class="form-group">
                 <label for="codeSecret">🔑 Mot de passe élève :</label>
-                <input type="password" id="codeSecret" placeholder="Mot de passe transmis par le professeur" required>
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="password" id="codeSecret" placeholder="Mot de passe transmis par le professeur" required style="width: 100%; padding-right: 40px;">
+                    <button type="button" onclick="togglePasswordVisibility('codeSecret', this)" style="position: absolute; right: 8px; background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Afficher/Masquer le mot de passe">👁️</button>
+                </div>
             </div>
 
             <div id="loginError" class="error-message"></div>
@@ -117,7 +123,10 @@
             <h3>🔐 Accès Espace Professeur</h3>
             <div class="form-group">
                 <label for="profPassword">Mot de passe enseignant :</label>
-                <input type="password" id="profPassword" placeholder="Entrez le mot de passe professeur">
+                <div style="position: relative; display: flex; align-items: center;">
+                    <input type="password" id="profPassword" placeholder="Entrez le mot de passe professeur" style="width: 100%; padding-right: 40px;">
+                    <button type="button" onclick="togglePasswordVisibility('profPassword', this)" style="position: absolute; right: 8px; background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Afficher/Masquer le mot de passe">👁️</button>
+                </div>
             </div>
             <div id="profError" class="error-message"></div>
             <button class="btn-login" onclick="checkProfPassword()">Valider</button>
