@@ -22,3 +22,45 @@ Le site **`site-techno`** intègre désormais l'intégralité des fonctionnalit�
 1. **Conserver et déployer uniquement `site-techno`** (via GitHub Pages ou votre serveur d'hébergement).
 2. **Archiver ou rediriger le dépôt `Matériaux`** vers l'URL de `site-techno`.
 3. **Mettre à jour vos favoris / liens** transmis aux élèves pour qu'ils pointent vers `site-techno`.
+
+---
+
+## 📝 Configuration Google Apps Script — Saisie des Notes du Rapport de Stage
+
+Pour enregistrer automatiquement les notes directement dans votre Google Sheet (`https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c`), suivez ces étapes :
+
+### 1. Code Google Apps Script
+Ouvrez votre Google Sheet, allez dans **Extensions > Apps Script** et collez le code suivant :
+
+```javascript
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+
+    var nom = data.nom || '';
+    var prenom = data.prenom || '';
+    var note = data.note !== undefined ? data.note : '';
+    var dateSaisie = data.date || new Date().toLocaleDateString('fr-FR');
+
+    // Ajoute une ligne avec : nom, prenom, note, date de saisie
+    sheet.appendRow([nom, prenom, note, dateSaisie]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'success' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+### 2. Procédure de déploiement
+1. Cliquez sur **Déployer > Nouveau déploiement**.
+2. Sélectionnez le type **Application Web**.
+3. **Exécuter en tant que** : *Moi*.
+4. **Qui a accès** : *Tout le monde* (Anyone).
+5. Cliquez sur **Déployer** et copiez l'URL de l'application Web générée.
+6. Reportez cette URL dans `js/config.js` au niveau du champ `STAGE_WEB_APP_URL`.

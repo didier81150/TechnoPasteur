@@ -12,11 +12,23 @@ const CONFIG = {
     // Annuaire 4ème / 5ème / 3ème : lu automatiquement depuis le Google Sheet.
     ANNUAIRE_CSV_URL: 'https://docs.google.com/spreadsheets/d/1-u2cr0GIEheeC4C4aSozYghTIE-H_EtsPt9ZGmdict4/export?format=csv',
 
+    // Annuaire Enseignants (pour la saisie des notes du rapport de stage)
+    ENSEIGNANTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/1cABpA_7xuv1AmTgubnh21MnaV7XuKhM_0OVwSBWqcqI/export?format=csv',
+
+    // Selection des eleves de 3eme pour le rapport de stage
+    STAGE_ELEVES_CSV_URL: 'https://docs.google.com/spreadsheets/d/12WUptiE4s0Xev6BHTKAjgqUIRhIZRv3NJ0Fe_HK7K8w/export?format=csv',
+
+    // Sheet des notes du rapport de stage
+    STAGE_NOTES_CSV_URL: 'https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c/export?format=csv',
+
     // Sheet résultats (vérification et export)
     RESULTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/export?format=csv',
 
     // Apps Script Web App pour enregistrement des résultats
-    RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE'
+    RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE',
+
+    // Web App URL pour la saisie des notes du rapport de stage
+    STAGE_WEB_APP_URL: ''
 };
 
 // Base de données unifiée des activités par niveau
