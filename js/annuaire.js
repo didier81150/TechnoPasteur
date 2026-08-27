@@ -5,6 +5,19 @@
 let annuaireEleves = [];
 let currentStudent = null;
 
+// Bascule d'affichage du mot de passe
+function togglePasswordVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+    if (input.type === 'password') {
+        input.type = 'text';
+        if (btn) btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        if (btn) btn.textContent = '👁️';
+    }
+}
+
 // Charge l'annuaire depuis le Google Sheet (avec secours démo en cas de problème réseau)
 async function loadAnnuaire() {
     const btnLogin = document.getElementById('btnLogin');
@@ -13,55 +26,61 @@ async function loadAnnuaire() {
         btnLogin.textContent = "Chargement de l'annuaire...";
     }
 
-    try {
-        const response = await fetch(CONFIG.ANNUAIRE_CSV_URL);
-        if (!response.ok) throw new Error('Réponse HTTP ' + response.status);
-        const csvData = await response.text();
+    annuaireEleves = [];
 
-        const lines = csvData.split('\n').filter(l => l.trim() !== '');
-        const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
+    const urls = CONFIG.ANNUAIRE_CSV_URLS || { '4eme': CONFIG.ANNUAIRE_CSV_URL };
 
-        const nomIndex = headers.findIndex(h => h === 'nom');
-        const prenomIndex = headers.findIndex(h => h === 'prénom' || h === 'prenom');
-        const classeIndex = headers.findIndex(h => h === 'classe');
-        const pwdIndex = headers.findIndex(h => h === 'mot_de_passe' || h === 'mot de passe' || h === 'code_secret' || h === 'password');
-        const ppaIndex = headers.findIndex(h => h === 'ppa');
+    for (const [nivKey, url] of Object.entries(urls)) {
+        try {
+            const response = await fetch(url);
+            if (!response.ok) continue;
+            const csvData = await response.text();
 
-        if (nomIndex === -1 || prenomIndex === -1 || classeIndex === -1 || pwdIndex === -1) {
-            throw new Error('Colonnes attendues introuvables dans l\'annuaire');
-        }
+            const lines = csvData.split('\n').filter(l => l.trim() !== '');
+            if (lines.length < 2) continue;
 
-        annuaireEleves = [];
-        for (let i = 1; i < lines.length; i++) {
-            const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
-            if (values[nomIndex]) {
-                const classeVal = values[classeIndex] || '';
-                let niveauVal = '4eme';
-                if (classeVal.includes('5')) niveauVal = '5eme';
-                else if (classeVal.includes('3')) niveauVal = '3eme';
-                else if (classeVal.includes('4')) niveauVal = '4eme';
+            const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
 
-                annuaireEleves.push({
-                    nom: values[nomIndex],
-                    prenom: values[prenomIndex],
-                    classe: classeVal,
-                    niveau: niveauVal,
-                    motDePasse: values[pwdIndex],
-                    ppa: ppaIndex !== -1 ? ['oui', 'true', '1'].includes((values[ppaIndex] || '').toLowerCase()) : false
-                });
+            const nomIndex = headers.findIndex(h => h === 'nom');
+            const prenomIndex = headers.findIndex(h => h === 'prénom' || h === 'prenom');
+            const classeIndex = headers.findIndex(h => h === 'classe');
+            const pwdIndex = headers.findIndex(h => h === 'mot_de_passe' || h === 'mot de passe' || h === 'code_secret' || h === 'password' || h.includes('pass'));
+            const ppaIndex = headers.findIndex(h => h === 'ppa');
+
+            for (let i = 1; i < lines.length; i++) {
+                const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
+                if (values[nomIndex]) {
+                    const classeVal = values[classeIndex] || '';
+                    let niveauVal = nivKey;
+                    if (classeVal.includes('5')) niveauVal = '5eme';
+                    else if (classeVal.includes('3')) niveauVal = '3eme';
+                    else if (classeVal.includes('4')) niveauVal = '4eme';
+
+                    annuaireEleves.push({
+                        nom: values[nomIndex],
+                        prenom: values[prenomIndex] || '',
+                        classe: classeVal,
+                        niveau: niveauVal,
+                        motDePasse: pwdIndex !== -1 ? values[pwdIndex] : '1234',
+                        ppa: ppaIndex !== -1 ? ['oui', 'true', '1'].includes((values[ppaIndex] || '').toLowerCase()) : false
+                    });
+                }
             }
+        } catch (err) {
+            console.warn(`Erreur chargement annuaire ${nivKey}:`, err);
         }
+    }
 
-        console.log(`✅ ${annuaireEleves.length} élèves chargés depuis l'annuaire`);
-    } catch (error) {
-        console.warn("⚠️ Utilisation de l'annuaire démo de secours (problème réseau ou Sheet distant non accessible):", error);
+    if (annuaireEleves.length === 0) {
+        console.warn("⚠️ Utilisation de l'annuaire démo de secours:");
         loadDemoAnnuaire();
-    } finally {
-        fillNomSelect();
-        if (btnLogin) {
-            btnLogin.disabled = false;
-            btnLogin.textContent = 'Se connecter';
-        }
+    } else {
+        console.log(`✅ ${annuaireEleves.length} élèves chargés au total depuis les annuaires`);
+    }
+
+    if (btnLogin) {
+        btnLogin.disabled = false;
+        btnLogin.textContent = 'Se connecter';
     }
 }
 
@@ -74,87 +93,65 @@ function loadDemoAnnuaire() {
     ];
 }
 
-// Remplissage en cascade (Nom -> Prénom -> Classe)
-function fillNomSelect() {
-    const select = document.getElementById('selectNom');
-    if (!select) return;
-    select.innerHTML = '<option value="">-- Choisir votre nom --</option>';
-    const noms = [...new Set(annuaireEleves.map(e => e.nom))].sort();
-    noms.forEach(nom => {
-        const option = document.createElement('option');
-        option.value = nom;
-        option.textContent = nom;
-        select.appendChild(option);
-    });
-}
-
-function onNomChange() {
-    const nom = document.getElementById('selectNom').value;
-    const selectPrenom = document.getElementById('selectPrenom');
+// Remplissage en cascade (Niveau -> Classe -> Élève)
+function onNiveauChange() {
+    const niveau = document.getElementById('selectNiveau').value;
     const selectClasse = document.getElementById('selectClasse');
+    const selectEleve = document.getElementById('selectEleve');
 
-    selectClasse.innerHTML = '<option value="">-- Sélectionnez d\'abord votre prénom --</option>';
-    selectClasse.disabled = true;
+    selectEleve.innerHTML = '<option value="">-- Sélectionnez d\'abord la classe --</option>';
+    selectEleve.disabled = true;
 
-    if (!nom) {
-        selectPrenom.innerHTML = '<option value="">-- Sélectionnez d\'abord votre nom --</option>';
-        selectPrenom.disabled = true;
-        return;
-    }
-
-    const prenoms = [...new Set(annuaireEleves.filter(e => e.nom === nom).map(e => e.prenom))].sort();
-    selectPrenom.innerHTML = '<option value="">-- Choisir votre prénom --</option>';
-    prenoms.forEach(prenom => {
-        const option = document.createElement('option');
-        option.value = prenom;
-        option.textContent = prenom;
-        selectPrenom.appendChild(option);
-    });
-    selectPrenom.disabled = false;
-
-    if (prenoms.length === 1) {
-        selectPrenom.value = prenoms[0];
-        onPrenomChange();
-    }
-}
-
-function onPrenomChange() {
-    const nom = document.getElementById('selectNom').value;
-    const prenom = document.getElementById('selectPrenom').value;
-    const selectClasse = document.getElementById('selectClasse');
-
-    if (!prenom) {
-        selectClasse.innerHTML = '<option value="">-- Sélectionnez d\'abord votre prénom --</option>';
+    if (!niveau) {
+        selectClasse.innerHTML = '<option value="">-- Sélectionnez d\'abord le niveau --</option>';
         selectClasse.disabled = true;
         return;
     }
 
-    const classes = [...new Set(annuaireEleves.filter(e => e.nom === nom && e.prenom === prenom).map(e => e.classe))].sort();
-    selectClasse.innerHTML = '<option value="">-- Choisir votre classe --</option>';
-    classes.forEach(classe => {
+    const classes = [...new Set(annuaireEleves.filter(e => e.niveau === niveau).map(e => e.classe))].sort();
+    selectClasse.innerHTML = '<option value="">-- Choisir la classe --</option>';
+    classes.forEach(cls => {
         const option = document.createElement('option');
-        option.value = classe;
-        option.textContent = classe;
+        option.value = cls;
+        option.textContent = cls;
         selectClasse.appendChild(option);
     });
     selectClasse.disabled = false;
+}
 
-    if (classes.length === 1) {
-        selectClasse.value = classes[0];
+function onClasseChange() {
+    const niveau = document.getElementById('selectNiveau').value;
+    const classe = document.getElementById('selectClasse').value;
+    const selectEleve = document.getElementById('selectEleve');
+
+    if (!classe) {
+        selectEleve.innerHTML = '<option value="">-- Sélectionnez d\'abord la classe --</option>';
+        selectEleve.disabled = true;
+        return;
     }
+
+    const eleves = annuaireEleves.filter(e => e.niveau === niveau && e.classe === classe).sort((a, b) => a.nom.localeCompare(b.nom));
+    selectEleve.innerHTML = '<option value="">-- Choisir votre nom & prénom --</option>';
+    eleves.forEach(e => {
+        const option = document.createElement('option');
+        option.value = `${e.nom}___${e.prenom}`;
+        option.textContent = `${e.nom} ${e.prenom}`;
+        selectEleve.appendChild(option);
+    });
+    selectEleve.disabled = false;
 }
 
 // Connexion de l'élève
 function handleLogin(event) {
     if (event) event.preventDefault();
 
-    const nom = document.getElementById('selectNom').value;
-    const prenom = document.getElementById('selectPrenom').value;
+    const niveau = document.getElementById('selectNiveau').value;
     const classe = document.getElementById('selectClasse').value;
+    const eleveVal = document.getElementById('selectEleve').value;
     const motDePasse = document.getElementById('codeSecret').value.trim();
 
-    if (!nom || !prenom || !classe) {
-        showLoginError('⚠️ Veuillez renseigner votre nom, prénom et classe.');
+    if (!niveau || !classe || !eleveVal) {
+        showLoginError('⚠️ Veuillez renseigner le niveau, la classe et votre nom.');
         return;
     }
     if (!motDePasse) {
@@ -162,7 +159,8 @@ function handleLogin(event) {
         return;
     }
 
-    const eleve = annuaireEleves.find(e => e.nom === nom && e.prenom === prenom && e.classe === classe);
+    const [nom, prenom] = eleveVal.split('___');
+    const eleve = annuaireEleves.find(e => e.niveau === niveau && e.classe === classe && e.nom === nom && e.prenom === prenom);
 
     if (!eleve) {
         showLoginError("❌ Élève introuvable dans l'annuaire.");
@@ -195,7 +193,7 @@ function logout() {
         document.getElementById('loginScreen').style.display = 'block';
 
         document.getElementById('codeSecret').value = '';
-        document.getElementById('selectNom').value = '';
-        onNomChange();
+        if (document.getElementById('selectNiveau')) document.getElementById('selectNiveau').value = '';
+        onNiveauChange();
     }
 }

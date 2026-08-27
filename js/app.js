@@ -65,15 +65,32 @@ function refreshCurrentDashboard() {
 
     const activities = ACTIVITIES_DATABASE.filter(act => act.niveau === currentActiveLevel);
 
+    // Vérification de la correspondance du niveau élève
+    const isStudentLevelMatch = !currentStudent || currentStudent.niveau === currentActiveLevel;
+
     if (activities.length === 0) {
         grid.innerHTML = '<p style="grid-column: 1/-1; text-align:center; color: var(--text-muted); padding: 40px 0;">Aucune activité disponible pour ce niveau.</p>';
         return;
     }
 
     activities.forEach(act => {
-        const unlocked = isActivityUnlocked(act.id);
+        const unlockedByProf = isActivityUnlocked(act.id);
+        const accessible = isStudentLevelMatch && unlockedByProf;
+
         const card = document.createElement('div');
-        card.className = `activity-card ${unlocked ? '' : 'locked'}`;
+        card.className = `activity-card ${accessible ? '' : 'locked'}`;
+        if (!isStudentLevelMatch) {
+            card.style.opacity = '0.55';
+            card.style.filter = 'grayscale(80%)';
+        }
+
+        let statusText = '🟢 Accessible';
+        if (!isStudentLevelMatch) {
+            const levelLabel = currentActiveLevel === '5eme' ? '5ème' : (currentActiveLevel === '4eme' ? '4ème' : '3ème');
+            statusText = `🚫 Réservé aux ${levelLabel}`;
+        } else if (!unlockedByProf) {
+            statusText = '🔒 Verrouillé par le prof';
+        }
 
         card.innerHTML = `
             <div>
@@ -82,11 +99,11 @@ function refreshCurrentDashboard() {
                 <p class="activity-desc">${act.description}</p>
             </div>
             <div class="activity-footer">
-                <span class="activity-status ${unlocked ? 'status-unlocked' : 'status-locked'}">
-                    ${unlocked ? '🟢 Accessible' : '🔒 Verrouillé'}
+                <span class="activity-status ${accessible ? 'status-unlocked' : 'status-locked'}">
+                    ${statusText}
                 </span>
-                <button class="btn-start-activity" ${unlocked ? '' : 'disabled'} onclick="launchActivity('${act.id}')">
-                    ${unlocked ? 'Accéder →' : 'Bloqué'}
+                <button class="btn-start-activity" ${accessible ? '' : 'disabled'} onclick="launchActivity('${act.id}')">
+                    ${accessible ? 'Accéder →' : 'Inaccessible'}
                 </button>
             </div>
         `;

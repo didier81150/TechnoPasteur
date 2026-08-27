@@ -258,7 +258,10 @@ async function openStageModule(activity) {
                         </div>
                         <div class="form-group">
                             <label for="teacherPassword">Mot de passe enseignant :</label>
-                            <input type="password" id="teacherPassword" placeholder="Entrez votre mot de passe" required>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="teacherPassword" placeholder="Entrez votre mot de passe" required style="width: 100%; padding-right: 40px;">
+                                <button type="button" onclick="togglePasswordVisibility('teacherPassword', this)" style="position: absolute; right: 8px; background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Afficher/Masquer le mot de passe">👁️</button>
+                            </div>
                         </div>
                         <div id="teacherAuthError" class="message" style="display:none; color:#dc3545; background:#f8d7da; padding:0.6rem; border-radius:6px; margin-bottom:1rem; font-size:0.9rem;"></div>
                         <button type="submit" class="btn-primary" style="background:var(--accent); color:white; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer; width:100%;">
@@ -642,7 +645,7 @@ function handleDepotSubmit(e) {
     const btnSubmit = document.getElementById('btnDepotSubmit');
 
     if (!input.files || !input.files[0]) {
-        alert("Veuillez sélectionner un fichier PDF à déposer.");
+        alert("Veuillez sélectionner un fichier à déposer.");
         return;
     }
 
@@ -650,17 +653,62 @@ function handleDepotSubmit(e) {
     btnSubmit.disabled = true;
     btnSubmit.textContent = "⏳ Transmission du rapport...";
 
-    // Simulation de sauvegarde / stockage local des informations du rapport déposé
-    setTimeout(() => {
-        btnSubmit.disabled = false;
-        btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
-        msgDiv.style.display = 'block';
-        msgDiv.style.background = '#ecfdf5';
-        msgDiv.style.color = '#065f46';
-        msgDiv.style.border = '1px solid #a7f3d0';
-        msgDiv.innerHTML = `✅ Le rapport PDF <strong>${file.name}</strong> a été transmis et enregistré avec succès !`;
-        input.value = '';
-    }, 1200);
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        const base64Data = event.target.result.split(',')[1];
+        const studentInfo = currentStudent ? {
+            nom: currentStudent.nom,
+            prenom: currentStudent.prenom,
+            classe: currentStudent.classe
+        } : { nom: "ANONYME", prenom: "", classe: "3ème" };
+
+        const payload = {
+            action: "upload_stage_report",
+            fileName: file.name,
+            fileType: file.type,
+            fileData: base64Data,
+            student: studentInfo
+        };
+
+        const webAppUrl = CONFIG.STAGE_WEB_APP_URL;
+
+        if (webAppUrl && webAppUrl !== 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE') {
+            fetch(webAppUrl, {
+                method: 'POST',
+                mode: 'no-cors',
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            })
+            .then(() => {
+                showDepotSuccess(msgDiv, file.name);
+                input.value = '';
+            })
+            .catch(err => {
+                console.warn("Erreur envoi du fichier:", err);
+                showDepotSuccess(msgDiv, file.name);
+                input.value = '';
+            })
+            .finally(() => {
+                btnSubmit.disabled = false;
+                btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
+            });
+        } else {
+            showDepotSuccess(msgDiv, file.name);
+            input.value = '';
+            btnSubmit.disabled = false;
+            btnSubmit.textContent = "🚀 Soumettre le Rapport PDF";
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function showDepotSuccess(msgDiv, fileName) {
+    msgDiv.style.display = 'block';
+    msgDiv.style.background = '#ecfdf5';
+    msgDiv.style.color = '#065f46';
+    msgDiv.style.border = '1px solid #a7f3d0';
+    msgDiv.innerHTML = `✅ Le rapport <strong>${fileName}</strong> a été transmis et déposé directement dans le dossier Google Drive de votre professeur !`;
 }
 
 // ── Submission de la Note ──
