@@ -130,8 +130,24 @@ async function loadStageEleves() {
     }
 }
 
+async function openStageModuleDirect() {
+    const loginScreen = document.getElementById('loginScreen');
+    const dashboardScreen = document.getElementById('dashboardScreen');
+    if (loginScreen) loginScreen.style.display = 'none';
+    if (dashboardScreen) dashboardScreen.style.display = 'none';
+
+    await openStageModule({ id: '3_rapport_stage' });
+
+    // Passer directement à l'onglet de saisie des notes
+    const tabBtns = document.querySelectorAll('.stage-tab-btn');
+    if (tabBtns && tabBtns[2]) {
+        switchStageTab('saisie', tabBtns[2]);
+    }
+}
+
 async function openStageModule(activity) {
     document.getElementById('dashboardScreen').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'none';
     const container = document.getElementById('activityContent');
 
     // S'assurer que les enseignants et la liste des élèves sont chargés
@@ -310,15 +326,15 @@ async function openStageModule(activity) {
                         <div id="stage-stats-bar" class="stats-bar" style="display:none; grid-template-columns: repeat(3, 1fr); gap: 0.75rem; margin-bottom: 1.5rem;">
                             <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
                                 <div class="stat-value" id="stage-stat-count" style="font-weight:bold; font-size:1.4rem;">—</div>
-                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Notes</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Élèves notés</div>
                             </div>
                             <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
                                 <div class="stat-value" id="stage-stat-avg" style="font-weight:bold; font-size:1.4rem;">—</div>
-                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Moyenne</div>
+                                <div class="stat-label" id="stage-stat-avg-label" style="font-size:0.75rem; color:var(--text-muted);">Moyenne de la classe</div>
                             </div>
                             <div class="stat-card" style="background:var(--bg-main); border-radius:8px; padding:0.75rem; text-align:center;">
                                 <div class="stat-value" id="stage-stat-max" style="font-weight:bold; font-size:1.4rem;">—</div>
-                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Max</div>
+                                <div class="stat-label" style="font-size:0.75rem; color:var(--text-muted);">Meilleure note</div>
                             </div>
                         </div>
 
@@ -842,9 +858,16 @@ function renderStageNotes(data) {
         const avg = notes.reduce((a, b) => a + b, 0) / notes.length;
         const max = Math.max(...notes);
 
+        const viewClasse = document.getElementById('stageViewClasse');
+        const classeVal = viewClasse ? viewClasse.value : '';
+        const avgLabel = document.getElementById('stage-stat-avg-label');
+        if (avgLabel) {
+            avgLabel.textContent = classeVal ? `Moyenne classe ${classeVal}` : 'Moyenne globale';
+        }
+
         document.getElementById('stage-stat-count').textContent = notes.length;
-        document.getElementById('stage-stat-avg').textContent = avg.toFixed(2).replace('.', ',');
-        document.getElementById('stage-stat-max').textContent = max.toFixed(2).replace('.', ',');
+        document.getElementById('stage-stat-avg').textContent = avg.toFixed(2).replace('.', ',') + ' / 20';
+        document.getElementById('stage-stat-max').textContent = max.toFixed(2).replace('.', ',') + ' / 20';
         document.getElementById('stage-stat-avg').style.color = avg >= 14 ? '#28a745' : avg >= 10 ? '#ffc107' : '#dc3545';
         statsBar.style.display = 'grid';
     }

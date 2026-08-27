@@ -14,12 +14,17 @@ function showDashboard(niveau) {
         currentActiveLevel = niveau;
     }
 
-    document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('activityScreen').style.display = 'none';
-    document.getElementById('dashboardScreen').style.display = 'block';
 
-    updateStudentBar();
-    switchLevelTab(currentActiveLevel);
+    if (!currentStudent) {
+        document.getElementById('dashboardScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'block';
+    } else {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('dashboardScreen').style.display = 'block';
+        updateStudentBar();
+        switchLevelTab(currentActiveLevel);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
