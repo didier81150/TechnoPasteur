@@ -141,19 +141,22 @@ async function openStageModuleDirect() {
     if (loginScreen) loginScreen.style.display = 'none';
     if (dashboardScreen) dashboardScreen.style.display = 'none';
 
-    await openStageModule({ id: '3_rapport_stage' });
+    await openStageModule({ id: '3_rapport_stage' }, true);
 
     // Passer directement à l'onglet de saisie des notes
     const tabBtns = document.querySelectorAll('.stage-tab-btn');
-    if (tabBtns && tabBtns[2]) {
-        switchStageTab('saisie', tabBtns[2]);
+    const saisieBtn = Array.from(tabBtns).find(btn => btn.getAttribute('onclick') && btn.getAttribute('onclick').includes("'saisie'"));
+    if (saisieBtn) {
+        switchStageTab('saisie', saisieBtn);
     }
 }
 
-async function openStageModule(activity) {
+async function openStageModule(activity, isTeacherAccess = false) {
     document.getElementById('dashboardScreen').style.display = 'none';
     document.getElementById('loginScreen').style.display = 'none';
     const container = document.getElementById('activityContent');
+
+    const showTeacherTabs = isTeacherAccess || !!currentTeacher;
 
     // S'assurer que les enseignants et la liste des élèves sont chargés
     if (enseignantsList.length === 0) await loadEnseignants();
@@ -179,12 +182,14 @@ async function openStageModule(activity) {
                 <button class="stage-tab-btn" onclick="switchStageTab('depot', this)">
                     📤 Dépôt du Rapport (PDF)
                 </button>
+                ${showTeacherTabs ? `
                 <button class="stage-tab-btn" onclick="switchStageTab('saisie', this)">
                     ✏️ Saisie des Notes
                 </button>
                 <button class="stage-tab-btn" onclick="switchStageTab('visualisation', this)">
                     📊 Visualiser les Notes
                 </button>
+                ` : ''}
             </div>
 
             <div class="stage-card">
