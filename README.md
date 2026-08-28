@@ -96,3 +96,76 @@ function doPost(e) {
 5. **Report de l'URL dans le code du site :**
    - Copiez l'URL de l'application Web générée (`https://script.google.com/macros/s/.../exec`).
    - Assurez-vous qu'elle est bien renseignée dans `js/config.js` pour la clé `STAGE_WEB_APP_URL`.
+
+---
+
+## 📐 Configuration Google Apps Script — Module Analyse Fonctionnelle 4ème
+
+Le module **Analyse Fonctionnelle – Expression du Besoin (4ème)** enregistre automatiquement les résultats des QCM de l'élève dans un Google Sheet.
+
+### 1. Structure de la feuille Google Sheet à créer
+Dans votre Google Sheet, créez une feuille et placez les en-têtes suivants sur la première ligne (Ligne 1) :
+
+| Colonne A | Colonne B | Colonne C | Colonne D | Colonne E | Colonne F | Colonne G | Colonne H | Colonne I | Colonne J | Colonne K |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **Date** | **Nom** | **Prénom** | **Classe** | **Élève** | **Score** | **Note /8** | **Pourcentage** | **QCM 1** | **QCM 2** | **Appréciation** |
+
+---
+
+### 2. Code Google Apps Script pour l'Analyse Fonctionnelle
+Dans votre projet Apps Script (lié à la feuille ou indépendant), collez le code suivant dans `Code.gs` :
+
+```javascript
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+
+    var date = data.timestamp || new Date().toLocaleString('fr-FR');
+    var nom = data.nom || '';
+    var prenom = data.prenom || '';
+    var classe = data.classe || '';
+    var studentName = data.studentName || (nom + ' ' + prenom);
+    var score = data.score !== undefined ? data.score : '';
+    var maxScore = data.maxScore || 8;
+    var noteAffichage = score + ' / ' + maxScore;
+    var percentage = (data.percentage !== undefined ? data.percentage : 0) + '%';
+    var qcm1 = data.quiz1 !== undefined ? (data.quiz1 + ' / 4') : '';
+    var qcm2 = data.quiz2 !== undefined ? (data.quiz2 + ' / 4') : '';
+    var grade = data.grade || '';
+
+    sheet.appendRow([
+      date,
+      nom,
+      prenom,
+      classe,
+      studentName,
+      score,
+      noteAffichage,
+      percentage,
+      qcm1,
+      qcm2,
+      grade
+    ]);
+
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'success' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService
+      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+---
+
+### 3. Déploiement & Configuration
+1. En haut à droite d'Apps Script, cliquez sur **Déployer > Nouveau déploiement**.
+2. Sélectionnez **Application Web**.
+3. Réglez :
+   - **Exécuter en tant que** : *Moi*
+   - **Qui a accès** : *Tout le monde* (*Anyone*)
+4. Copiez l'URL d'application Web générée.
+5. Collez l'URL dans `js/config.js` sous la clé `ANALYSE_WEB_APP_URL`.
