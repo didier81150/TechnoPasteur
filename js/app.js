@@ -129,5 +129,7 @@ function launchActivity(activityId) {
         openVideoPlayer(act);
     } else if (act.type === 'stage') {
         openStageModule(act);
+    } else if (act.type === 'analyse') {
+        openAnalyseModule(act);
     }
 }

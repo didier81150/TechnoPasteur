@@ -33,7 +33,10 @@ const CONFIG = {
     RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE',
 
     // Web App URL pour la saisie des notes du rapport de stage
-    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzTflLVPLu73homD9vQmmsTraSTdBZzw_xZZasWxfX0iHo23fBS646ML4f_LeOL0hSWbA/exec'
+    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzTflLVPLu73homD9vQmmsTraSTdBZzw_xZZasWxfX0iHo23fBS646ML4f_LeOL0hSWbA/exec',
+
+    // Web App URL pour l'Analyse Fonctionnelle 4ème
+    ANALYSE_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_ANALYSE'
 };
 
 // Base de données unifiée des activités par niveau
@@ -74,6 +77,17 @@ const ACTIVITIES_DATABASE = [
     },
 
     // --- 4ème ---
+    {
+        id: "4_analyse_fonctionnelle",
+        niveau: "4eme",
+        titre: "Analyse Fonctionnelle – Expression du Besoin",
+        type: "analyse",
+        badgeText: "Analyse",
+        badgeClass: "badge-quiz",
+        description: "Cours, entraînement au graphe des prestations (bête à cornes) et évaluation QCM.",
+        defaultUnlocked: false,
+        pdfUrl: "https://drive.google.com"
+    },
     {
         id: "4_qcm_materiaux_1",
         niveau: "4eme",
