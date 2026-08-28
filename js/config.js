@@ -33,7 +33,7 @@ const CONFIG = {
     RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE',
 
     // Web App URL pour la saisie des notes du rapport de stage
-    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbxLTBQ2aZ8Qy5gKml1kbmF2MaRczPOX5rFe8qG1q-oCNywD9SGJW0ANRgIpVQ6XBVLcJQ/exec'
+    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzTflLVPLu73homD9vQmmsTraSTdBZzw_xZZasWxfX0iHo23fBS646ML4f_LeOL0hSWbA/exec'
 };
 
 // Base de données unifiée des activités par niveau
