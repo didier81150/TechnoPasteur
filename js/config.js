@@ -36,7 +36,10 @@ const CONFIG = {
     STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzTflLVPLu73homD9vQmmsTraSTdBZzw_xZZasWxfX0iHo23fBS646ML4f_LeOL0hSWbA/exec',
 
     // Web App URL pour l'Analyse Fonctionnelle 4ème
-    ANALYSE_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_ANALYSE'
+    ANALYSE_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_ANALYSE',
+
+    // Web App URL pour l'Évaluation des Compétences 3ème
+    EVAL_3EME_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzfd0l22_ICOtzv7BVgZAlQIC8yql1Sk4MFZTdLbZXWd092oxRJfnSFlMQ14VseOs-yqg/exec'
 };
 
 // Base de données unifiée des activités par niveau
@@ -176,5 +179,15 @@ const ACTIVITIES_DATABASE = [
         badgeClass: "badge-stage",
         description: "Espace Rapport de Stage : documents ressource, dépôt du rapport PDF et gestion des évaluations.",
         defaultUnlocked: true
+    },
+    {
+        id: "3_eval_competences",
+        niveau: "3eme",
+        titre: "Évaluation Compétences 3ème",
+        type: "eval_competences",
+        badgeText: "Éval",
+        badgeClass: "badge-qcm",
+        description: "Évaluation globale des compétences 3ème (90 questions). Accès déverrouillé par l'enseignant.",
+        defaultUnlocked: false
     }
 ];
