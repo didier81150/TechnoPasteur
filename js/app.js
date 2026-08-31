@@ -131,5 +131,7 @@ function launchActivity(activityId) {
         openStageModule(act);
     } else if (act.type === 'analyse') {
         openAnalyseModule(act);
+    } else if (act.type === 'eval_competences') {
+        openEvalCompetencesModule();
     }
 }
