@@ -19,7 +19,7 @@ const STAGE_DOCUMENTS = [
         titre: "Organisation et dates",
         description: "Calendrier et dates de restitution du rapport de stage.",
         icon: "📅",
-        url: "https://drive.google.com/file/d/1K0gM5uCMnWDEsnAFRVsOF5VbmUGS0v63/view?usp=drive_link"
+        url: "https://drive.google.com/file/d/1yc5GLcSUCUB0M9vvIJBpYZDWI7Py93tg/view?usp=drive_link"
     },
     {
         titre: "Barème Rapport de Stage",
