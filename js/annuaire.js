@@ -45,7 +45,7 @@ async function loadAnnuaire() {
             const prenomIndex = headers.findIndex(h => h === 'prénom' || h === 'prenom');
             const classeIndex = headers.findIndex(h => h === 'classe');
             const pwdIndex = headers.findIndex(h => h === 'mot_de_passe' || h === 'mot de passe' || h === 'code_secret' || h === 'password' || h.includes('pass'));
-            const ppaIndex = headers.findIndex(h => h === 'ppa');
+            const ppaIndex = headers.findIndex(h => h === 'ppa' || h === 'pap');
 
             for (let i = 1; i < lines.length; i++) {
                 const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
@@ -56,13 +56,16 @@ async function loadAnnuaire() {
                     else if (classeVal.includes('3')) niveauVal = '3eme';
                     else if (classeVal.includes('4')) niveauVal = '4eme';
 
+                    const isPap = ppaIndex !== -1 ? ['o', 'oui', 'true', '1'].includes((values[ppaIndex] || '').toLowerCase()) : false;
+
                     annuaireEleves.push({
                         nom: values[nomIndex],
                         prenom: values[prenomIndex] || '',
                         classe: classeVal,
                         niveau: niveauVal,
                         motDePasse: pwdIndex !== -1 ? values[pwdIndex] : '1234',
-                        ppa: ppaIndex !== -1 ? ['oui', 'true', '1'].includes((values[ppaIndex] || '').toLowerCase()) : false
+                        ppa: isPap,
+                        pap: isPap
                     });
                 }
             }
@@ -86,10 +89,10 @@ async function loadAnnuaire() {
 
 function loadDemoAnnuaire() {
     annuaireEleves = [
-        { nom: "DUPONT", prenom: "Lucas", classe: "4ème A", niveau: "4eme", motDePasse: "1234", ppa: false },
-        { nom: "MARTIN", prenom: "Emma", classe: "4ème B", niveau: "4eme", motDePasse: "1234", ppa: true },
-        { nom: "BERNARD", prenom: "Léo", classe: "5ème A", niveau: "5eme", motDePasse: "1234", ppa: false },
-        { nom: "PETIT", prenom: "Chloé", classe: "3ème A", niveau: "3eme", motDePasse: "1234", ppa: false }
+        { nom: "DUPONT", prenom: "Lucas", classe: "4ème A", niveau: "4eme", motDePasse: "1234", ppa: false, pap: false },
+        { nom: "MARTIN", prenom: "Emma", classe: "4ème B", niveau: "4eme", motDePasse: "1234", ppa: true, pap: true },
+        { nom: "BERNARD", prenom: "Léo", classe: "5ème A", niveau: "5eme", motDePasse: "1234", ppa: false, pap: false },
+        { nom: "PETIT", prenom: "Chloé", classe: "3ème A", niveau: "3eme", motDePasse: "1234", ppa: false, pap: false }
     ];
 }
 
