@@ -2,9 +2,27 @@
 // MODULE ANALYSE FONCTIONNELLE (EXPRESSION DU BESOIN - 4ème)
 // =====================================================
 
+let analyseTimer1 = null;
+let analyseTimer2 = null;
+
+function stopAnalyseTimers() {
+    if (analyseTimer1) {
+        clearInterval(analyseTimer1);
+        analyseTimer1 = null;
+    }
+    if (analyseTimer2) {
+        clearInterval(analyseTimer2);
+        analyseTimer2 = null;
+    }
+}
+
 function openAnalyseModule(activity) {
+    stopAnalyseTimers();
     document.getElementById('dashboardScreen').style.display = 'none';
     const container = document.getElementById('activityContent');
+
+    const isPapStudent = currentStudent ? (!!currentStudent.pap || !!currentStudent.ppa) : false;
+    const durationMinutes = isPapStudent ? 20 : 15;
 
     const studentInfo = currentStudent
         ? `${currentStudent.nom.toUpperCase()} ${currentStudent.prenom} (${currentStudent.classe})`
@@ -21,6 +39,12 @@ function openAnalyseModule(activity) {
                 <p class="subtitle" style="font-size: 1rem; opacity: 0.9; margin-top: 6px;">
                     Expression du besoin — <span style="background: rgba(255, 255, 255, 0.15); padding: 2px 12px; border-radius: 20px;">Graphe des prestations</span>
                 </p>
+                <div style="margin-top: 10px;">
+                    ${isPapStudent
+                        ? '<span style="background: #2b6cb0; border: 1px solid rgba(255,255,255,0.4); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 700;">🎓 Temps PAP (+5 min) : 20 min / QCM</span>'
+                        : '<span style="background: rgba(255, 255, 255, 0.15); color: #fff; padding: 6px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: 600;">⏱️ Durée : 15 min / QCM</span>'
+                    }
+                </div>
             </header>
 
             <!-- MODULE 1 : THÉORIE -->
@@ -137,104 +161,142 @@ function openAnalyseModule(activity) {
 
             <!-- MODULE 3 : QUIZ -->
             <section id="module-quiz" class="module module-quiz" style="background: #fff; border-radius: 16px; padding: 24px; margin-bottom: 30px; border-top: 6px solid #d69e2e; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
-                <div class="module-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 18px; border-bottom: 2px solid #edf2f7; padding-bottom: 12px;">
-                    <span style="font-size: 1.5rem;">🧪</span>
-                    <span class="badge" style="background: #d69e2e; color: #fff; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: 700;">Module 3</span>
-                    <h2 style="font-size: 1.4rem; color: #1a365d;">Quiz – Analyse fonctionnelle</h2>
+                <div class="module-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; border-bottom: 2px solid #edf2f7; padding-bottom: 12px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 1.5rem;">🧪</span>
+                        <span class="badge" style="background: #d69e2e; color: #fff; font-size: 0.75rem; padding: 4px 12px; border-radius: 20px; font-weight: 700;">Module 3</span>
+                        <h2 style="font-size: 1.4rem; color: #1a365d;">Quiz – Analyse fonctionnelle</h2>
+                    </div>
+                    <div>
+                        ${isPapStudent
+                            ? '<span style="background: #2b6cb0; color: #fff; font-size: 0.8rem; padding: 4px 12px; border-radius: 12px; font-weight: 700;">🎓 Aménagement PAP (+5 min)</span>'
+                            : ''}
+                    </div>
                 </div>
 
                 <p style="margin-bottom: 20px; color: #4a5568;">
-                    Répondez aux deux QCM, validez vos réponses, puis envoyez votre note vers Google Sheets.
+                    Chaque QCM est chronométré (${durationMinutes} minutes). Cliquez sur <strong>« ▶️ Démarrer »</strong> pour lancer l'épreuve.
+                    Le QCM 2 se déverrouillera une fois le QCM 1 validé.
                 </p>
 
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; position: relative;">
 
                     <!-- QCM 1 -->
-                    <div id="quiz1" style="background: #fafcff; border-radius: 12px; padding: 18px; border: 2px solid #e9edf2;">
-                        <h3 style="font-size: 1.1rem; color: #1a365d; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
-                            QCM 1 – Les questions clés
-                            <span style="background: #2b6cb0; color: #fff; font-size: 0.75rem; padding: 2px 10px; border-radius: 12px;">4 questions</span>
-                        </h3>
+                    <div id="quiz1" style="background: #fafcff; border-radius: 12px; padding: 18px; border: 2px solid #e9edf2; display: flex; flex-direction: column;">
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+                            <h3 style="font-size: 1.1rem; color: #1a365d; margin: 0;">
+                                QCM 1 – Les questions clés
+                            </h3>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: #1a365d; color: #fff; font-size: 0.9rem; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-family: monospace;" id="timerDisplay1">
+                                    ⏱️ ${durationMinutes}:00
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 14px; text-align: center;">
+                            <button id="startQuiz1Btn" style="background: #2b6cb0; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; cursor: pointer; transition: background 0.2s;">
+                                ▶️ Démarrer le QCM 1
+                            </button>
+                        </div>
 
                         <div class="quiz-question" data-q="q1_1" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">1. Quand on demande <em>"Quel produit étudie-t-on ?"</em>, on recherche…</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="A"> A. La matière d'œuvre</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="B"> B. Le besoin satisfait</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="C"> C. L'utilisateur</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="D"> D. <strong>Le nom du produit</strong></label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="A" disabled> A. La matière d'œuvre</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="B" disabled> B. Le besoin satisfait</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="C" disabled> C. L'utilisateur</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_1" value="D" disabled> D. Le nom du produit</label>
                         </div>
 
                         <div class="quiz-question" data-q="q1_2" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">2. Quand on demande <em>"À qui le produit rend-il service ?"</em>, on recherche…</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="A"> A. La matière d'œuvre</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="B"> B. Le besoin</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="C"> C. <strong>L'utilisateur</strong></label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="D"> D. Le nom du produit</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="A" disabled> A. La matière d'œuvre</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="B" disabled> B. Le besoin</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="C" disabled> C. L'utilisateur</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_2" value="D" disabled> D. Le nom du produit</label>
                         </div>
 
                         <div class="quiz-question" data-q="q1_3" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">3. Quand on demande <em>"Sur quoi le produit agit-il ?"</em>, on recherche…</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="A"> A. <strong>La matière d'œuvre</strong></label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="B"> B. L'utilisateur</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="C"> C. La fonction d'usage</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="D"> D. Le coût</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="A" disabled> A. La matière d'œuvre</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="B" disabled> B. L'utilisateur</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="C" disabled> C. La fonction d'usage</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_3" value="D" disabled> D. Le coût</label>
                         </div>
 
                         <div class="quiz-question" data-q="q1_4" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">4. Quand on demande <em>"Dans quel but le produit existe-t-il ?"</em>, on recherche…</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="A"> A. L'utilisateur</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="B"> B. <strong>La fonction d'usage (besoin)</strong></label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="C"> C. La matière d'œuvre</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="D"> D. Le prix de vente</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="A" disabled> A. L'utilisateur</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="B" disabled> B. La fonction d'usage (besoin)</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="C" disabled> C. La matière d'œuvre</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q1_4" value="D" disabled> D. Le prix de vente</label>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
-                            <button class="btn-check-quiz" data-quiz="1" style="background: #d69e2e; color: #fff; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">✅ Valider QCM 1</button>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 14px;">
+                            <button class="btn-check-quiz" id="checkQuiz1Btn" data-quiz="1" disabled style="background: #d69e2e; color: #fff; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; opacity: 0.5;">✅ Valider QCM 1</button>
                             <span style="font-weight: 700; font-size: 1rem;">📊 <span id="score1">0 / 4</span></span>
                         </div>
                     </div>
 
                     <!-- QCM 2 -->
-                    <div id="quiz2" style="background: #fafcff; border-radius: 12px; padding: 18px; border: 2px solid #e9edf2;">
-                        <h3 style="font-size: 1.1rem; color: #1a365d; margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between;">
-                            QCM 2 – Le graphe des prestations
-                            <span style="background: #2b6cb0; color: #fff; font-size: 0.75rem; padding: 2px 10px; border-radius: 12px;">4 questions</span>
-                        </h3>
+                    <div id="quiz2" style="background: #f1f5f9; border-radius: 12px; padding: 18px; border: 2px solid #cbd5e1; display: flex; flex-direction: column; opacity: 0.7; position: relative;">
+                        <div id="quiz2LockOverlay" style="position: absolute; top:0; left:0; right:0; bottom:0; background: rgba(241, 245, 249, 0.85); border-radius: 12px; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; text-align: center;">
+                            <span style="font-size: 2.5rem; margin-bottom: 8px;">🔒</span>
+                            <h4 style="color: #1a365d; margin-bottom: 4px; font-size: 1.1rem;">QCM 2 Verrouillé</h4>
+                            <p style="font-size: 0.85rem; color: #4a5568; margin: 0;">Vous devez obligatoirement valider le QCM 1 pour déverrouiller le QCM 2.</p>
+                        </div>
+
+                        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+                            <h3 style="font-size: 1.1rem; color: #1a365d; margin: 0;">
+                                QCM 2 – Le graphe des prestations
+                            </h3>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="background: #1a365d; color: #fff; font-size: 0.9rem; padding: 4px 12px; border-radius: 12px; font-weight: 700; font-family: monospace;" id="timerDisplay2">
+                                    ⏱️ ${durationMinutes}:00
+                                </span>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 14px; text-align: center;">
+                            <button id="startQuiz2Btn" disabled style="background: #2b6cb0; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; font-weight: 700; font-size: 0.9rem; cursor: pointer; opacity: 0.5;">
+                                ▶️ Démarrer le QCM 2
+                            </button>
+                        </div>
 
                         <div class="quiz-question" data-q="q2_1" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">1. Qu'exprime un graphe des prestations (bête à cornes) ?</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="A"> A. Le coût de fabrication</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="B"> B. <strong>Le besoin auquel répond un produit</strong></label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="C"> C. Les étapes de construction</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="D"> D. La date de péremption</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="A" disabled> A. Le coût de fabrication</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="B" disabled> B. Le besoin auquel répond un produit</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="C" disabled> C. Les étapes de construction</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_1" value="D" disabled> D. La date de péremption</label>
                         </div>
 
                         <div class="quiz-question" data-q="q2_2" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">2. Dans le graphe des prestations, la <em>"matière d'œuvre"</em> correspond à :</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="A"> A. L'utilisateur</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="B"> B. <strong>L'élément sur lequel le produit agit</strong></label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="C"> C. Le besoin satisfait</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="D"> D. Le nom du produit</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="A" disabled> A. L'utilisateur</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="B" disabled> B. L'élément sur lequel le produit agit</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="C" disabled> C. Le besoin satisfait</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_2" value="D" disabled> D. Le nom du produit</label>
                         </div>
 
                         <div class="quiz-question" data-q="q2_3" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">3. La phrase de vérification du graphe des prestations suit l'ordre :</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="A"> A. Utilisateur → Produit → Matière → Besoin</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="B"> B. <strong>Produit → Utilisateur → Matière → Besoin</strong></label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="C"> C. Besoin → Produit → Utilisateur → Matière</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="D"> D. Matière → Besoin → Produit → Utilisateur</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="A" disabled> A. Utilisateur → Produit → Matière → Besoin</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="B" disabled> B. Produit → Utilisateur → Matière → Besoin</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="C" disabled> C. Besoin → Produit → Utilisateur → Matière</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_3" value="D" disabled> D. Matière → Besoin → Produit → Utilisateur</label>
                         </div>
 
                         <div class="quiz-question" data-q="q2_4" style="margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #edf2f7;">
                             <p style="font-weight: 600; font-size: 0.9rem; margin-bottom: 6px;">4. La <em>"fonction d'usage"</em> est également appelée :</p>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="A"> A. La matière d'œuvre</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="B"> B. L'utilisateur</label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="C"> C. <strong>Le besoin satisfait</strong></label>
-                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="D"> D. Le produit</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="A" disabled> A. La matière d'œuvre</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="B" disabled> B. L'utilisateur</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="C" disabled> C. Le besoin à satisfaire</label>
+                            <label style="display: block; font-size: 0.85rem; margin: 2px 0;"><input type="radio" name="q2_4" value="D" disabled> D. Le produit</label>
                         </div>
 
-                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 14px;">
-                            <button class="btn-check-quiz" data-quiz="2" style="background: #d69e2e; color: #fff; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">✅ Valider QCM 2</button>
+                        <div style="display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 14px;">
+                            <button class="btn-check-quiz" id="checkQuiz2Btn" data-quiz="2" disabled style="background: #d69e2e; color: #fff; border: none; padding: 8px 18px; border-radius: 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer; opacity: 0.5;">✅ Valider QCM 2</button>
                             <span style="font-weight: 700; font-size: 1rem;">📊 <span id="score2">0 / 4</span></span>
                         </div>
                     </div>
@@ -271,6 +333,11 @@ function openAnalyseModule(activity) {
 }
 
 function initAnalyseLogic() {
+    stopAnalyseTimers();
+
+    const isPapStudent = currentStudent ? (!!currentStudent.pap || !!currentStudent.ppa) : false;
+    const durationSeconds = (isPapStudent ? 20 : 15) * 60;
+
     const corrections = {
         piscine: {
             produit: 'Piscine municipale',
@@ -381,13 +448,29 @@ function initAnalyseLogic() {
         });
     }
 
-    // Logic Quiz
+    // Logic Quiz & Timers
     const answers = {
         q1_1: 'D', q1_2: 'C', q1_3: 'A', q1_4: 'B',
         q2_1: 'B', q2_2: 'B', q2_3: 'B', q2_4: 'C'
     };
     let quizScores = { 1: 0, 2: 0 };
     let quizChecked = { 1: false, 2: false };
+
+    let timeLeft1 = durationSeconds;
+    let timeLeft2 = durationSeconds;
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function setQuizRadioState(quizNum, enabled) {
+        const container = document.getElementById(`quiz${quizNum}`);
+        if (!container) return;
+        const radios = container.querySelectorAll('input[type="radio"]');
+        radios.forEach(r => r.disabled = !enabled);
+    }
 
     function getGrade(score, max) {
         const pct = (score / max) * 100;
@@ -398,8 +481,23 @@ function initAnalyseLogic() {
     }
 
     function checkQuiz(quizNum) {
+        if (quizChecked[quizNum]) return;
+
+        // Stop timer for this quiz
+        if (quizNum === 1 && analyseTimer1) {
+            clearInterval(analyseTimer1);
+            analyseTimer1 = null;
+        } else if (quizNum === 2 && analyseTimer2) {
+            clearInterval(analyseTimer2);
+            analyseTimer2 = null;
+        }
+
+        // Freeze / Disable radio buttons
+        setQuizRadioState(quizNum, false);
+
         const container = document.getElementById(`quiz${quizNum}`);
         if (!container) return;
+
         const questions = container.querySelectorAll('.quiz-question');
         let correct = 0;
 
@@ -421,94 +519,192 @@ function initAnalyseLogic() {
 
         quizScores[quizNum] = correct;
         quizChecked[quizNum] = true;
-        document.getElementById(`score${quizNum}`).textContent = `${correct} / ${questions.length}`;
+
+        const scoreEl = document.getElementById(`score${quizNum}`);
+        if (scoreEl) scoreEl.textContent = `${correct} / ${questions.length}`;
+
+        const checkBtn = document.getElementById(`checkQuiz${quizNum}Btn`);
+        if (checkBtn) {
+            checkBtn.disabled = true;
+            checkBtn.style.opacity = '0.5';
+            checkBtn.textContent = `✅ QCM ${quizNum} Validé`;
+        }
 
         const total = quizScores[1] + quizScores[2];
-        document.getElementById('totalScoreDisplay').textContent = total;
+        const totalScoreEl = document.getElementById('totalScoreDisplay');
+        if (totalScoreEl) totalScoreEl.textContent = total;
+
         const grade = getGrade(total, 8);
         const badge = document.getElementById('gradeDisplay');
-        badge.textContent = grade.text;
-        badge.style.background = grade.bg;
-        badge.style.color = grade.color;
+        if (badge) {
+            badge.textContent = grade.text;
+            badge.style.background = grade.bg;
+            badge.style.color = grade.color;
+        }
 
-        const sendBtn = document.getElementById('sendToSheetBtn');
+        // Unlock QCM 2 when QCM 1 is validated
+        if (quizNum === 1) {
+            unlockQuiz2();
+        }
+
+        // Enable Google Sheets send button if both quizzes are checked
         if (quizChecked[1] && quizChecked[2]) {
-            sendBtn.disabled = false;
-            sendBtn.style.opacity = '1';
+            const sendBtn = document.getElementById('sendToSheetBtn');
+            if (sendBtn) {
+                sendBtn.disabled = false;
+                sendBtn.style.opacity = '1';
+            }
         }
     }
 
-    document.querySelectorAll('.btn-check-quiz').forEach(btn => {
-        btn.addEventListener('click', function() {
-            checkQuiz(parseInt(this.dataset.quiz));
+    function unlockQuiz2() {
+        const quiz2El = document.getElementById('quiz2');
+        const overlay = document.getElementById('quiz2LockOverlay');
+        const startQuiz2Btn = document.getElementById('startQuiz2Btn');
+
+        if (overlay) overlay.style.display = 'none';
+        if (quiz2El) {
+            quiz2El.style.opacity = '1';
+            quiz2El.style.background = '#fafcff';
+            quiz2El.style.borderColor = '#e9edf2';
+        }
+        if (startQuiz2Btn) {
+            startQuiz2Btn.disabled = false;
+            startQuiz2Btn.style.opacity = '1';
+        }
+    }
+
+    // Event listener Start QCM 1
+    const startQuiz1Btn = document.getElementById('startQuiz1Btn');
+    if (startQuiz1Btn) {
+        startQuiz1Btn.addEventListener('click', function() {
+            this.style.display = 'none';
+            setQuizRadioState(1, true);
+
+            const checkBtn = document.getElementById('checkQuiz1Btn');
+            if (checkBtn) {
+                checkBtn.disabled = false;
+                checkBtn.style.opacity = '1';
+            }
+
+            const timerDisplay = document.getElementById('timerDisplay1');
+            analyseTimer1 = setInterval(() => {
+                timeLeft1--;
+                if (timerDisplay) timerDisplay.textContent = `⏱️ ${formatTime(timeLeft1)}`;
+                if (timeLeft1 <= 0) {
+                    clearInterval(analyseTimer1);
+                    analyseTimer1 = null;
+                    checkQuiz(1);
+                }
+            }, 1000);
         });
-    });
+    }
+
+    // Event listener Start QCM 2
+    const startQuiz2Btn = document.getElementById('startQuiz2Btn');
+    if (startQuiz2Btn) {
+        startQuiz2Btn.addEventListener('click', function() {
+            this.style.display = 'none';
+            setQuizRadioState(2, true);
+
+            const checkBtn = document.getElementById('checkQuiz2Btn');
+            if (checkBtn) {
+                checkBtn.disabled = false;
+                checkBtn.style.opacity = '1';
+            }
+
+            const timerDisplay = document.getElementById('timerDisplay2');
+            analyseTimer2 = setInterval(() => {
+                timeLeft2--;
+                if (timerDisplay) timerDisplay.textContent = `⏱️ ${formatTime(timeLeft2)}`;
+                if (timeLeft2 <= 0) {
+                    clearInterval(analyseTimer2);
+                    analyseTimer2 = null;
+                    checkQuiz(2);
+                }
+            }, 1000);
+        });
+    }
+
+    // Event listeners Validation buttons
+    const checkQuiz1Btn = document.getElementById('checkQuiz1Btn');
+    if (checkQuiz1Btn) {
+        checkQuiz1Btn.addEventListener('click', function() {
+            checkQuiz(1);
+        });
+    }
+
+    const checkQuiz2Btn = document.getElementById('checkQuiz2Btn');
+    if (checkQuiz2Btn) {
+        checkQuiz2Btn.addEventListener('click', function() {
+            checkQuiz(2);
+        });
+    }
 
     // Envoi vers Google Sheets
-    document.getElementById('sendToSheetBtn').addEventListener('click', async function() {
-        const feedback = document.getElementById('sendFeedback');
-        const btn = this;
-        btn.disabled = true;
-        btn.textContent = '⏳ Envoi en cours...';
+    const sendToSheetBtn = document.getElementById('sendToSheetBtn');
+    if (sendToSheetBtn) {
+        sendToSheetBtn.addEventListener('click', async function() {
+            const feedback = document.getElementById('sendFeedback');
+            const btn = this;
+            btn.disabled = true;
+            btn.textContent = '⏳ Envoi en cours...';
 
-        const total = quizScores[1] + quizScores[2];
-        const studentName = document.getElementById('studentName').value;
+            const total = quizScores[1] + quizScores[2];
+            const studentName = document.getElementById('studentName').value;
 
-        const details = [];
-        document.querySelectorAll('.quiz-question').forEach(q => {
-            const qName = q.dataset.q;
-            const selected = q.querySelector('input[type="radio"]:checked');
-            const userAnswer = selected ? selected.value : 'Non répondu';
-            details.push({
-                question: qName,
-                userAnswer: userAnswer,
-                correctAnswer: answers[qName],
-                isCorrect: userAnswer === answers[qName]
+            const details = [];
+            document.querySelectorAll('.quiz-question').forEach(q => {
+                const qName = q.dataset.q;
+                const selected = q.querySelector('input[type="radio"]:checked');
+                const userAnswer = selected ? selected.value : 'Non répondu';
+                details.push({
+                    question: qName,
+                    userAnswer: userAnswer,
+                    correctAnswer: answers[qName],
+                    isCorrect: userAnswer === answers[qName]
+                });
             });
+
+            const payload = {
+                timestamp: new Date().toISOString(),
+                nom: currentStudent ? currentStudent.nom : '',
+                prenom: currentStudent ? currentStudent.prenom : '',
+                classe: currentStudent ? currentStudent.classe : '',
+                studentName: studentName,
+                score: total,
+                maxScore: 8,
+                percentage: Math.round((total / 8) * 100),
+                quiz1: quizScores[1],
+                quiz2: quizScores[2],
+                grade: getGrade(total, 8).text,
+                pap: isPapStudent ? 'OUI' : 'NON',
+                details: details
+            };
+
+            const defaultSpreadsheetScriptUrl = 'https://script.google.com/macros/s/AKfycbz_SPREADSHEET_ANALYSE/exec';
+
+            const targetUrl = (typeof CONFIG !== 'undefined' && CONFIG.ANALYSE_WEB_APP_URL && CONFIG.ANALYSE_WEB_APP_URL !== 'COLLER_ICI_URL_APPS_SCRIPT_ANALYSE')
+                ? CONFIG.ANALYSE_WEB_APP_URL
+                : defaultSpreadsheetScriptUrl;
+
+            try {
+                await fetch(targetUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload)
+                });
+
+                feedback.textContent = '✅ Note envoyée avec succès vers Google Sheets !';
+                feedback.style.color = '#16a34a';
+                btn.textContent = '✅ Envoyé !';
+            } catch (error) {
+                console.error('Erreur d\'envoi :', error);
+                feedback.textContent = '❌ Erreur lors de l\'envoi. Les résultats ont été validés localement.';
+                feedback.style.color = '#dc2626';
+                btn.textContent = '📤 Réessayer';
+                btn.disabled = false;
+            }
         });
-
-        const payload = {
-            timestamp: new Date().toISOString(),
-            nom: currentStudent ? currentStudent.nom : '',
-            prenom: currentStudent ? currentStudent.prenom : '',
-            classe: currentStudent ? currentStudent.classe : '',
-            studentName: studentName,
-            score: total,
-            maxScore: 8,
-            percentage: Math.round((total / 8) * 100),
-            quiz1: quizScores[1],
-            quiz2: quizScores[2],
-            grade: getGrade(total, 8).text,
-            details: details
-        };
-
-        const targetUrl = (typeof CONFIG !== 'undefined' && CONFIG.ANALYSE_WEB_APP_URL)
-            ? CONFIG.ANALYSE_WEB_APP_URL
-            : '';
-
-        if (!targetUrl || targetUrl === 'COLLER_ICI_URL_APPS_SCRIPT_ANALYSE') {
-            feedback.textContent = '⚠️ Module prêt ! L\'enseignant doit configurer ANALYSE_WEB_APP_URL dans js/config.js.';
-            feedback.style.color = '#d97706';
-            btn.textContent = '✅ Validé (Local)';
-            return;
-        }
-
-        try {
-            await fetch(targetUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify(payload)
-            });
-
-            feedback.textContent = '✅ Note envoyée avec succès vers Google Sheets !';
-            feedback.style.color = '#16a34a';
-            btn.textContent = '✅ Envoyé !';
-        } catch (error) {
-            console.error('Erreur d\'envoi :', error);
-            feedback.textContent = '❌ Erreur lors de l\'envoi. Vérifiez la connexion et l\'URL Apps Script.';
-            feedback.style.color = '#dc2626';
-            btn.textContent = '📤 Réessayer';
-            btn.disabled = false;
-        }
-    });
+    }
 }
