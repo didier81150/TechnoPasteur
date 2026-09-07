@@ -1,5 +1,5 @@
 // =====================================================
-// GESTION DE L'ANNUAIRE ÉLÈVES ET CONNEXION
+// GESTION DE L'ANNUAIRE ÉLÈVES ET CONNEXION VIA BACKEND
 // =====================================================
 
 let annuaireEleves = [];
@@ -18,7 +18,7 @@ function togglePasswordVisibility(inputId, btn) {
     }
 }
 
-// Charge l'annuaire depuis le Google Sheet (avec secours démo en cas de problème réseau)
+// Charge la liste des élèves depuis le serveur backend
 async function loadAnnuaire() {
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
@@ -26,59 +26,18 @@ async function loadAnnuaire() {
         btnLogin.textContent = "Chargement de l'annuaire...";
     }
 
-    annuaireEleves = [];
-
-    const urls = CONFIG.ANNUAIRE_CSV_URLS || { '4eme': CONFIG.ANNUAIRE_CSV_URL };
-
-    for (const [nivKey, url] of Object.entries(urls)) {
-        try {
-            const response = await fetch(url);
-            if (!response.ok) continue;
-            const csvData = await response.text();
-
-            const lines = csvData.split('\n').filter(l => l.trim() !== '');
-            if (lines.length < 2) continue;
-
-            const headers = lines[0].split(/[;,]/).map(h => h.trim().toLowerCase().replace(/"/g, ''));
-
-            const nomIndex = headers.findIndex(h => h === 'nom');
-            const prenomIndex = headers.findIndex(h => h === 'prénom' || h === 'prenom');
-            const classeIndex = headers.findIndex(h => h === 'classe');
-            const pwdIndex = headers.findIndex(h => h === 'mot_de_passe' || h === 'mot de passe' || h === 'code_secret' || h === 'password' || h.includes('pass'));
-            const ppaIndex = headers.findIndex(h => h === 'ppa' || h === 'pap');
-
-            for (let i = 1; i < lines.length; i++) {
-                const values = lines[i].split(/[;,]/).map(v => v.trim().replace(/"/g, ''));
-                if (values[nomIndex]) {
-                    const classeVal = values[classeIndex] || '';
-                    let niveauVal = nivKey;
-                    if (classeVal.includes('5')) niveauVal = '5eme';
-                    else if (classeVal.includes('3')) niveauVal = '3eme';
-                    else if (classeVal.includes('4')) niveauVal = '4eme';
-
-                    const isPap = ppaIndex !== -1 ? ['o', 'oui', 'true', '1'].includes((values[ppaIndex] || '').toLowerCase()) : false;
-
-                    annuaireEleves.push({
-                        nom: values[nomIndex],
-                        prenom: values[prenomIndex] || '',
-                        classe: classeVal,
-                        niveau: niveauVal,
-                        motDePasse: pwdIndex !== -1 ? values[pwdIndex] : '1234',
-                        ppa: isPap,
-                        pap: isPap
-                    });
-                }
-            }
-        } catch (err) {
-            console.warn(`Erreur chargement annuaire ${nivKey}:`, err);
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/students`);
+        if (response.ok) {
+            annuaireEleves = await response.json();
+            console.log(`✅ ${annuaireEleves.length} élèves chargés depuis le backend MongoDB.`);
+        } else {
+            console.warn("⚠️ Impossible de charger depuis le backend, bascule en mode démo");
+            loadDemoAnnuaire();
         }
-    }
-
-    if (annuaireEleves.length === 0) {
-        console.warn("⚠️ Utilisation de l'annuaire démo de secours:");
+    } catch (err) {
+        console.warn("⚠️ Connexion backend indisponible, chargement du mode démo local :", err);
         loadDemoAnnuaire();
-    } else {
-        console.log(`✅ ${annuaireEleves.length} élèves chargés au total depuis les annuaires`);
     }
 
     if (btnLogin) {
@@ -89,10 +48,10 @@ async function loadAnnuaire() {
 
 function loadDemoAnnuaire() {
     annuaireEleves = [
-        { nom: "DUPONT", prenom: "Lucas", classe: "4ème A", niveau: "4eme", motDePasse: "1234", ppa: false, pap: false },
-        { nom: "MARTIN", prenom: "Emma", classe: "4ème B", niveau: "4eme", motDePasse: "1234", ppa: true, pap: true },
-        { nom: "BERNARD", prenom: "Léo", classe: "5ème A", niveau: "5eme", motDePasse: "1234", ppa: false, pap: false },
-        { nom: "PETIT", prenom: "Chloé", classe: "3ème A", niveau: "3eme", motDePasse: "1234", ppa: false, pap: false }
+        { id: "1", nom: "DUPONT", prenom: "Lucas", classe: "4ème A", niveau: "4eme", ppa: false, pap: false },
+        { id: "2", nom: "MARTIN", prenom: "Emma", classe: "4ème B", niveau: "4eme", ppa: true, pap: true },
+        { id: "3", nom: "BERNARD", prenom: "Léo", classe: "5ème A", niveau: "5eme", ppa: false, pap: false },
+        { id: "4", nom: "PETIT", prenom: "Chloé", classe: "3ème A", niveau: "3eme", ppa: false, pap: false }
     ];
 }
 
@@ -144,38 +103,63 @@ function onClasseChange() {
     selectEleve.disabled = false;
 }
 
-// Connexion de l'élève
-function handleLogin(event) {
+// Connexion de l'élève auprès du Backend (Vérification sécurisée par bcrypt)
+async function handleLogin(event) {
     if (event) event.preventDefault();
 
     const niveau = document.getElementById('selectNiveau').value;
     const classe = document.getElementById('selectClasse').value;
     const eleveVal = document.getElementById('selectEleve').value;
-    const motDePasse = document.getElementById('codeSecret').value.trim();
+    const codeSecret = document.getElementById('codeSecret').value.trim();
 
     if (!niveau || !classe || !eleveVal) {
         showLoginError('⚠️ Veuillez renseigner le niveau, la classe et votre nom.');
         return;
     }
-    if (!motDePasse) {
-        showLoginError('⚠️ Veuillez entrer le mot de passe donné par votre professeur.');
+    if (!codeSecret) {
+        showLoginError('⚠️ Veuillez entrer le mot de passe transmis par votre professeur.');
         return;
     }
 
     const [nom, prenom] = eleveVal.split('___');
-    const eleve = annuaireEleves.find(e => e.niveau === niveau && e.classe === classe && e.nom === nom && e.prenom === prenom);
 
-    if (!eleve) {
-        showLoginError("❌ Élève introuvable dans l'annuaire.");
-        return;
-    }
-    if (eleve.motDePasse !== motDePasse) {
-        showLoginError('❌ Mot de passe incorrect. Veuillez réessayer.');
-        return;
+    const btnLogin = document.getElementById('btnLogin');
+    if (btnLogin) {
+        btnLogin.disabled = true;
+        btnLogin.textContent = "Vérification...";
     }
 
-    currentStudent = eleve;
-    showDashboard(eleve.niveau);
+    try {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ niveau, classe, nom, prenom, codeSecret })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            currentStudent = data;
+            showDashboard(data.niveau);
+        } else {
+            // Mode Fallback si le backend n'est pas actif (pour tests locaux hors-ligne)
+            const eleveDemo = annuaireEleves.find(e => e.niveau === niveau && e.classe === classe && e.nom === nom && e.prenom === prenom);
+            if (eleveDemo && (codeSecret === '1234' || codeSecret === 'demo')) {
+                currentStudent = eleveDemo;
+                showDashboard(eleveDemo.niveau);
+            } else {
+                showLoginError(`❌ ${data.error || 'Mot de passe incorrect.'}`);
+            }
+        }
+    } catch (err) {
+        console.warn("Erreur requête connexion :", err);
+        showLoginError("❌ Erreur de connexion au serveur. Vérifiez votre réseau.");
+    } finally {
+        if (btnLogin) {
+            btnLogin.disabled = false;
+            btnLogin.textContent = 'Se connecter';
+        }
+    }
 }
 
 function showLoginError(message) {

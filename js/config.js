@@ -3,43 +3,16 @@
 // =====================================================
 
 const CONFIG = {
-    PROF_PASSWORD: "prof2024",
+    // URL du serveur Backend (en local ou sur Render)
+    // En production sur Render, si la page est servie depuis le même domaine ou via API relative
+    API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+        ? 'http://localhost:3000/api'
+        : '/api',
+
     TEMPS_PAR_QUESTION: 60, // secondes par question
     PPA_BONUS_PERCENTAGE: 15,
     STORAGE_KEY_RESULTS: "qcm_materiaux_resultats",
     STORAGE_KEY_UNLOCKS: "site_techno_unlocked_activities",
-
-    // Annuaires 5ème / 4ème / 3ème : lus automatiquement depuis Google Sheets.
-    ANNUAIRE_CSV_URLS: {
-        '5eme': 'https://docs.google.com/spreadsheets/d/1HRz8G2-i8Pn9dOLHWQgGrbycfJNx6BzcaLsgmA3tCks/export?format=csv',
-        '4eme': 'https://docs.google.com/spreadsheets/d/1-u2cr0GIEheeC4C4aSozYghTIE-H_EtsPt9ZGmdict4/export?format=csv',
-        '3eme': 'https://docs.google.com/spreadsheets/d/12WUptiE4s0Xev6BHTKAjgqUIRhIZRv3NJ0Fe_HK7K8w/export?format=csv'
-    },
-    ANNUAIRE_CSV_URL: 'https://docs.google.com/spreadsheets/d/1-u2cr0GIEheeC4C4aSozYghTIE-H_EtsPt9ZGmdict4/export?format=csv',
-
-    // Annuaire Enseignants (pour la saisie des notes du rapport de stage)
-    ENSEIGNANTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSavhNL7HmwKMlP7ZttTOSP7cKAfI1Wt7N52P9UDlC_gsaVoxP43EbXsCGzm11bb39QQ5Yv1vqznb41/pub?output=csv',
-
-    // Selection des eleves de 3eme pour le rapport de stage
-    STAGE_ELEVES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTWClG07V8mZ6eNvmURE1GE1tDBMRMT0zizYm7LsT-UbCOmQh2ScK9DRJbiUkJDR0TedBtx9KIE_oqi/pub?output=csv',
-
-    // Sheet des notes du rapport de stage
-    STAGE_NOTES_CSV_URL: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vR99nXZ-5Y6l52AludzKXoOz8sHjCcOTT05qXSyj6IzoEAmBI9f57zxwrmqMwuP87JMS8F3NB2MMJIn/pub?output=csv',
-
-    // Sheet résultats (vérification et export)
-    RESULTS_CSV_URL: 'https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/export?format=csv',
-
-    // Apps Script Web App pour enregistrement des résultats
-    RESULTS_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_DEPLOYE',
-
-    // Web App URL pour la saisie des notes du rapport de stage
-    STAGE_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzTflLVPLu73homD9vQmmsTraSTdBZzw_xZZasWxfX0iHo23fBS646ML4f_LeOL0hSWbA/exec',
-
-    // Web App URL pour l'Analyse Fonctionnelle 4ème
-    ANALYSE_WEB_APP_URL: 'COLLER_ICI_URL_APPS_SCRIPT_ANALYSE',
-
-    // Web App URL pour l'Évaluation des Compétences 3ème
-    EVAL_3EME_WEB_APP_URL: 'https://script.google.com/macros/s/AKfycbzfd0l22_ICOtzv7BVgZAlQIC8yql1Sk4MFZTdLbZXWd092oxRJfnSFlMQ14VseOs-yqg/exec'
 };
 
 // Base de données unifiée des activités par niveau

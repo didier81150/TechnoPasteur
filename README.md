@@ -1,171 +1,91 @@
-# Site-Techno – Portail & Évaluations Technologie Collège
+# ⚙️ TechnoPasteur – Plateforme Pédagogique Technologie Collège (Backend & Front-end)
 
-## 📌 Présentation
-**Site-Techno** est la plateforme pédagogique unifiée pour l'enseignement de la Technologie au collège (niveaux 5ème, 4ème et 3ème).
-
-Elle regroupe :
-- Un système d'identification personnalisé par élève (Nom, Prénom, Classe, Mot de passe).
-- La gestion des aménagements pédagogiques (temps tiers-temps / PPA +15%).
-- Des parcours d'apprentissage par niveau (5ème, 4ème, 3ème) incluant QCM, fiches PDF de synthèse et ressources vidéo.
-- Un espace professeur pour le déverrouillage d'activités, la consultation et l'export CSV des résultats.
-- La synchronisation automatique avec Google Sheets & Google Apps Script.
+Ce projet est la plateforme web **TechnoPasteur** pour l'enseignement de la Technologie au collège (5ème, 4ème, 3ème). Il inclut un **serveur backend Node.js + Express** connecté à une **base de données MongoDB Atlas**, permettant de gérer la connexion sécurisée des élèves, le verrouillage/déverrouillage d'activités, l'enregistrement des évaluations, la saisie des notes de stage et un tableau de suivi enseignant avec export PRONOTE CSV.
 
 ---
 
-## 🔀 Fusion des sites : Quel site conserver ?
+## 🛠️ Structure du Projet
 
-> **Site à conserver : `site-techno`**
-
-Le site **`site-techno`** intègre désormais l'intégralité des fonctionnalités et contenus de l'ancien site isolé **Matériaux** (notamment les évaluations et QCM Score 1, Score 2, Score 3 de 4ème).
-
-### Recommandations :
-1. **Conserver et déployer uniquement `site-techno`** (via GitHub Pages ou votre serveur d'hébergement).
-2. **Archiver ou rediriger le dépôt `Matériaux`** vers l'URL de `site-techno`.
-3. **Mettre à jour vos favoris / liens** transmis aux élèves pour qu'ils pointent vers `site-techno`.
+- `server/` : Le serveur API backend (Express + Mongoose)
+  - `server/index.js` : Point d'entrée de l'application Express
+  - `server/models/` : Modèles Mongoose (`Student`, `Activity`, `ActivityUnlock`, `Result`, `StageNote`, `ProfAction`)
+- `scripts/` : Scripts d'administration
+  - `scripts/migrate.js` : Script de migration automatique depuis Google Sheets/CSV vers MongoDB
+- `js/` : Code JavaScript front-end navigateur (`config.js`, `annuaire.js`, `prof.js`, `stage.js`, `quiz.js`, etc.)
+- `index.html` : Interface web utilisateur
+- `.env.example` : Fichier modèle des variables d'environnement
+- `package.json` : Fichier de configuration Node.js
 
 ---
 
-## 📝 Configuration Google Apps Script — Dépôt des Rapports PDF sur Drive & Saisie des Notes
+## 🚀 GUIDE DE DÉPLOIEMENT GRATUIT PAS À PAS SUR RENDER
 
-Pour enregistrer automatiquement les rapports PDF dans le sous-dossier **`Dépôt rapport de stage`** de votre Google Drive et enregistrer les notes dans votre Google Sheet, suivez cette procédure pas-à-pas :
+Vous allez héberger gratuitement votre serveur backend sur **Render.com** sans carte bancaire ni abonnement.
 
-### 1. Code Google Apps Script mis à jour
-Ouvrez votre Google Sheet associatrice, allez dans **Extensions > Apps Script** et remplacez le code existant dans `Code.gs` par le suivant :
+### Étape 1 : Publier votre code sur GitHub
+1. Connectez-vous sur votre compte **GitHub**.
+2. Envoyez toutes les modifications du projet sur votre dépôt GitHub (`TechnoPasteur`).
 
+---
+
+### Étape 2 : Créer le Web Service sur Render
+1. Allez sur le site : [https://dashboard.render.com/](https://dashboard.render.com/) et connectez-vous (ou créez un compte gratuit).
+2. Cliquez sur le bouton bleu **« New + »** en haut à droite, puis sélectionnez **« Web Service »**.
+3. Choisissez l'option **« Build and deploy from a Git repository »** et cliquez sur **« Next »**.
+4. Sélectionnez votre dépôt GitHub **`TechnoPasteur`** (ou cliquez sur **« Connect account »** pour lier votre compte GitHub).
+5. Renseignez les champs comme suit :
+   - **Name** : `technopasteur-backend` *(ou le nom de votre choix)*
+   - **Region** : `Frankfurt (Europe)`
+   - **Branch** : `main` *(ou master)*
+   - **Root Directory** : *(Laissez ce champ vide)*
+   - **Runtime** : `Node`
+   - **Build Command** : `npm install`
+   - **Start Command** : `node server/index.js`
+   - **Instance Type** : Choisissez **« Free »** (Gratuit, 0$/mois)
+
+---
+
+### Étape 3 : Ajouter les Variables Secrètes dans Render (Très Important)
+1. Dans la même page (ou dans l'onglet **« Environment »** de votre Web Service sur Render), faites défiler jusqu'à la section **« Environment Variables »**.
+2. Cliquez sur le bouton **« Add Environment Variable »** pour ajouter chacune des variables ci-dessous :
+
+| Key (Nom de la variable) | Value (Valeur à saisir) |
+| :--- | :--- |
+| `MONGODB_URI` | Collez votre chaîne de connexion MongoDB Atlas complete :<br>`mongodb+srv://didierboivin81_db_user:<MOT_DE_PASSE>@cluster0.81kgxnh.mongodb.net/technopasteur?retryWrites=true&w=majority` |
+| `MOT_DE_PASSE_PROF` | Saisissez votre mot de passe professeur pour le tableau de suivi (ex: `MonProfMdp2025!`) |
+| `MOT_DE_PASSE_PROF_STAGE` | Saisissez le mot de passe pour les enseignants de stage (ex: `ProfStage2025!`) |
+| `JWT_SECRET` | Saisissez une phrase secrète aléatoire de votre choix (ex: `SecretTechnoPasteurGraulhet2025`) |
+
+3. Cliquez sur **« Create Web Service »** (ou **« Save Changes »**).
+
+Render va automatiquement installer les dépendances et démarrer votre serveur backend en quelques secondes. Une URL HTTPS gratuite vous sera attribuée, par exemple :
+`https://technopasteur-backend.onrender.com`
+
+---
+
+### Étape 4 : Lier le site front-end GitHub Pages à votre backend Render
+Ouvrez le fichier `js/config.js` de votre site et mettez à jour l'URL de l'API avec votre adresse Render :
 ```javascript
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-
-    // ACTION 1 : Dépôt du rapport PDF dans le sous-dossier Google Drive "Dépôt rapport de stage"
-    if (data.action === "upload_stage_report") {
-      var folderName = "Dépôt rapport de stage";
-      var folders = DriveApp.getFoldersByName(folderName);
-      var folder;
-      if (folders.hasNext()) {
-        folder = folders.next();
-      } else {
-        folder = DriveApp.createFolder(folderName);
-      }
-
-      var contentType = data.fileType || "application/pdf";
-      var blob = Utilities.newBlob(Utilities.base64Decode(data.fileData), contentType, data.fileName);
-      var file = folder.createFile(blob);
-
-      return ContentService
-        .createTextOutput(JSON.stringify({ status: 'success', url: file.getUrl() }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    // ACTION 2 : Saisie des notes du rapport de stage
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var nom = data.nom || '';
-    var prenom = data.prenom || '';
-    var note = data.note !== undefined ? data.note : '';
-    var dateSaisie = data.date || new Date().toLocaleDateString('fr-FR');
-
-    sheet.appendRow([nom, prenom, note, dateSaisie]);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'success' }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
-```
-
-### 2. Procédure claire et pas-à-pas pour la mise à jour sur Google Apps Script
-
-1. **Ouvrir le projet Apps Script :**
-   - Accédez à votre Google Sheet et cliquez sur le menu **Extensions** > **Apps Script**.
-2. **Mettre à jour le code :**
-   - Collez le code ci-dessus dans le fichier `Code.gs` et cliquez sur l'icône de **Disquette (Enregistrer)**.
-3. **Mettre à jour le déploiement de la Web App :**
-   - Cliquez sur le bouton bleu **Déployer** (en haut à droite), puis sélectionnez **Gérer les déploiements**.
-   - Cliquez sur l'icône de **Crayon (Modifier)** à côté de la version actuelle.
-   - Dans le menu déroulant **Version**, sélectionnez **Nouvelle version**.
-   - Vérifiez que :
-     - **Exécuter en tant que** : *Moi* (`me@gmail.com` ou votre adresse académique).
-     - **Qui a accès** : *Tout le monde* (*Anyone*).
-   - Cliquez sur **Déployer**.
-4. **Accorder les autorisations Google Drive (si demandé) :**
-   - Si Google demande d'autoriser l'accès aux fichiers Drive, cliquez sur **Autoriser l'accès**, choisissez votre compte, cliquez sur **Paramètres avancés**, puis sur **Accéder à (nom du projet)** et validez les permissions.
-5. **Report de l'URL dans le code du site :**
-   - Copiez l'URL de l'application Web générée (`https://script.google.com/macros/s/.../exec`).
-   - Assurez-vous qu'elle est bien renseignée dans `js/config.js` pour la clé `STAGE_WEB_APP_URL`.
-
----
-
-## 📐 Configuration Google Apps Script — Module Analyse Fonctionnelle 4ème
-
-Le module **Analyse Fonctionnelle – Expression du Besoin (4ème)** enregistre automatiquement les résultats des QCM de l'élève dans un Google Sheet.
-
-### 1. Structure de la feuille Google Sheet à créer
-Dans votre Google Sheet, créez une feuille et placez les en-têtes suivants sur la première ligne (Ligne 1) :
-
-| Colonne A | Colonne B | Colonne C | Colonne D | Colonne E | Colonne F | Colonne G | Colonne H | Colonne I | Colonne J | Colonne K |
-| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Date** | **Nom** | **Prénom** | **Classe** | **Élève** | **Score** | **Note /8** | **Pourcentage** | **QCM 1** | **QCM 2** | **Appréciation** |
-
----
-
-### 2. Code Google Apps Script pour l'Analyse Fonctionnelle
-Dans votre projet Apps Script (lié à la feuille ou indépendant), collez le code suivant dans `Code.gs` :
-
-```javascript
-function doPost(e) {
-  try {
-    var data = JSON.parse(e.postData.contents);
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-
-    var date = data.timestamp || new Date().toLocaleString('fr-FR');
-    var nom = data.nom || '';
-    var prenom = data.prenom || '';
-    var classe = data.classe || '';
-    var studentName = data.studentName || (nom + ' ' + prenom);
-    var score = data.score !== undefined ? data.score : '';
-    var maxScore = data.maxScore || 8;
-    var noteAffichage = score + ' / ' + maxScore;
-    var percentage = (data.percentage !== undefined ? data.percentage : 0) + '%';
-    var qcm1 = data.quiz1 !== undefined ? (data.quiz1 + ' / 4') : '';
-    var qcm2 = data.quiz2 !== undefined ? (data.quiz2 + ' / 4') : '';
-    var grade = data.grade || '';
-
-    sheet.appendRow([
-      date,
-      nom,
-      prenom,
-      classe,
-      studentName,
-      score,
-      noteAffichage,
-      percentage,
-      qcm1,
-      qcm2,
-      grade
-    ]);
-
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'success' }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({ status: 'error', message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+    ? 'http://localhost:3000/api'
+    : 'https://technopasteur-backend.onrender.com/api', // <-- Remplacez par votre URL Render
 ```
 
 ---
 
-### 3. Déploiement & Configuration
-1. En haut à droite d'Apps Script, cliquez sur **Déployer > Nouveau déploiement**.
-2. Sélectionnez **Application Web**.
-3. Réglez :
-   - **Exécuter en tant que** : *Moi*
-   - **Qui a accès** : *Tout le monde* (*Anyone*)
-4. Copiez l'URL d'application Web générée.
-5. Collez l'URL dans `js/config.js` sous la clé `ANALYSE_WEB_APP_URL`.
+### Étape 5 : Lancer la Migration des Données Google Sheets vers MongoDB Atlas
+
+Une fois votre cluster MongoDB Atlas en ligne et votre serveur déployé, lancez le script de migration depuis votre ordinateur :
+
+1. Ouvrez un terminal dans le dossier de votre projet.
+2. Créez un fichier `.env` sur votre ordinateur en copiant `.env.example` et saisissez vos vraies valeurs.
+3. Exécutez la commande :
+```bash
+npm run migrate
+```
+Le script va importer automatiquement tous les élèves de 5ème, 4ème et 3ème, hacher leurs mots de passe avec `bcrypt`, créer la liste des activités et importer l'historique des notes de stage.
+
+---
+
+## ℹ️ Remarque sur l'offre gratuite Render
+L'offre gratuite de Render met le serveur backend en veille après 15 minutes sans requête. Lorsque le premier élève ou le professeur se connecte après une période d'inactivité, le serveur peut mettre environ 30 secondes à se « réveiller ». Ce fonctionnement est totalement normal et n'entraîne aucune perte de données.

@@ -682,26 +682,38 @@ function initAnalyseLogic() {
                 details: details
             };
 
-            const defaultSpreadsheetScriptUrl = 'https://script.google.com/macros/s/AKfycbz_SPREADSHEET_ANALYSE/exec';
-
-            const targetUrl = (typeof CONFIG !== 'undefined' && CONFIG.ANALYSE_WEB_APP_URL && CONFIG.ANALYSE_WEB_APP_URL !== 'COLLER_ICI_URL_APPS_SCRIPT_ANALYSE')
-                ? CONFIG.ANALYSE_WEB_APP_URL
-                : defaultSpreadsheetScriptUrl;
-
             try {
-                await fetch(targetUrl, {
+                const response = await fetch(`${CONFIG.API_BASE_URL}/results`, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        studentId: currentStudent ? currentStudent.id : undefined,
+                        nom: currentStudent ? currentStudent.nom : '',
+                        prenom: currentStudent ? currentStudent.prenom : '',
+                        classe: currentStudent ? currentStudent.classe : '',
+                        niveau: '4eme',
+                        activityCode: '4_analyse_fonctionnelle',
+                        activityType: 'analyse',
+                        score: total,
+                        maxScore: 8,
+                        percentage: Math.round((total / 8) * 100),
+                        reponses: details,
+                        ppa: isPapStudent
+                    })
                 });
 
-                feedback.textContent = '✅ Note envoyée avec succès vers Google Sheets !';
-                feedback.style.color = '#16a34a';
-                btn.textContent = '✅ Envoyé !';
+                if (response.ok) {
+                    feedback.textContent = '✅ Note enregistrée avec succès dans MongoDB Atlas !';
+                    feedback.style.color = '#16a34a';
+                    btn.textContent = '✅ Envoyé !';
+                } else {
+                    feedback.textContent = '⚠️ Résultat conservé localement.';
+                    feedback.style.color = '#d97706';
+                }
             } catch (error) {
                 console.error('Erreur d\'envoi :', error);
-                feedback.textContent = '❌ Erreur lors de l\'envoi. Les résultats ont été validés localement.';
-                feedback.style.color = '#dc2626';
+                feedback.textContent = '⚠️ Résultat validé localement (mode hors-ligne).';
+                feedback.style.color = '#d97706';
                 btn.textContent = '📤 Réessayer';
                 btn.disabled = false;
             }
