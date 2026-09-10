@@ -11,7 +11,7 @@ Ce guide simple et adapté aux débutants vous explique pas à pas comment dépl
 3. Sélectionnez l'option **« Build and deploy from a Git repository »** et cliquez sur **« Next »**.
 4. Connectez ou choisissez votre dépôt GitHub **`TechnoPasteur`**.
 5. Renseignez la configuration suivante :
-   - **Name** : `technopasteur-backend`
+   - **Name** : `technopasteur` (ou `technopasteur-backend`)
    - **Region** : `Frankfurt (Europe)` (ou la plus proche de chez vous)
    - **Branch** : `main` *(ou la branche principale de votre dépôt)*
    - **Root Directory** : *(Laissez ce champ vide)*
@@ -37,7 +37,7 @@ Ce guide simple et adapté aux débutants vous explique pas à pas comment dépl
 3. Cliquez sur **« Create Web Service »** (ou **« Save Changes »**).
 
 Render va déployer automatiquement votre backend. Après 1 à 2 minutes, votre service sera en ligne et vous obtiendrez une URL HTTPS du type :
-`https://technopasteur-backend.onrender.com`
+`https://technopasteur.onrender.com`
 
 ---
 
@@ -45,7 +45,7 @@ Render va déployer automatiquement votre backend. Après 1 à 2 minutes, votre 
 
 1. Ouvrez votre navigateur internet.
 2. Saisissez l'URL de votre backend Render suivie de `/api/health`, par exemple :
-   `https://technopasteur-backend.onrender.com/api/health`
+   `https://technopasteur.onrender.com/api/health`
 3. Vous devez recevoir un message au format JSON confirmant le bon fonctionnement :
    ```json
    { "status": "ok", "message": "Backend TechnoPasteur opérationnel" }
@@ -77,7 +77,7 @@ Une fois le backend en ligne et fonctionnel :
    ```javascript
    API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
        ? 'http://localhost:3000/api'
-       : 'https://technopasteur-backend.onrender.com/api',
+       : 'https://technopasteur.onrender.com/api',
    ```
 3. Envoyez vos modifications sur GitHub (`git commit` et `git push`).
 4. Votre site hébergé sur **GitHub Pages** communiquera désormais en toute sécurité avec votre backend Render et votre base de données MongoDB Atlas !

@@ -7,7 +7,7 @@ const CONFIG = {
     // En production hébergé sur GitHub Pages, on appelle le backend hébergé sur Render
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:3000/api'
-        : 'https://technopasteur-backend.onrender.com/api',
+        : 'https://technopasteur.onrender.com/api',
 
     TEMPS_PAR_QUESTION: 60, // secondes par question
     PPA_BONUS_PERCENTAGE: 15,
