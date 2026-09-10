@@ -682,40 +682,48 @@ function initAnalyseLogic() {
                 details: details
             };
 
+            const payload = {
+                type: 'RESULTAT_ACTIVITE',
+                studentId: currentStudent ? currentStudent.id : undefined,
+                nom: currentStudent ? currentStudent.nom : '',
+                prenom: currentStudent ? currentStudent.prenom : '',
+                classe: currentStudent ? currentStudent.classe : '',
+                niveau: '4eme',
+                activityCode: '4_analyse_fonctionnelle',
+                activityType: 'analyse',
+                score: total,
+                maxScore: 8,
+                percentage: Math.round((total / 8) * 100),
+                reponses: details,
+                ppa: isPapStudent,
+                dateStr: new Date().toLocaleDateString('fr-FR')
+            };
+
+            let gasSuccess = false;
+            let backendSuccess = false;
+
+            if (typeof sendDataToGoogleAppsScript === 'function') {
+                gasSuccess = await sendDataToGoogleAppsScript(payload);
+            }
+
             try {
                 const response = await fetch(`${CONFIG.API_BASE_URL}/results`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        studentId: currentStudent ? currentStudent.id : undefined,
-                        nom: currentStudent ? currentStudent.nom : '',
-                        prenom: currentStudent ? currentStudent.prenom : '',
-                        classe: currentStudent ? currentStudent.classe : '',
-                        niveau: '4eme',
-                        activityCode: '4_analyse_fonctionnelle',
-                        activityType: 'analyse',
-                        score: total,
-                        maxScore: 8,
-                        percentage: Math.round((total / 8) * 100),
-                        reponses: details,
-                        ppa: isPapStudent
-                    })
+                    body: JSON.stringify(payload)
                 });
-
-                if (response.ok) {
-                    feedback.textContent = '✅ Note enregistrée avec succès dans MongoDB Atlas !';
-                    feedback.style.color = '#16a34a';
-                    btn.textContent = '✅ Envoyé !';
-                } else {
-                    feedback.textContent = '⚠️ Résultat conservé localement.';
-                    feedback.style.color = '#d97706';
-                }
+                if (response.ok) backendSuccess = true;
             } catch (error) {
-                console.error('Erreur d\'envoi :', error);
-                feedback.textContent = '⚠️ Résultat validé localement (mode hors-ligne).';
+                console.warn('Erreur envoi backend :', error);
+            }
+
+            if (gasSuccess || backendSuccess) {
+                feedback.textContent = '✅ Note enregistrée avec succès !';
+                feedback.style.color = '#16a34a';
+                btn.textContent = '✅ Envoyé !';
+            } else {
+                feedback.textContent = '⚠️ Résultat conservé localement.';
                 feedback.style.color = '#d97706';
-                btn.textContent = '📤 Réessayer';
-                btn.disabled = false;
             }
         });
     }
