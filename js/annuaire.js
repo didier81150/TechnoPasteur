@@ -48,10 +48,10 @@ async function loadAnnuaire() {
 
 function loadDemoAnnuaire() {
     annuaireEleves = [
-        { id: "1", nom: "DUPONT", prenom: "Lucas", classe: "4ème A", niveau: "4eme", ppa: false, pap: false },
-        { id: "2", nom: "MARTIN", prenom: "Emma", classe: "4ème B", niveau: "4eme", ppa: true, pap: true },
-        { id: "3", nom: "BERNARD", prenom: "Léo", classe: "5ème A", niveau: "5eme", ppa: false, pap: false },
-        { id: "4", nom: "PETIT", prenom: "Chloé", classe: "3ème A", niveau: "3eme", ppa: false, pap: false }
+        { id: "1", nom: "DUPONT", prenom: "Lucas", classe: "401", niveau: "4eme", ppa: false, pap: false },
+        { id: "2", nom: "MARTIN", prenom: "Emma", classe: "402", niveau: "4eme", ppa: true, pap: true },
+        { id: "3", nom: "BERNARD", prenom: "Léo", classe: "501", niveau: "5eme", ppa: false, pap: false },
+        { id: "4", nom: "PETIT", prenom: "Chloé", classe: "301", niveau: "3eme", ppa: false, pap: false }
     ];
 }
 

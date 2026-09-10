@@ -57,9 +57,26 @@ async function checkProfPassword() {
     }
 }
 
+function onProfNiveauChange() {
+    const nivSelect = document.getElementById('profSuiviNiveau');
+    const classSelect = document.getElementById('profSuiviClasse');
+    if (!nivSelect || !classSelect) return;
+
+    const niv = nivSelect.value;
+    const prefix = niv === '5eme' ? '50' : (niv === '4eme' ? '40' : '30');
+
+    let html = '';
+    for (let i = 1; i <= 8; i++) {
+        const cls = `${prefix}${i}`;
+        html += `<option value="${cls}">Classe ${cls}</option>`;
+    }
+    classSelect.innerHTML = html;
+}
+
 function showProfDashboardView() {
     document.getElementById('profLoginView').style.display = 'none';
     document.getElementById('profResultsView').style.display = 'block';
+    onProfNiveauChange();
     switchProfTab('suivi');
 }
 
@@ -100,15 +117,18 @@ async function renderUnlockManagement() {
         console.warn("Utilisation de la base locale pour les activités.");
     }
 
+    const prefix = niveau === '5eme' ? '50' : (niveau === '4eme' ? '40' : '30');
+    let classOptionsHTML = `<option value="ALL">Toutes les classes (${niveau})</option>`;
+    for (let i = 1; i <= 8; i++) {
+        const cls = `${prefix}${i}`;
+        classOptionsHTML += `<option value="${cls}">Classe ${cls}</option>`;
+    }
+
     let html = `
         <div style="margin-bottom:12px; display:flex; gap:10px; align-items:center;">
             <label style="font-weight:600;">Classe ciblée :</label>
             <select id="unlockClasseSelect" onchange="renderUnlockManagement()" style="padding:6px 12px; border-radius:6px;">
-                <option value="ALL">Toutes les classes (${niveau})</option>
-                <option value="4A">Classe 4A</option>
-                <option value="4B">Classe 4B</option>
-                <option value="302">Classe 302</option>
-                <option value="303">Classe 303</option>
+                ${classOptionsHTML}
             </select>
         </div>
         <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">Basculez les interrupteurs pour déverrouiller ou verrouiller les activités pour la classe sélectionnée :</p>
@@ -178,7 +198,12 @@ async function loadProfSuiviData() {
         return;
     }
 
-    container.innerHTML = '<p style="margin-top:15px; color:var(--text-muted);">⏳ Génération du tableau de suivi en cours...</p>';
+    container.innerHTML = `
+        <div style="margin-top:15px; padding:15px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; color:#1e40af;">
+            <p style="margin-bottom:6px; font-weight:600;">⏳ Connexion au serveur backend en cours...</p>
+            <p style="font-size:0.88rem; opacity:0.9;">Si le serveur backend Render était en veille (inactif depuis 15 minutes), son démarrage automatique peut prendre de 30 à 50 secondes. Veuillez patienter...</p>
+        </div>
+    `;
 
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/prof/summary?niveau=${niveau}&classe=${classe}`, {
@@ -189,11 +214,30 @@ async function loadProfSuiviData() {
             const data = await response.json();
             renderProfSuiviTable(data);
         } else {
-            container.innerHTML = '<p style="color:var(--danger); margin-top:15px;">❌ Erreur lors du chargement des données de suivi.</p>';
+            renderProfSuiviError(container, "❌ Erreur lors du chargement des données de suivi.");
         }
     } catch (e) {
-        container.innerHTML = '<p style="color:var(--danger); margin-top:15px;">❌ Connexion au serveur backend indisponible.</p>';
+        renderProfSuiviError(container, "❌ Connexion au serveur backend indisponible.");
     }
+}
+
+function renderProfSuiviError(container, errorText) {
+    container.innerHTML = `
+        <div style="margin-top:15px; padding:15px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; color:#991b1b;">
+            <p style="font-weight:700; margin-bottom:8px;">${errorText}</p>
+            <p style="font-size:0.88rem; margin-bottom:12px; color:#7f1d1d;">
+                Le serveur backend distant (Render) n'a pas répondu à temps ou est hors ligne.
+            </p>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button onclick="loadProfSuiviData()" class="btn-primary" style="background:#dc2626; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;">
+                    🔄 Réessayer la connexion
+                </button>
+                <button onclick="switchProfTab('local')" class="btn-secondary" style="background:#4b5563; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;">
+                    💾 Voir les résultats locaux (navigateur)
+                </button>
+            </div>
+        </div>
+    `;
 }
 
 let lastSuiviData = null;

@@ -39,7 +39,8 @@ const DEMO_ENSEIGNANTS = [
 ];
 
 const STAGE_STUDENTS_DATA = {
-    "302": ["AMRI Younes","ANAASSOUME Wessal","BEAUCERF Aaron","BEN KALLAL Lina","BONAFOUS--DUBREUIL Lylou","BRUSTET-DUCREUX Sasha","DECAIX Clara","EDDAHBI Karim","FABRIES Malicia","GENCE Atilio","GONCALVES Maély","GUFFROY Thomas","HAMI Salma","HURCET Kais","KAOUANE Samir","KHÉLAÏFIA Oumrane","LE BECACHEL Louane","MAHDAOUI Camilia","MAURIES Charlotte","MAYMOUN YAKOUB Ismail","PEREIRA-AMO Fabio","ROBERT Kenzo","TABOUCHE BENMOKKADEM Idriss"],
+    "301": ["AMRI Younes","ANAASSOUME Wessal","BEAUCERF Aaron","BEN KALLAL Lina","BONAFOUS--DUBREUIL Lylou","BRUSTET-DUCREUX Sasha","DECAIX Clara","EDDAHBI Karim","FABRIES Malicia","GENCE Atilio","GONCALVES Maély","GUFFROY Thomas","HAMI Salma","HURCET Kais","KAOUANE Samir"],
+    "302": ["KHÉLAÏFIA Oumrane","LE BECACHEL Louane","MAHDAOUI Camilia","MAURIES Charlotte","MAYMOUN YAKOUB Ismail","PEREIRA-AMO Fabio","ROBERT Kenzo","TABOUCHE BENMOKKADEM Idriss"],
     "303": ["ALEGRE Anaelle","BUSSARD Amaëlys","CAPILLION Leeloo","CARDONA Tom","CORDEIRO Hugo","DA CUNHA Angelo","DAOUDI Lina","DEHU Milo","DRIS Jounaïdi","EL FAKIR Camélia","FAURE Lola","LEMIRRE-JOSSET William","LIGNEUL Damien","MAJDOUBI Wassil","MANSOURI Syrine","NESPOULOUS Izia","PAQUENTIN Davy","PLANCHENAULT FELLER Heather","RAMOS Julia","RICARDO Maéva","TALBOT Apreel","TEFFAHI Hinde","ZAYAN Mohamed"]
 };
 
@@ -364,7 +365,13 @@ function initStageSelects() {
     stageClasse.innerHTML = '<option value="">— Choisir une classe —</option>';
     stageViewClasse.innerHTML = '<option value="">— Toutes les classes —</option>';
 
-    const classesList = Object.keys(stageElevesMap).sort();
+    // Générer la liste des classes 301 à 308 ainsi que toute classe disponible dans la base
+    const defaultClasses = [];
+    for (let i = 1; i <= 8; i++) {
+        defaultClasses.push(`30${i}`);
+    }
+    const dbClasses = Object.keys(stageElevesMap);
+    const classesList = [...new Set([...defaultClasses, ...dbClasses])].sort();
 
     classesList.forEach(c => {
         const opt1 = document.createElement('option');

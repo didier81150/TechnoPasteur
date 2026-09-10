@@ -169,7 +169,7 @@
             <div id="tabPanel_suivi" class="prof-tab-panel">
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
                     <label style="font-weight: 600;">Niveau :</label>
-                    <select id="profSuiviNiveau" onchange="loadProfSuiviData()" style="padding: 6px 12px; border-radius: 6px;">
+                    <select id="profSuiviNiveau" onchange="onProfNiveauChange(); loadProfSuiviData();" style="padding: 6px 12px; border-radius: 6px;">
                         <option value="4eme">4ème</option>
                         <option value="5eme">5ème</option>
                         <option value="3eme">3ème</option>
@@ -177,11 +177,7 @@
 
                     <label style="font-weight: 600; margin-left: 10px;">Classe :</label>
                     <select id="profSuiviClasse" onchange="loadProfSuiviData()" style="padding: 6px 12px; border-radius: 6px;">
-                        <option value="4A">4A</option>
-                        <option value="4B">4B</option>
-                        <option value="302">302</option>
-                        <option value="303">303</option>
-                        <option value="5A">5A</option>
+                        <!-- Rempli dynamiquement selon le niveau -->
                     </select>
 
                     <button class="btn-primary" onclick="loadProfSuiviData()" style="padding: 6px 14px; border:none; background: #2563eb; color:white; border-radius:6px; cursor:pointer;">🔄 Actualiser</button>
