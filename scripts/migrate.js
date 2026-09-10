@@ -46,6 +46,35 @@ async function fetchCsvText(url) {
     }
 }
 
+function normalizeClassName(rawClasse, defaultNiveau) {
+    if (!rawClasse) return defaultNiveau === '5eme' ? '501' : (defaultNiveau === '4eme' ? '401' : '301');
+    const str = rawClasse.trim().toUpperCase();
+
+    if (/^[345]0[1-8]$/.test(str)) {
+        return str;
+    }
+
+    let prefix = '50';
+    if (str.includes('4') || defaultNiveau === '4eme') prefix = '40';
+    else if (str.includes('3') || defaultNiveau === '3eme') prefix = '30';
+
+    const letterMatch = str.match(/([A-H])$/);
+    if (letterMatch) {
+        const num = letterMatch[1].charCodeAt(0) - 64;
+        return `${prefix}${num}`;
+    }
+
+    const digitMatch = str.match(/(\d+)$/);
+    if (digitMatch) {
+        const num = parseInt(digitMatch[1], 10);
+        if (num >= 1 && num <= 8) {
+            return `${prefix}${num}`;
+        }
+    }
+
+    return `${prefix}1`;
+}
+
 function parseCsv(csvText) {
     if (!csvText) return [];
     const lines = csvText.split('\n').filter(l => l.trim() !== '');
@@ -110,16 +139,12 @@ async function migrateStudents() {
             const cleanNom = nom.trim().toUpperCase();
             const cleanPrenom = prenom ? prenom.trim() : '';
 
-            if (!classe || !classe.trim()) {
-                classe = `${nivKey.replace('eme', 'ème')} A`;
-            } else {
-                classe = classe.trim();
-            }
-
             let niveau = nivKey;
-            if (classe.includes('5')) niveau = '5eme';
-            else if (classe.includes('4')) niveau = '4eme';
-            else if (classe.includes('3')) niveau = '3eme';
+            classe = normalizeClassName(classe, niveau);
+
+            if (classe.startsWith('5')) niveau = '5eme';
+            else if (classe.startsWith('4')) niveau = '4eme';
+            else if (classe.startsWith('3')) niveau = '3eme';
 
             const isPpa = ['o', 'oui', 'true', '1', 'vrai'].includes((ppaRaw || '').toLowerCase().trim());
             const plainPassword = rawPwd && rawPwd.trim() ? rawPwd.trim() : '1234';
@@ -210,6 +235,44 @@ async function migrateStageNotes() {
     console.log(`✅ ${count} notes de stage historiques importées.`);
 }
 
+async function normalizeExistingDatabaseRecords() {
+    console.log('🔄 Normalisation des classes déjà enregistrées dans MongoDB...');
+    const students = await Student.find({});
+    let countStudents = 0;
+    for (const st of students) {
+        const normClasse = normalizeClassName(st.classe, st.niveau);
+        if (normClasse !== st.classe) {
+            st.classe = normClasse;
+            await st.save();
+            countStudents++;
+        }
+    }
+
+    const stageNotes = await StageNote.find({});
+    let countNotes = 0;
+    for (const sn of stageNotes) {
+        const normClasse = normalizeClassName(sn.classe, '3eme');
+        if (normClasse !== sn.classe) {
+            sn.classe = normClasse;
+            await sn.save();
+            countNotes++;
+        }
+    }
+
+    const results = await Result.find({});
+    let countResults = 0;
+    for (const res of results) {
+        const normClasse = normalizeClassName(res.classe, res.niveau);
+        if (normClasse !== res.classe) {
+            res.classe = normClasse;
+            await res.save();
+            countResults++;
+        }
+    }
+
+    console.log(`✅ Normalisation terminée : ${countStudents} élèves, ${countNotes} notes de stage, et ${countResults} résultats mis à jour.`);
+}
+
 async function run() {
     const mongoUri = process.env.MONGODB_URI;
     if (!mongoUri) {
@@ -225,6 +288,7 @@ async function run() {
         await migrateActivities();
         await migrateStudents();
         await migrateStageNotes();
+        await normalizeExistingDatabaseRecords();
 
         console.log('🎉 Migration globale terminée avec succès !');
         process.exit(0);
