@@ -88,6 +88,26 @@ async function loadAnnuaire() {
             if (response.ok) {
                 const csvText = await response.text();
                 const rows = parseCSV(csvText);
+fix-backend-connection-and-class-normalization-13965832169568202811
+                annuaireEleves = rows.map((r, index) => {
+                    const rawClass = (r.classe || r.class || '').toString().trim();
+                    let level = normalizeNiveau(r.niveau || r.level);
+                    if (!level && rawClass) {
+                        if (rawClass.startsWith('5')) level = '5eme';
+                        else if (rawClass.startsWith('4')) level = '4eme';
+                        else if (rawClass.startsWith('3')) level = '3eme';
+                    }
+                    return {
+                        id: r.id || String(index + 1),
+                        niveau: level,
+                        classe: rawClass,
+                        nom: (r.nom || r.lastname || '').toUpperCase(),
+                        prenom: r.prenom || r.firstname || '',
+                        motDePasse: r.codesecret || r.motdepasse || r.password || r.code || '',
+                        ppa: (r.ppa || '').toLowerCase() === 'true' || (r.ppa || '').toLowerCase() === 'oui',
+                        pap: (r.pap || '').toLowerCase() === 'true' || (r.pap || '').toLowerCase() === 'oui'
+                    };
+                }).filter(e => e.niveau && e.classe && e.nom);
                 annuaireEleves = rows.map((r, index) => ({
                     id: r.id || String(index + 1),
                     niveau: normalizeNiveau(r.niveau || r.level),
@@ -98,6 +118,7 @@ async function loadAnnuaire() {
                     ppa: (r.ppa || '').toLowerCase() === 'true' || (r.ppa || '').toLowerCase() === 'oui',
                     pap: (r.pap || '').toLowerCase() === 'true' || (r.pap || '').toLowerCase() === 'oui'
                 })).filter(e => e.niveau && e.classe && e.nom);
+main
 
                 console.log(`✅ ${annuaireEleves.length} élèves chargés depuis Google Sheets CSV.`);
                 if (btnLogin) {

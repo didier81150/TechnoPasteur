@@ -225,6 +225,56 @@ async function loadProfSuiviData() {
         return;
     }
 
+    // Si le mode Google Sheets est actif ou que l'annuaire est chargé localement
+    if (CONFIG.USE_GOOGLE_SHEETS || (annuaireEleves && annuaireEleves.length > 0)) {
+        const filteredEleves = annuaireEleves.filter(e => e.niveau === niveau && e.classe === classe);
+        const activitiesForLevel = ACTIVITIES_DATABASE.filter(a => a.niveau === niveau);
+
+        const summary = filteredEleves.map(st => {
+            const actScores = {};
+            let nbDone = 0;
+
+            activitiesForLevel.forEach(act => {
+                // Recherche dans le stockage local pour l'activité spécifique
+                const actCode = act.code || act.id;
+                const results = getStoredResults().filter(r =>
+                    r.nom && st.nom && r.nom.toUpperCase() === st.nom.toUpperCase() &&
+                    r.prenom && st.prenom && r.prenom.toUpperCase() === st.prenom.toUpperCase() &&
+                    (r.activityCode === actCode || r.activityId === actCode || r.quizId === act.quizId || r.quizType === act.quizId)
+                );
+                if (results.length > 0) {
+                    const lastRes = results[results.length - 1];
+                    actScores[actCode] = {
+                        score: lastRes.score,
+                        maxScore: lastRes.maxScore || 10,
+                        percentage: lastRes.percentage !== undefined ? lastRes.percentage : (lastRes.pourcentage !== undefined ? lastRes.pourcentage : Math.round((lastRes.score / (lastRes.maxScore || 10)) * 100)),
+                        date: lastRes.dateStr || lastRes.date
+                    };
+                    nbDone++;
+                }
+            });
+
+            return {
+                id: st.id,
+                nom: st.nom,
+                prenom: st.prenom,
+                classe: st.classe,
+                ppa: st.ppa,
+                activityScores: actScores,
+                stageNote: null,
+                nbActivitiesDone: nbDone
+            };
+        });
+
+        renderProfSuiviTable({
+            niveau,
+            classe,
+            activities: activitiesForLevel.map(a => ({ code: a.code || a.id, titre: a.titre })),
+            summary
+        });
+        return;
+    }
+
     container.innerHTML = `
         <div style="margin-top:15px; padding:15px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; color:#1e40af;">
             <p style="margin-bottom:6px; font-weight:600;">⏳ Connexion au serveur backend en cours...</p>

@@ -6,20 +6,35 @@ const CONFIG = {
     // Mode de fonctionnement (100% Google Sheets)
     USE_GOOGLE_SHEETS: true,
 
+fix-backend-connection-and-class-normalization-13965832169568202811
+    // 1. URL du CSV Google Sheets pour l'Annuaire Élèves
+    GOOGLE_SHEET_ELEVES_CSV: "https://docs.google.com/spreadsheets/d/1OjjJLMQRKO-Lu_3Wzz0VKOgCXX3I_W2Sv51ah4GYfhI/export?format=csv",
+
+    // 2. URL du CSV Google Sheets pour l'Annuaire Enseignants
+    GOOGLE_SHEET_ENSEIGNANTS_CSV: "https://docs.google.com/spreadsheets/d/1cABpA_7xuv1AmTgubnh21MnaV7XuKhM_0OVwSBWqcqI/export?format=csv",
     // 1. URL du CSV Google Sheets pour l'Annuaire Élèves (Colonnes: Niveau | Classe | Nom | Prenom | MotDePasse)
     GOOGLE_SHEET_ELEVES_CSV: "",
 
     // 2. URL du CSV Google Sheets pour l'Annuaire Enseignants (Colonnes: Nom | MotDePasse)
     GOOGLE_SHEET_ENSEIGNANTS_CSV: "",
+main
 
     // 3. URL du Web App Google Apps Script pour l'enregistrement automatique des notes/activités/stage
     GOOGLE_APPS_SCRIPT_URL: "",
+
+fix-backend-connection-and-class-normalization-13965832169568202811
+    // 4. URL du CSV Google Sheets pour la consultation des Notes de Stage
+    GOOGLE_SHEET_STAGE_NOTES_CSV: "https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c/export?format=csv",
+
+    // URL du serveur Backend (en fallback si nécessaire)
+    API_BASE_URL: (typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
 
     // 4. URL du CSV Google Sheets pour la consultation des Notes de Stage (Optionnel pour Enseignants)
     GOOGLE_SHEET_STAGE_NOTES_CSV: "",
 
     // URL du serveur Backend (en fallback si nécessaire)
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+main
         ? 'http://localhost:3000/api'
         : 'https://technopasteur-backend.onrender.com/api',
 
