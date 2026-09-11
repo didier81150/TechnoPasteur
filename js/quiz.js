@@ -473,42 +473,49 @@ async function sendResultToGoogleSheets(resultData) {
     const saveStatus = document.getElementById('saveStatus');
     if (!saveStatus) return;
 
-    saveStatus.textContent = '📤 Envoi du résultat vers MongoDB Atlas...';
+    saveStatus.textContent = '📤 Envoi du résultat en cours...';
     saveStatus.style.color = '#6C757D';
 
-    try {
-        const payload = {
-            studentId: currentStudent ? currentStudent.id : undefined,
-            nom: resultData.nom,
-            prenom: resultData.prenom,
-            classe: resultData.classe,
-            niveau: currentStudent ? currentStudent.niveau : '4eme',
-            activityCode: `qcm_${resultData.quizType}`,
-            activityType: 'qcm',
-            score: resultData.score,
-            maxScore: resultData.total,
-            percentage: resultData.pourcentage,
-            dateStr: resultData.date,
-            heureStr: resultData.heure,
-            ppa: currentStudent ? !!currentStudent.ppa : false
-        };
+    const payload = {
+        type: 'RESULTAT_ACTIVITE',
+        studentId: currentStudent ? currentStudent.id : undefined,
+        nom: resultData.nom,
+        prenom: resultData.prenom,
+        classe: resultData.classe,
+        niveau: currentStudent ? currentStudent.niveau : '4eme',
+        activityCode: `qcm_${resultData.quizType}`,
+        activityType: 'qcm',
+        score: resultData.score,
+        maxScore: resultData.total,
+        percentage: resultData.pourcentage,
+        dateStr: resultData.date,
+        heureStr: resultData.heure,
+        ppa: currentStudent ? !!currentStudent.ppa : false
+    };
 
+    let gasSuccess = false;
+    let backendSuccess = false;
+
+    if (typeof sendDataToGoogleAppsScript === 'function') {
+        gasSuccess = await sendDataToGoogleAppsScript(payload);
+    }
+
+    try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/results`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
-
-        if (response.ok) {
-            saveStatus.textContent = '✅ Résultat enregistré sur MongoDB Atlas et localement.';
-            saveStatus.style.color = '#28A745';
-        } else {
-            saveStatus.textContent = '⚠️ Résultat conservé localement.';
-            saveStatus.style.color = '#856404';
-        }
+        if (response.ok) backendSuccess = true;
     } catch (error) {
-        console.error("❌ Erreur envoi backend :", error);
-        saveStatus.textContent = '⚠️ Résultat conservé localement (hors-ligne).';
+        console.warn("⚠️ Envoi backend non disponible :", error);
+    }
+
+    if (gasSuccess || backendSuccess) {
+        saveStatus.textContent = '✅ Résultat enregistré en ligne et localement.';
+        saveStatus.style.color = '#28A745';
+    } else {
+        saveStatus.textContent = '⚠️ Résultat conservé localement sur ce navigateur.';
         saveStatus.style.color = '#856404';
     }
 }

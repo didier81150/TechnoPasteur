@@ -1,9 +1,64 @@
 // =====================================================
-// GESTION DE L'ANNUAIRE ÉLÈVES ET CONNEXION VIA BACKEND
+// GESTION DE L'ANNUAIRE ÉLÈVES ET CONNEXION
 // =====================================================
 
 let annuaireEleves = [];
 let currentStudent = null;
+
+// Helper: Parse un texte CSV (séparateur virgule ou point-virgule)
+function parseCSV(text) {
+    if (!text) return [];
+    const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+    if (lines.length < 2) return [];
+
+    const headerLine = lines[0];
+    const delimiter = headerLine.includes(';') ? ';' : ',';
+
+    const parseLine = (line) => {
+        const result = [];
+        let cur = '';
+        let inQuotes = false;
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === delimiter && !inQuotes) {
+                result.push(cur.trim());
+                cur = '';
+            } else {
+                cur += char;
+            }
+        }
+        result.push(cur.trim());
+        return result.map(s => s.replace(/^"|"$/g, '').trim());
+    };
+
+    const headers = parseLine(lines[0]).map(h =>
+        h.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "")
+    );
+
+    const records = [];
+    for (let i = 1; i < lines.length; i++) {
+        const values = parseLine(lines[i]);
+        if (values.length === 0) continue;
+        const row = {};
+        headers.forEach((h, index) => {
+            row[h] = values[index] || '';
+        });
+        records.push(row);
+    }
+    return records;
+}
+
+// Normalise les libellés de niveau (ex: 5ème, 5eme, 5 -> 5eme)
+function normalizeNiveau(raw) {
+    if (!raw) return '';
+    const str = raw.toString().toLowerCase().trim();
+    if (str.includes('5')) return '5eme';
+    if (str.includes('4')) return '4eme';
+    if (str.includes('3')) return '3eme';
+    return str;
+}
 
 // Bascule d'affichage du mot de passe
 function togglePasswordVisibility(inputId, btn) {
@@ -18,7 +73,7 @@ function togglePasswordVisibility(inputId, btn) {
     }
 }
 
-// Charge la liste des élèves depuis le serveur backend
+// Charge la liste des élèves depuis Google Sheets CSV (ou backend / démo)
 async function loadAnnuaire() {
     const btnLogin = document.getElementById('btnLogin');
     if (btnLogin) {
@@ -26,13 +81,44 @@ async function loadAnnuaire() {
         btnLogin.textContent = "Chargement de l'annuaire...";
     }
 
+    // 1. Essai depuis le CSV Google Sheets si configuré
+    if (CONFIG.GOOGLE_SHEET_ELEVES_CSV && CONFIG.GOOGLE_SHEET_ELEVES_CSV.trim() !== '') {
+        try {
+            const response = await fetch(CONFIG.GOOGLE_SHEET_ELEVES_CSV);
+            if (response.ok) {
+                const csvText = await response.text();
+                const rows = parseCSV(csvText);
+                annuaireEleves = rows.map((r, index) => ({
+                    id: r.id || String(index + 1),
+                    niveau: normalizeNiveau(r.niveau || r.level),
+                    classe: r.classe || r.class || '',
+                    nom: (r.nom || r.lastname || '').toUpperCase(),
+                    prenom: r.prenom || r.firstname || '',
+                    motDePasse: r.motdepasse || r.password || r.code || '',
+                    ppa: (r.ppa || '').toLowerCase() === 'true' || (r.ppa || '').toLowerCase() === 'oui',
+                    pap: (r.pap || '').toLowerCase() === 'true' || (r.pap || '').toLowerCase() === 'oui'
+                })).filter(e => e.niveau && e.classe && e.nom);
+
+                console.log(`✅ ${annuaireEleves.length} élèves chargés depuis Google Sheets CSV.`);
+                if (btnLogin) {
+                    btnLogin.disabled = false;
+                    btnLogin.textContent = 'Se connecter';
+                }
+                return;
+            }
+        } catch (err) {
+            console.warn("⚠️ Échec du chargement depuis Google Sheets CSV, tentative backend / démo...", err);
+        }
+    }
+
+    // 2. Fallback backend Express / MongoDB
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/students`);
         if (response.ok) {
             annuaireEleves = await response.json();
-            console.log(`✅ ${annuaireEleves.length} élèves chargés depuis le backend MongoDB.`);
+            console.log(`✅ ${annuaireEleves.length} élèves chargés depuis le backend.`);
         } else {
-            console.warn("⚠️ Impossible de charger depuis le backend, bascule en mode démo");
+            console.warn("⚠️ Backend non disponible, chargement de l'annuaire de démonstration.");
             loadDemoAnnuaire();
         }
     } catch (err) {
@@ -48,10 +134,10 @@ async function loadAnnuaire() {
 
 function loadDemoAnnuaire() {
     annuaireEleves = [
-        { id: "1", nom: "DUPONT", prenom: "Lucas", classe: "401", niveau: "4eme", ppa: false, pap: false },
-        { id: "2", nom: "MARTIN", prenom: "Emma", classe: "402", niveau: "4eme", ppa: true, pap: true },
-        { id: "3", nom: "BERNARD", prenom: "Léo", classe: "501", niveau: "5eme", ppa: false, pap: false },
-        { id: "4", nom: "PETIT", prenom: "Chloé", classe: "301", niveau: "3eme", ppa: false, pap: false }
+        { id: "1", nom: "DUPONT", prenom: "Lucas", classe: "401", niveau: "4eme", motDePasse: "A1B2", ppa: false, pap: false },
+        { id: "2", nom: "MARTIN", prenom: "Emma", classe: "402", niveau: "4eme", motDePasse: "C3D4", ppa: true, pap: true },
+        { id: "3", nom: "BERNARD", prenom: "Léo", classe: "501", niveau: "5eme", motDePasse: "E5F6", ppa: false, pap: false },
+        { id: "4", nom: "PETIT", prenom: "Chloé", classe: "301", niveau: "3eme", motDePasse: "G7H8", ppa: false, pap: false }
     ];
 }
 
@@ -103,7 +189,7 @@ function onClasseChange() {
     selectEleve.disabled = false;
 }
 
-// Connexion de l'élève auprès du Backend (Vérification sécurisée par bcrypt)
+// Connexion de l'élève
 async function handleLogin(event) {
     if (event) event.preventDefault();
 
@@ -130,30 +216,54 @@ async function handleLogin(event) {
     }
 
     try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ niveau, classe, nom, prenom, codeSecret })
-        });
+        const eleve = annuaireEleves.find(e =>
+            e.niveau === niveau &&
+            e.classe === classe &&
+            e.nom.toUpperCase() === nom.toUpperCase() &&
+            e.prenom.toUpperCase() === prenom.toUpperCase()
+        );
 
-        const data = await response.json();
+        if (eleve) {
+            // Vérification mot de passe
+            const expectedPassword = (eleve.motDePasse || '').trim();
+            const inputPassword = codeSecret.trim();
 
-        if (response.ok) {
-            currentStudent = data;
-            showDashboard(data.niveau);
-        } else {
-            // Mode Fallback si le backend n'est pas actif (pour tests locaux hors-ligne)
-            const eleveDemo = annuaireEleves.find(e => e.niveau === niveau && e.classe === classe && e.nom === nom && e.prenom === prenom);
-            if (eleveDemo && (codeSecret === '1234' || codeSecret === 'demo')) {
-                currentStudent = eleveDemo;
-                showDashboard(eleveDemo.niveau);
+            if (expectedPassword && inputPassword.toUpperCase() === expectedPassword.toUpperCase()) {
+                currentStudent = eleve;
+                showDashboard(eleve.niveau);
+                return;
+            } else if (!expectedPassword && (inputPassword === '1234' || inputPassword === 'demo')) {
+                currentStudent = eleve;
+                showDashboard(eleve.niveau);
+                return;
             } else {
-                showLoginError(`❌ ${data.error || 'Mot de passe incorrect.'}`);
+                showLoginError('❌ Mot de passe incorrect.');
+                return;
             }
         }
+
+        // Si non trouvé localement et qu'un backend est disponible
+        if (!CONFIG.GOOGLE_SHEET_ELEVES_CSV && CONFIG.API_BASE_URL) {
+            const response = await fetch(`${CONFIG.API_BASE_URL}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ niveau, classe, nom, prenom, codeSecret })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                currentStudent = data;
+                showDashboard(data.niveau);
+                return;
+            } else {
+                showLoginError(`❌ ${data.error || 'Mot de passe incorrect.'}`);
+                return;
+            }
+        }
+
+        showLoginError('❌ Élève non trouvé ou mot de passe incorrect.');
     } catch (err) {
         console.warn("Erreur requête connexion :", err);
-        showLoginError("❌ Erreur de connexion au serveur. Vérifiez votre réseau.");
+        showLoginError("❌ Erreur de connexion. Veuillez réessayer.");
     } finally {
         if (btnLogin) {
             btnLogin.disabled = false;
