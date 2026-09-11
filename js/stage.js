@@ -57,6 +57,7 @@ async function loadEnseignants() {
                     motDePasse: (r.motdepasse || r.password || r.code || '').trim()
                 })).filter(e => e.nom);
                 console.log(`✅ ${enseignantsList.length} enseignants chargés depuis Google Sheets CSV.`);
+                populateTeacherSelect();
                 return;
             }
         } catch (err) {
@@ -64,6 +65,7 @@ async function loadEnseignants() {
         }
     }
     enseignantsList = DEMO_ENSEIGNANTS;
+    populateTeacherSelect();
 }
 
 function populateTeacherSelect() {
@@ -340,6 +342,7 @@ async function openStageModule(activity, isTeacherAccess = false) {
     `;
 
     document.getElementById('activityScreen').style.display = 'block';
+    await loadEnseignants();
     populateTeacherSelect();
     initStageSelects();
     prefillStudentData();
