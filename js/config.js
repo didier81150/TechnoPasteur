@@ -3,8 +3,22 @@
 // =====================================================
 
 const CONFIG = {
-    // URL du serveur Backend (en local ou sur Render)
-    // En production hébergé sur GitHub Pages, on appelle le backend hébergé sur Render
+    // Mode de fonctionnement (100% Google Sheets)
+    USE_GOOGLE_SHEETS: true,
+
+    // 1. URL du CSV Google Sheets pour l'Annuaire Élèves (Colonnes: Niveau | Classe | Nom | Prenom | MotDePasse)
+    GOOGLE_SHEET_ELEVES_CSV: "",
+
+    // 2. URL du CSV Google Sheets pour l'Annuaire Enseignants (Colonnes: Nom | MotDePasse)
+    GOOGLE_SHEET_ENSEIGNANTS_CSV: "",
+
+    // 3. URL du Web App Google Apps Script pour l'enregistrement automatique des notes/activités/stage
+    GOOGLE_APPS_SCRIPT_URL: "",
+
+    // 4. URL du CSV Google Sheets pour la consultation des Notes de Stage (Optionnel pour Enseignants)
+    GOOGLE_SHEET_STAGE_NOTES_CSV: "",
+
+    // URL du serveur Backend (en fallback si nécessaire)
     API_BASE_URL: window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
         ? 'http://localhost:3000/api'
         : 'https://technopasteur-backend.onrender.com/api',
@@ -14,6 +28,36 @@ const CONFIG = {
     STORAGE_KEY_RESULTS: "qcm_materiaux_resultats",
     STORAGE_KEY_UNLOCKS: "site_techno_unlocked_activities",
 };
+
+// Helper global d'envoi de données vers Google Apps Script Web App
+async function sendDataToGoogleAppsScript(payload) {
+    if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL.trim() === '') {
+        return false;
+    }
+
+    try {
+        await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        return true;
+    } catch (err) {
+        console.warn("⚠️ Premier essai POST Google Apps Script échoué, tentative no-cors...", err);
+        try {
+            await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(payload)
+            });
+            return true;
+        } catch (err2) {
+            console.error("❌ Échec envoi Google Apps Script :", err2);
+            return false;
+        }
+    }
+}
 
 // Base de données unifiée des activités par niveau
 const ACTIVITIES_DATABASE = [

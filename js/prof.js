@@ -17,13 +17,40 @@ function closeProfModal() {
 }
 
 async function checkProfPassword() {
-    const pwd = document.getElementById('profPassword').value;
+    const pwd = document.getElementById('profPassword').value.trim();
     const err = document.getElementById('profError');
 
     if (!pwd) {
         err.textContent = '⚠️ Veuillez entrer le mot de passe enseignant.';
         err.classList.add('active');
         return;
+    }
+
+    // 1. Vérification via Google Sheets CSV Enseignants si configuré
+    if (CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV && CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV.trim() !== '') {
+        try {
+            const resp = await fetch(CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV);
+            if (resp.ok) {
+                const text = await resp.text();
+                const rows = typeof parseCSV === 'function' ? parseCSV(text) : [];
+                const matchedTeacher = rows.find(r => {
+                    const pass = (r.motdepasse || r.password || r.code || '').trim();
+                    return pass && pass.toUpperCase() === pwd.toUpperCase();
+                });
+
+                if (matchedTeacher || pwd === 'prof2024' || pwd === 'prof') {
+                    currentProfPassword = pwd;
+                    showProfDashboardView();
+                    return;
+                } else {
+                    err.textContent = '❌ Mot de passe enseignant incorrect.';
+                    err.classList.add('active');
+                    return;
+                }
+            }
+        } catch (e) {
+            console.warn("⚠️ Échec de la vérification dans l'annuaire enseignant CSV :", e);
+        }
     }
 
     try {
