@@ -45,10 +45,59 @@ const STAGE_STUDENTS_DATA = {
 };
 
 async function loadEnseignants() {
+    if (CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV && CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV.trim() !== '') {
+        try {
+            const resp = await fetch(CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV);
+            if (resp.ok) {
+                const text = await resp.text();
+                const rows = typeof parseCSV === 'function' ? parseCSV(text) : [];
+                enseignantsList = rows.map(r => ({
+                    nom: (r.nom || r.lastname || '').toUpperCase().trim(),
+                    prenom: (r.prenom || r.firstname || '').trim(),
+                    motDePasse: (r.motdepasse || r.password || r.code || '').trim()
+                })).filter(e => e.nom);
+                console.log(`✅ ${enseignantsList.length} enseignants chargés depuis Google Sheets CSV.`);
+                return;
+            }
+        } catch (err) {
+            console.warn("⚠️ Impossible de charger la liste des enseignants depuis CSV :", err);
+        }
+    }
     enseignantsList = DEMO_ENSEIGNANTS;
 }
 
+function populateTeacherSelect() {
+    const select = document.getElementById('teacherSelect');
+    if (!select) return;
+    select.innerHTML = '<option value="">— Sélectionner votre nom —</option>';
+    const sorted = [...enseignantsList].sort((a, b) => a.nom.localeCompare(b.nom));
+    sorted.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = `${t.nom}___${t.prenom}`;
+        opt.textContent = t.prenom ? `${t.nom} ${t.prenom}` : t.nom;
+        select.appendChild(opt);
+    });
+}
+
 async function loadStageEleves() {
+    if (typeof annuaireEleves !== 'undefined' && annuaireEleves.length > 0) {
+        const eleves3eme = annuaireEleves.filter(e => e.niveau === '3eme' || (e.classe && e.classe.startsWith('3')));
+        if (eleves3eme.length > 0) {
+            stageElevesMap = {};
+            eleves3eme.forEach(st => {
+                const c = st.classe || '301';
+                if (!stageElevesMap[c]) stageElevesMap[c] = [];
+                stageElevesMap[c].push({
+                    nom: st.nom,
+                    prenom: st.prenom,
+                    fullText: `${st.nom} ${st.prenom}`
+                });
+            });
+            console.log(`✅ ${Object.keys(stageElevesMap).length} classes de 3ème chargées depuis l'annuaire.`);
+            return;
+        }
+    }
+
     try {
         const response = await fetch(`${CONFIG.API_BASE_URL}/students?niveau=3eme`);
         if (response.ok) {
@@ -192,13 +241,19 @@ async function openStageModule(activity, isTeacherAccess = false) {
                 <div id="teacherAuthBlock" style="padding: 1.5rem; background: var(--bg-main); border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1.5rem; display: none;">
                     <h3 style="margin-bottom:0.5rem; color:var(--text-color);">🔒 Accès réservé aux Enseignants</h3>
                     <p style="font-size:0.88rem; color:var(--text-muted); margin-bottom:1rem;">
-                        Veuillez entrer le mot de passe enseignant pour saisir ou consulter les notes de stage.
+                        Veuillez sélectionner votre nom et entrer votre mot de passe pour saisir ou consulter les notes de stage.
                     </p>
                     <form onsubmit="handleTeacherLogin(event)">
                         <div class="form-group">
-                            <label for="teacherPassword">Mot de passe enseignant stage :</label>
+                            <label for="teacherSelect">Enseignant :</label>
+                            <select id="teacherSelect" required style="width: 100%; margin-bottom: 1rem; padding: 8px; border-radius: 6px; border: 1px solid var(--border-color);">
+                                <option value="">— Sélectionner votre nom —</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="teacherPassword">Mot de passe enseignant :</label>
                             <div style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="teacherPassword" placeholder="Entrez le mot de passe enseignant" required style="width: 100%; padding-right: 40px;">
+                                <input type="password" id="teacherPassword" placeholder="Entrez votre mot de passe" required style="width: 100%; padding-right: 40px;">
                                 <button type="button" onclick="togglePasswordVisibility('teacherPassword', this)" style="position: absolute; right: 8px; background: none; border: none; cursor: pointer; font-size: 1.2rem;">👁️</button>
                             </div>
                         </div>
@@ -210,7 +265,7 @@ async function openStageModule(activity, isTeacherAccess = false) {
                 </div>
 
                 <div id="teacherStatusBanner" style="display:none; align-items:center; justify-content:space-between; background:#e0f2fe; color:#0369a1; padding:0.75rem 1rem; border-radius:8px; margin-bottom:1.5rem; border:1px solid #bae6fd;">
-                    <span>👨‍🏫 Enseignant identifié</span>
+                    <span id="teacherStatusText">👨‍🏫 Enseignant identifié</span>
                     <button onclick="logoutTeacher()" style="background:none; border:none; color:#0284c7; cursor:pointer; font-weight:600; text-decoration:underline;">Se déconnecter</button>
                 </div>
 
@@ -220,6 +275,11 @@ async function openStageModule(activity, isTeacherAccess = false) {
                         <h3 class="stage-card-title">Enregistrer une note de rapport de stage</h3>
 
                         <form id="stageNoteForm" onsubmit="handleStageNoteSubmit(event)">
+                            <div class="form-group">
+                                <label for="stageProfDisplay">Enseignant évaluateur :</label>
+                                <input type="text" id="stageProfDisplay" readonly style="background: var(--bg-main); font-weight:600;">
+                            </div>
+
                             <div class="form-group">
                                 <label for="stageClasse">Classe</label>
                                 <select id="stageClasse" required onchange="onStageClasseChange()">
@@ -280,6 +340,7 @@ async function openStageModule(activity, isTeacherAccess = false) {
     `;
 
     document.getElementById('activityScreen').style.display = 'block';
+    populateTeacherSelect();
     initStageSelects();
     prefillStudentData();
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -301,18 +362,23 @@ let stageProfTokenPwd = '';
 function updateTeacherAuthUI() {
     const authBlock = document.getElementById('teacherAuthBlock');
     const banner = document.getElementById('teacherStatusBanner');
+    const bannerText = document.getElementById('teacherStatusText');
+    const profDisplay = document.getElementById('stageProfDisplay');
     const saisieContent = document.getElementById('saisieMainContent');
     const visuContent = document.getElementById('visualisationMainContent');
 
     if (!authBlock) return;
 
-    if (!stageProfTokenPwd) {
+    if (!stageProfTokenPwd || !currentTeacher) {
         authBlock.style.display = 'block';
         if (banner) banner.style.display = 'none';
         if (saisieContent) saisieContent.style.display = 'none';
         if (visuContent) visuContent.style.display = 'none';
     } else {
         authBlock.style.display = 'none';
+        const teacherName = currentTeacher.prenom ? `${currentTeacher.nom} ${currentTeacher.prenom}` : currentTeacher.nom;
+        if (bannerText) bannerText.innerHTML = `👨‍🏫 Enseignant identifié : <strong>${teacherName}</strong>`;
+        if (profDisplay) profDisplay.value = teacherName;
         if (banner) banner.style.display = 'flex';
         if (saisieContent) saisieContent.style.display = 'block';
         if (visuContent) visuContent.style.display = 'block';
@@ -321,71 +387,61 @@ function updateTeacherAuthUI() {
 
 async function handleTeacherLogin(e) {
     if (e) e.preventDefault();
+    const teacherSelect = document.getElementById('teacherSelect');
+    const teacherVal = teacherSelect ? teacherSelect.value : '';
     const pwd = document.getElementById('teacherPassword').value.trim();
     const errDiv = document.getElementById('teacherAuthError');
 
     errDiv.style.display = 'none';
 
-    // 1. Vérification via Google Sheets CSV Enseignants si configuré
-    if (CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV && CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV.trim() !== '') {
-        try {
-            const resp = await fetch(CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV);
-            if (resp.ok) {
-                const text = await resp.text();
-                const rows = typeof parseCSV === 'function' ? parseCSV(text) : [];
-                const matchedTeacher = rows.find(r => {
-                    const pass = (r.motdepasse || r.password || r.code || '').trim();
-                    return pass && pass.toUpperCase() === pwd.toUpperCase();
-                });
-
-                if (matchedTeacher || pwd === 'prof2024' || pwd === 'prof' || pwd === 'DB' || pwd === 'MS') {
-                    stageProfTokenPwd = pwd;
-                    currentTeacher = matchedTeacher || { nom: 'Enseignant', prenom: '' };
-                    updateTeacherAuthUI();
-                    return;
-                } else {
-                    errDiv.textContent = '❌ Mot de passe enseignant incorrect.';
-                    errDiv.style.display = 'block';
-                    return;
-                }
-            }
-        } catch (err) {
-            console.warn("⚠️ Échec de la vérification dans l'annuaire enseignant CSV :", err);
-        }
+    if (!teacherVal) {
+        errDiv.textContent = '⚠️ Veuillez sélectionner votre nom d\'enseignant.';
+        errDiv.style.display = 'block';
+        return;
     }
 
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/prof-stage/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ motDePasseProfStage: pwd })
-        });
+    const [nom, prenom] = teacherVal.split('___');
 
-        if (response.ok) {
+    if (enseignantsList.length === 0) await loadEnseignants();
+
+    const matchedTeacher = enseignantsList.find(t =>
+        t.nom.toUpperCase() === nom.toUpperCase() &&
+        (prenom ? (t.prenom || '').toUpperCase() === prenom.toUpperCase() : true)
+    );
+
+    if (matchedTeacher) {
+        const expectedPwd = (matchedTeacher.motDePasse || '').trim();
+        if (expectedPwd && expectedPwd.toUpperCase() === pwd.toUpperCase()) {
             stageProfTokenPwd = pwd;
+            currentTeacher = matchedTeacher;
             updateTeacherAuthUI();
-        } else {
-            if (pwd === 'prof2024' || pwd === 'prof' || pwd === 'DB' || pwd === 'MS') {
-                stageProfTokenPwd = pwd;
-                updateTeacherAuthUI();
-            } else {
-                errDiv.textContent = '❌ Mot de passe enseignant incorrect.';
-                errDiv.style.display = 'block';
-            }
-        }
-    } catch (err) {
-        if (pwd === 'prof2024' || pwd === 'prof' || pwd === 'DB' || pwd === 'MS') {
+            return;
+        } else if (!expectedPwd && (pwd === 'prof2024' || pwd === 'prof' || pwd === 'DB' || pwd === 'MS')) {
             stageProfTokenPwd = pwd;
+            currentTeacher = matchedTeacher;
             updateTeacherAuthUI();
+            return;
         } else {
-            errDiv.textContent = '❌ Mot de passe enseignant incorrect.';
+            errDiv.textContent = '❌ Mot de passe incorrect pour cet enseignant.';
             errDiv.style.display = 'block';
+            return;
         }
     }
+
+    if (pwd === 'prof2024' || pwd === 'prof' || pwd === 'DB' || pwd === 'MS') {
+        stageProfTokenPwd = pwd;
+        currentTeacher = { nom, prenom };
+        updateTeacherAuthUI();
+        return;
+    }
+
+    errDiv.textContent = '❌ Enseignant non trouvé ou mot de passe incorrect.';
+    errDiv.style.display = 'block';
 }
 
 function logoutTeacher() {
     stageProfTokenPwd = '';
+    currentTeacher = null;
     updateTeacherAuthUI();
 }
 
@@ -480,6 +536,8 @@ async function handleStageNoteSubmit(e) {
     const noteVal = parseFloat(noteInput.value);
     submitBtn.disabled = true;
 
+    const teacherName = currentTeacher ? (currentTeacher.prenom ? `${currentTeacher.nom} ${currentTeacher.prenom}` : currentTeacher.nom) : 'Enseignant';
+
     const payload = {
         type: 'NOTE_STAGE',
         nom: eleveObj.nom,
@@ -487,7 +545,7 @@ async function handleStageNoteSubmit(e) {
         classe: classeSelect.value,
         note: noteVal,
         commentaire: commentInput ? commentInput.value : '',
-        prof: currentTeacher ? currentTeacher.nom : 'Enseignant',
+        prof: teacherName,
         dateStr: new Date().toLocaleDateString('fr-FR')
     };
 
@@ -511,7 +569,7 @@ async function handleStageNoteSubmit(e) {
                 classe: classeSelect.value,
                 note: noteVal,
                 commentaire: commentInput ? commentInput.value : '',
-                prof: 'Enseignant',
+                prof: teacherName,
                 motDePasseProfStage: stageProfTokenPwd
             })
         });
