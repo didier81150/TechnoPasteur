@@ -101,7 +101,7 @@ async function loadAnnuaire() {
                         niveau: level,
                         classe: rawClass,
                         nom: (r.nom || r.lastname || '').toUpperCase(),
-                        prenom: r.prenom || r.prenom || r.firstname || '',
+                        prenom: r.prenom || r.firstname || '',
                         motDePasse: r.codesecret || r.motdepasse || r.password || r.code || '',
                         ppa: (r.ppa || '').toLowerCase() === 'true' || (r.ppa || '').toLowerCase() === 'oui',
                         pap: (r.pap || '').toLowerCase() === 'true' || (r.pap || '').toLowerCase() === 'oui'

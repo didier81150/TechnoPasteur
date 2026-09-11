@@ -667,11 +667,16 @@ function initAnalyseLogic() {
             });
 
             const payload = {
+                type: 'RESULTAT_ACTIVITE',
                 timestamp: new Date().toISOString(),
+                studentId: currentStudent ? currentStudent.id : undefined,
                 nom: currentStudent ? currentStudent.nom : '',
                 prenom: currentStudent ? currentStudent.prenom : '',
                 classe: currentStudent ? currentStudent.classe : '',
                 studentName: studentName,
+                niveau: '4eme',
+                activityCode: '4_analyse_fonctionnelle',
+                activityType: 'analyse',
                 score: total,
                 maxScore: 8,
                 percentage: Math.round((total / 8) * 100),
@@ -679,23 +684,9 @@ function initAnalyseLogic() {
                 quiz2: quizScores[2],
                 grade: getGrade(total, 8).text,
                 pap: isPapStudent ? 'OUI' : 'NON',
-                details: details
-            };
-
-            const payload = {
-                type: 'RESULTAT_ACTIVITE',
-                studentId: currentStudent ? currentStudent.id : undefined,
-                nom: currentStudent ? currentStudent.nom : '',
-                prenom: currentStudent ? currentStudent.prenom : '',
-                classe: currentStudent ? currentStudent.classe : '',
-                niveau: '4eme',
-                activityCode: '4_analyse_fonctionnelle',
-                activityType: 'analyse',
-                score: total,
-                maxScore: 8,
-                percentage: Math.round((total / 8) * 100),
-                reponses: details,
                 ppa: isPapStudent,
+                reponses: details,
+                details: details,
                 dateStr: new Date().toLocaleDateString('fr-FR')
             };
 
