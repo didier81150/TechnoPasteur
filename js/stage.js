@@ -95,30 +95,9 @@ async function loadStageEleves() {
                     fullText: `${st.nom} ${st.prenom}`
                 });
             });
-            console.log(`✅ ${Object.keys(stageElevesMap).length} classes de 3ème chargées depuis l'annuaire.`);
+            console.log(`✅ ${Object.keys(stageElevesMap).length} classes de 3ème chargées depuis l'annuaire Google Sheets.`);
             return;
         }
-    }
-
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/students?niveau=3eme`);
-        if (response.ok) {
-            const students = await response.json();
-            stageElevesMap = {};
-            students.forEach(st => {
-                const c = st.classe || '302';
-                if (!stageElevesMap[c]) stageElevesMap[c] = [];
-                stageElevesMap[c].push({
-                    nom: st.nom,
-                    prenom: st.prenom,
-                    fullText: `${st.nom} ${st.prenom}`
-                });
-            });
-            console.log(`✅ ${Object.keys(stageElevesMap).length} classes chargées depuis le backend pour le stage.`);
-            return;
-        }
-    } catch (e) {
-        console.warn("Utilisation de la liste d'élèves de secours pour le stage");
     }
 
     stageElevesMap = {};
@@ -553,38 +532,14 @@ async function handleStageNoteSubmit(e) {
     };
 
     let gasSuccess = false;
-    let backendSuccess = false;
 
     if (typeof sendDataToGoogleAppsScript === 'function') {
         gasSuccess = await sendDataToGoogleAppsScript(payload);
     }
 
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/stage-notes`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Stage-Prof-Password': stageProfTokenPwd
-            },
-            body: JSON.stringify({
-                nom: eleveObj.nom,
-                prenom: eleveObj.prenom,
-                classe: classeSelect.value,
-                note: noteVal,
-                commentaire: commentInput ? commentInput.value : '',
-                prof: teacherName,
-                motDePasseProfStage: stageProfTokenPwd
-            })
-        });
+    submitBtn.disabled = false;
 
-        if (response.ok) backendSuccess = true;
-    } catch (err) {
-        console.warn("⚠️ Envoi backend stage note indisponible :", err);
-    } finally {
-        submitBtn.disabled = false;
-    }
-
-    if (gasSuccess || backendSuccess) {
+    if (gasSuccess) {
         msgDiv.style.display = 'block';
         msgDiv.style.background = '#ecfdf5';
         msgDiv.style.color = '#065f46';
@@ -594,7 +549,7 @@ async function handleStageNoteSubmit(e) {
         msgDiv.style.display = 'block';
         msgDiv.style.background = '#fef3c7';
         msgDiv.style.color = '#92400e';
-        msgDiv.innerHTML = `⚠️ Impossible d'enregistrer en ligne. Vérifiez votre réseau ou la configuration.`;
+        msgDiv.innerHTML = `⚠️ Impossible d'enregistrer la note sur Google Sheets. Vérifiez la configuration du Web App.`;
     }
 }
 
@@ -604,7 +559,6 @@ async function loadStageNotes() {
 
     container.innerHTML = '⏳ Chargement des notes...';
 
-    // 1. Essai depuis le CSV Google Sheets si configuré
     if (CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV && CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV.trim() !== '') {
         try {
             const resp = await fetch(CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV);
@@ -627,6 +581,7 @@ async function loadStageNotes() {
                         <td>${r.classe || r.class || '—'}</td>
                         <td><strong style="color:#2563eb;">${r.note || r.notetotale || '—'} / 20</strong></td>
                         <td>${r.commentaire || r.appreciation || '—'}</td>
+                        <td>${r.prof || r.enseignant || '—'}</td>
                         <td>${r.date || r.datestr || '—'}</td>
                     </tr>
                 `).join('');
@@ -634,7 +589,7 @@ async function loadStageNotes() {
                 container.innerHTML = `
                     <table class="results-table" style="width:100%;">
                         <thead>
-                            <tr><th>Élève</th><th>Classe</th><th>Note</th><th>Commentaire</th><th>Date</th></tr>
+                            <tr><th>Élève</th><th>Classe</th><th>Note</th><th>Commentaire</th><th>Enseignant</th><th>Date</th></tr>
                         </thead>
                         <tbody>${tableRows}</tbody>
                     </table>
@@ -642,42 +597,9 @@ async function loadStageNotes() {
                 return;
             }
         } catch (e) {
-            console.warn("⚠️ Échec du chargement du CSV notes de stage, tentative backend...", e);
+            console.warn("⚠️ Échec du chargement du CSV notes de stage :", e);
         }
     }
 
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/stage-notes?classe=${classeVal}`, {
-            headers: { 'X-Stage-Prof-Password': stageProfTokenPwd }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            if (data.length === 0) {
-                container.innerHTML = '<p>Aucune note enregistrée.</p>';
-                return;
-            }
-
-            let rows = data.map(r => `
-                <tr>
-                    <td><strong>${r.nom}</strong> ${r.prenom}</td>
-                    <td>${r.classe}</td>
-                    <td><strong style="color:#2563eb;">${r.note} / 20</strong></td>
-                    <td>${r.commentaire || '—'}</td>
-                    <td>${new Date(r.updatedAt || r.createdAt).toLocaleDateString('fr-FR')}</td>
-                </tr>
-            `).join('');
-
-            container.innerHTML = `
-                <table class="results-table" style="width:100%;">
-                    <thead>
-                        <tr><th>Élève</th><th>Classe</th><th>Note</th><th>Commentaire</th><th>Date</th></tr>
-                    </thead>
-                    <tbody>${rows}</tbody>
-                </table>
-            `;
-        }
-    } catch (e) {
-        container.innerHTML = '<p style="color:var(--danger);">Erreur de chargement des notes.</p>';
-    }
+    container.innerHTML = '<p style="color:var(--danger); padding:1rem;">⚠️ Erreur ou feuille de notes Google Sheets non configurée.</p>';
 }
