@@ -447,7 +447,10 @@ async function finishEval3emeQuiz() {
         niveau2_total: stats.parNiveau[2].total,
         niveau3_correct: stats.parNiveau[3].correct,
         niveau3_total: stats.parNiveau[3].total,
-        timestamp: new Date().toISOString()
+        dateStr: new Date().toLocaleDateString('fr-FR'),
+        heureStr: new Date().toLocaleTimeString('fr-FR'),
+        timestamp: new Date().toISOString(),
+        targetSheet: "https://docs.google.com/spreadsheets/d/1FNWwGOkrjIP1V6qAobVF9KLfMNyepkEC3tqhlSst1sA/edit"
     };
 
     // Sauvegarde dans le localStorage du site

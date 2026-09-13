@@ -691,29 +691,16 @@ function initAnalyseLogic() {
             };
 
             let gasSuccess = false;
-            let backendSuccess = false;
-
             if (typeof sendDataToGoogleAppsScript === 'function') {
                 gasSuccess = await sendDataToGoogleAppsScript(payload);
             }
 
-            try {
-                const response = await fetch(`${CONFIG.API_BASE_URL}/results`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (response.ok) backendSuccess = true;
-            } catch (error) {
-                console.warn('Erreur envoi backend :', error);
-            }
-
-            if (gasSuccess || backendSuccess) {
-                feedback.textContent = '✅ Note enregistrée avec succès !';
+            if (gasSuccess) {
+                feedback.textContent = '✅ Note enregistrée avec succès sur Google Sheets !';
                 feedback.style.color = '#16a34a';
                 btn.textContent = '✅ Envoyé !';
             } else {
-                feedback.textContent = '⚠️ Résultat conservé localement.';
+                feedback.textContent = '⚠️ Envoi Google Sheets indisponible ou non configuré.';
                 feedback.style.color = '#d97706';
             }
         });

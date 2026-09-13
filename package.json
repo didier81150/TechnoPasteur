@@ -1,22 +1,12 @@
 {
-  "name": "technopasteur-backend",
+  "name": "technopasteur",
   "version": "1.0.0",
-  "description": "Backend Node.js / Express / MongoDB Atlas pour TechnoPasteur",
-  "main": "server/index.js",
+  "description": "Application pédagogique de Technologie au collège Pasteur (Google Sheets + Web App)",
+  "main": "index.html",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "node --watch server/index.js",
-    "migrate": "node scripts/migrate.js"
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "bcryptjs": "^2.4.3",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.3.1"
-  }
+  "license": "ISC"
 }

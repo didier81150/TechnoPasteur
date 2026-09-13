@@ -494,25 +494,12 @@ async function sendResultToGoogleSheets(resultData) {
     };
 
     let gasSuccess = false;
-    let backendSuccess = false;
-
     if (typeof sendDataToGoogleAppsScript === 'function') {
         gasSuccess = await sendDataToGoogleAppsScript(payload);
     }
 
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/results`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        if (response.ok) backendSuccess = true;
-    } catch (error) {
-        console.warn("⚠️ Envoi backend non disponible :", error);
-    }
-
-    if (gasSuccess || backendSuccess) {
-        saveStatus.textContent = '✅ Résultat enregistré en ligne et localement.';
+    if (gasSuccess) {
+        saveStatus.textContent = '✅ Résultat enregistré sur Google Sheets et localement.';
         saveStatus.style.color = '#28A745';
     } else {
         saveStatus.textContent = '⚠️ Résultat conservé localement sur ce navigateur.';
