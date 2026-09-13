@@ -12,8 +12,9 @@ const CONFIG = {
     // 2. URL du CSV Google Sheets pour l'Annuaire Enseignants
     GOOGLE_SHEET_ENSEIGNANTS_CSV: "https://docs.google.com/spreadsheets/d/1cABpA_7xuv1AmTgubnh21MnaV7XuKhM_0OVwSBWqcqI/export?format=csv",
 
-    // 3. URL du Web App Google Apps Script pour l'enregistrement automatique des notes/activités/stage
+    // 3. URL du Web App Google Apps Script pour l'enregistrement automatique des notes/activités/stage/évaluations
     GOOGLE_APPS_SCRIPT_URL: "",
+    EVAL_3EME_WEB_APP_URL: "",
 
     // 4. URL du CSV Google Sheets pour la consultation des Notes de Stage
     GOOGLE_SHEET_STAGE_NOTES_CSV: "https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c/export?format=csv",
@@ -30,13 +31,15 @@ const CONFIG = {
 };
 
 // Helper global d'envoi de données vers Google Apps Script Web App
-async function sendDataToGoogleAppsScript(payload) {
-    if (!CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL.trim() === '') {
+async function sendDataToGoogleAppsScript(payload, customUrl) {
+    const targetUrl = customUrl || CONFIG.GOOGLE_APPS_SCRIPT_URL || CONFIG.EVAL_3EME_WEB_APP_URL;
+    if (!targetUrl || targetUrl.trim() === '') {
+        console.warn("⚠️ Aucune URL Web App Google Apps Script configurée dans CONFIG.GOOGLE_APPS_SCRIPT_URL.");
         return false;
     }
 
     try {
-        await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+        await fetch(targetUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'text/plain;charset=utf-8' },
             body: JSON.stringify(payload)
@@ -45,7 +48,7 @@ async function sendDataToGoogleAppsScript(payload) {
     } catch (err) {
         console.warn("⚠️ Premier essai POST Google Apps Script échoué, tentative no-cors...", err);
         try {
-            await fetch(CONFIG.GOOGLE_APPS_SCRIPT_URL, {
+            await fetch(targetUrl, {
                 method: 'POST',
                 mode: 'no-cors',
                 headers: { 'Content-Type': 'text/plain;charset=utf-8' },
