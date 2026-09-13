@@ -73,6 +73,61 @@ function doPost(e) {
 
 ---
 
+## Étape 3.2 : Script Google Apps Script Spécifique pour l'Évaluation des Compétences 3ème
+
+Pour le Google Sheet dédié à l'**Évaluation des Compétences 3ème** ([Lien du Sheet](https://docs.google.com/spreadsheets/d/1FNWwGOkrjIP1V6qAobVF9KLfMNyepkEC3tqhlSst1sA/edit?usp=drivesdk)) :
+
+1. Ouvrez votre tableau Google Sheet d'évaluation.
+2. Allez dans **Extensions** ➡️ **Apps Script**.
+3. Remplacez le code existant par :
+
+```javascript
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+
+    // Si la ligne d'en-tête est absente, on peut l'ajouter
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "Date", "Heure", "Classe", "Nom", "Prénom",
+        "Score / 90", "Note / 20", "% Réussite Global",
+        "% Niveau 1", "% Niveau 2", "% Niveau 3",
+        "Détails Niveau 1", "Détails Niveau 2", "Détails Niveau 3"
+      ]);
+    }
+
+    sheet.appendRow([
+      data.dateStr || new Date().toLocaleDateString('fr-FR'),
+      data.heureStr || new Date().toLocaleTimeString('fr-FR'),
+      data.classe || '',
+      data.nom || '',
+      data.prenom || '',
+      data.score90 !== undefined ? data.score90 : (data.score || ''),
+      data.score20 || '',
+      (data.pourcentage !== undefined ? data.pourcentage + '%' : ''),
+      (data.niveau1_pourcentage !== undefined ? data.niveau1_pourcentage + '%' : ''),
+      (data.niveau2_pourcentage !== undefined ? data.niveau2_pourcentage + '%' : ''),
+      (data.niveau3_pourcentage !== undefined ? data.niveau3_pourcentage + '%' : ''),
+      (data.niveau1_correct !== undefined ? data.niveau1_correct + '/' + data.niveau1_total : ''),
+      (data.niveau2_correct !== undefined ? data.niveau2_correct + '/' + data.niveau2_total : ''),
+      (data.niveau3_correct !== undefined ? data.niveau3_correct + '/' + data.niveau3_total : '')
+    ]);
+
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+4. Cliquez sur **Déployer** ➡️ **Nouveau déploiement** ➡️ **Application Web** (accès : *Tout le monde*).
+5. Copiez l'URL de l'application Web et renseignez-la dans `CONFIG.GOOGLE_APPS_SCRIPT_URL` (ou `CONFIG.EVAL_3EME_WEB_APP_URL`) du fichier `js/config.js`.
+
+---
+
 ## Étape 4 : Renseigner les liens dans `js/config.js`
 
 Collez simplement vos liens Google Sheets dans le fichier `js/config.js` de votre site :

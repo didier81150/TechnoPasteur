@@ -19,10 +19,6 @@ const CONFIG = {
     // 4. URL du CSV Google Sheets pour la consultation des Notes de Stage
     GOOGLE_SHEET_STAGE_NOTES_CSV: "https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c/export?format=csv",
 
-    // URL du serveur Backend (en fallback si nécessaire)
-    API_BASE_URL: (typeof window !== 'undefined' && window.location && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'))
-        ? 'http://localhost:3000/api'
-        : 'https://technopasteur-backend.onrender.com/api',
 
     TEMPS_PAR_QUESTION: 60, // secondes par question
     PPA_BONUS_PERCENTAGE: 15,

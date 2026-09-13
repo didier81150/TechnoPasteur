@@ -120,20 +120,9 @@ async function loadAnnuaire() {
         }
     }
 
-    // 2. Fallback backend Express / MongoDB
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/students`);
-        if (response.ok) {
-            annuaireEleves = await response.json();
-            console.log(`✅ ${annuaireEleves.length} élèves chargés depuis le backend.`);
-        } else {
-            console.warn("⚠️ Backend non disponible, chargement de l'annuaire de démonstration.");
-            loadDemoAnnuaire();
-        }
-    } catch (err) {
-        console.warn("⚠️ Connexion backend indisponible, chargement du mode démo local :", err);
-        loadDemoAnnuaire();
-    }
+    // 2. Fallback annuaire de démonstration local
+    console.warn("⚠️ Google Sheets CSV non disponible, chargement de l'annuaire de démonstration local.");
+    loadDemoAnnuaire();
 
     if (btnLogin) {
         btnLogin.disabled = false;
@@ -245,24 +234,6 @@ async function handleLogin(event) {
                 return;
             } else {
                 showLoginError('❌ Mot de passe incorrect.');
-                return;
-            }
-        }
-
-        // Si non trouvé localement et qu'un backend est disponible
-        if (!CONFIG.GOOGLE_SHEET_ELEVES_CSV && CONFIG.API_BASE_URL) {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/login`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ niveau, classe, nom, prenom, codeSecret })
-            });
-            const data = await response.json();
-            if (response.ok) {
-                currentStudent = data;
-                showDashboard(data.niveau);
-                return;
-            } else {
-                showLoginError(`❌ ${data.error || 'Mot de passe incorrect.'}`);
                 return;
             }
         }

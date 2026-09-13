@@ -1,5 +1,5 @@
 // =====================================================
-// GESTION DE L'ESPACE PROFESSEUR, SUIVI GLOBAL & DÉVERROUILLAGE
+// GESTION DE L'ESPACE PROFESSEUR, SUIVI GLOBAL & DÉVERROUILLAGE (100% GOOGLE SHEETS & LOCAL)
 // =====================================================
 
 let currentProfPassword = '';
@@ -26,7 +26,7 @@ async function checkProfPassword() {
         return;
     }
 
-    // 1. Vérification via Google Sheets CSV Enseignants si configuré
+    // Vérification via Google Sheets CSV Enseignants si configuré
     if (CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV && CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV.trim() !== '') {
         try {
             const resp = await fetch(CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV);
@@ -38,7 +38,7 @@ async function checkProfPassword() {
                     return pass && pass.toUpperCase() === pwd.toUpperCase();
                 });
 
-                if (matchedTeacher || pwd === 'prof2024' || pwd === 'prof') {
+                if (matchedTeacher || pwd.toLowerCase() === 'prof2024' || pwd.toLowerCase() === 'prof') {
                     currentProfPassword = pwd;
                     showProfDashboardView();
                     return;
@@ -53,34 +53,12 @@ async function checkProfPassword() {
         }
     }
 
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/prof/login`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ motDePasseProf: pwd })
-        });
-
-        if (response.ok) {
-            currentProfPassword = pwd;
-            showProfDashboardView();
-        } else {
-            // Mode fallback si hors ligne
-            if (pwd === 'prof2024' || pwd === 'prof') {
-                currentProfPassword = pwd;
-                showProfDashboardView();
-            } else {
-                err.textContent = '❌ Mot de passe enseignant incorrect.';
-                err.classList.add('active');
-            }
-        }
-    } catch (e) {
-        if (pwd === 'prof2024' || pwd === 'prof') {
-            currentProfPassword = pwd;
-            showProfDashboardView();
-        } else {
-            err.textContent = '❌ Mot de passe enseignant incorrect.';
-            err.classList.add('active');
-        }
+    if (pwd.toLowerCase() === 'prof2024' || pwd.toLowerCase() === 'prof') {
+        currentProfPassword = pwd;
+        showProfDashboardView();
+    } else {
+        err.textContent = '❌ Mot de passe enseignant incorrect.';
+        err.classList.add('active');
     }
 }
 
@@ -123,26 +101,25 @@ function switchProfTab(tabName) {
 }
 
 // ----------------------------------------------------
-// 1. DÉVERROUILLAGE SYNCHRONISÉ PAR LE BACKEND
+// 1. DÉVERROUILLAGE LOCAL DES ACTIVITÉS
 // ----------------------------------------------------
-async function renderUnlockManagement() {
+function getLocalUnlocks() {
+    try {
+        return JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY_UNLOCKS)) || {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function renderUnlockManagement() {
     const container = document.getElementById('profUnlockContent');
     if (!container) return;
 
     const niveau = document.getElementById('profSuiviNiveau') ? document.getElementById('profSuiviNiveau').value : '4eme';
     const classe = document.getElementById('profSuiviClasse') ? document.getElementById('profSuiviClasse').value : 'ALL';
 
-    container.innerHTML = '<p>⏳ Chargement des états de verrouillage...</p>';
-
-    let activities = ACTIVITIES_DATABASE;
-    try {
-        const resp = await fetch(`${CONFIG.API_BASE_URL}/activities?niveau=${niveau}&classe=${classe}`);
-        if (resp.ok) {
-            activities = await resp.json();
-        }
-    } catch (e) {
-        console.warn("Utilisation de la base locale pour les activités.");
-    }
+    const localUnlocks = getLocalUnlocks();
+    const activities = ACTIVITIES_DATABASE.filter(a => a.niveau === niveau);
 
     const prefix = niveau === '5eme' ? '50' : (niveau === '4eme' ? '40' : '30');
     let classOptionsHTML = `<option value="ALL">Toutes les classes (${niveau})</option>`;
@@ -158,12 +135,14 @@ async function renderUnlockManagement() {
                 ${classOptionsHTML}
             </select>
         </div>
-        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">Basculez les interrupteurs pour déverrouiller ou verrouiller les activités pour la classe sélectionnée :</p>
+        <p style="font-size:0.9rem; color:var(--text-muted); margin-bottom:12px;">Basculez les interrupteurs pour déverrouiller ou verrouiller les activités :</p>
         <div class="unlock-toggle-list">
     `;
 
     activities.forEach(act => {
-        const isUnlocked = act.unlocked !== undefined ? act.unlocked : act.defaultUnlocked;
+        const actCode = act.code || act.id;
+        const key = `${actCode}_${classe}`;
+        const isUnlocked = localUnlocks[key] !== undefined ? localUnlocks[key] : (localUnlocks[actCode] !== undefined ? localUnlocks[actCode] : act.defaultUnlocked);
         const levelLabel = act.niveau === '5eme' ? '5ème' : (act.niveau === '4eme' ? '4ème' : '3ème');
         html += `
             <div class="unlock-item">
@@ -172,7 +151,7 @@ async function renderUnlockManagement() {
                     ${act.titre}
                 </label>
                 <label class="switch">
-                    <input type="checkbox" ${isUnlocked ? 'checked' : ''} onchange="toggleActivityUnlockBackend('${act.code || act.id}', '${act.niveau}', this.checked)">
+                    <input type="checkbox" ${isUnlocked ? 'checked' : ''} onchange="toggleActivityUnlockLocal('${actCode}', this.checked)">
                     <span class="slider"></span>
                 </label>
             </div>
@@ -183,29 +162,15 @@ async function renderUnlockManagement() {
     container.innerHTML = html;
 }
 
-async function toggleActivityUnlockBackend(activityCode, niveau, isChecked) {
+function toggleActivityUnlockLocal(activityCode, isChecked) {
     const targetClasse = document.getElementById('unlockClasseSelect') ? document.getElementById('unlockClasseSelect').value : 'ALL';
+    const localUnlocks = getLocalUnlocks();
+    const key = `${activityCode}_${targetClasse}`;
+    localUnlocks[key] = isChecked;
+    localUnlocks[activityCode] = isChecked;
+    localStorage.setItem(CONFIG.STORAGE_KEY_UNLOCKS, JSON.stringify(localUnlocks));
 
-    try {
-        await fetch(`${CONFIG.API_BASE_URL}/activities/unlock`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Prof-Password': currentProfPassword
-            },
-            body: JSON.stringify({
-                activityCode,
-                niveau,
-                classe: targetClasse,
-                unlocked: isChecked,
-                motDePasseProf: currentProfPassword
-            })
-        });
-    } catch (e) {
-        console.warn("Erreur synchronisation verrouillage backend :", e);
-    }
-
-    if (currentStudent) {
+    if (typeof refreshCurrentDashboard === 'function') {
         refreshCurrentDashboard();
     }
 }
@@ -213,7 +178,7 @@ async function toggleActivityUnlockBackend(activityCode, niveau, isChecked) {
 // ----------------------------------------------------
 // 2. TABLEAU DE SUIVI GLOBAL & PAR ÉLÈVE
 // ----------------------------------------------------
-async function loadProfSuiviData() {
+function loadProfSuiviData() {
     const container = document.getElementById('profSuiviContent');
     if (!container) return;
 
@@ -225,96 +190,51 @@ async function loadProfSuiviData() {
         return;
     }
 
-    // Si le mode Google Sheets est actif ou que l'annuaire est chargé localement
-    if (CONFIG.USE_GOOGLE_SHEETS || (annuaireEleves && annuaireEleves.length > 0)) {
-        const filteredEleves = annuaireEleves.filter(e => e.niveau === niveau && e.classe === classe);
-        const activitiesForLevel = ACTIVITIES_DATABASE.filter(a => a.niveau === niveau);
+    const filteredEleves = annuaireEleves ? annuaireEleves.filter(e => e.niveau === niveau && e.classe === classe) : [];
+    const activitiesForLevel = ACTIVITIES_DATABASE.filter(a => a.niveau === niveau);
 
-        const summary = filteredEleves.map(st => {
-            const actScores = {};
-            let nbDone = 0;
+    const summary = filteredEleves.map(st => {
+        const actScores = {};
+        let nbDone = 0;
 
-            activitiesForLevel.forEach(act => {
-                // Recherche dans le stockage local pour l'activité spécifique
-                const actCode = act.code || act.id;
-                const results = getStoredResults().filter(r =>
-                    r.nom && st.nom && r.nom.toUpperCase() === st.nom.toUpperCase() &&
-                    r.prenom && st.prenom && r.prenom.toUpperCase() === st.prenom.toUpperCase() &&
-                    (r.activityCode === actCode || r.activityId === actCode || r.quizId === act.quizId || r.quizType === act.quizId)
-                );
-                if (results.length > 0) {
-                    const lastRes = results[results.length - 1];
-                    actScores[actCode] = {
-                        score: lastRes.score,
-                        maxScore: lastRes.maxScore || 10,
-                        percentage: lastRes.percentage !== undefined ? lastRes.percentage : (lastRes.pourcentage !== undefined ? lastRes.pourcentage : Math.round((lastRes.score / (lastRes.maxScore || 10)) * 100)),
-                        date: lastRes.dateStr || lastRes.date
-                    };
-                    nbDone++;
-                }
-            });
-
-            return {
-                id: st.id,
-                nom: st.nom,
-                prenom: st.prenom,
-                classe: st.classe,
-                ppa: st.ppa,
-                activityScores: actScores,
-                stageNote: null,
-                nbActivitiesDone: nbDone
-            };
+        activitiesForLevel.forEach(act => {
+            const actCode = act.code || act.id;
+            const results = getStoredResults().filter(r =>
+                r.nom && st.nom && r.nom.toUpperCase() === st.nom.toUpperCase() &&
+                r.prenom && st.prenom && r.prenom.toUpperCase() === st.prenom.toUpperCase() &&
+                (r.activityCode === actCode || r.activityId === actCode || r.quizId === act.quizId || r.quizType === act.quizId)
+            );
+            if (results.length > 0) {
+                const lastRes = results[results.length - 1];
+                actScores[actCode] = {
+                    score: lastRes.score,
+                    maxScore: lastRes.maxScore || 10,
+                    percentage: lastRes.percentage !== undefined ? lastRes.percentage : (lastRes.pourcentage !== undefined ? lastRes.pourcentage : Math.round((lastRes.score / (lastRes.maxScore || 10)) * 100)),
+                    date: lastRes.dateStr || lastRes.date
+                };
+                nbDone++;
+            }
         });
 
-        renderProfSuiviTable({
-            niveau,
-            classe,
-            activities: activitiesForLevel.map(a => ({ code: a.code || a.id, titre: a.titre })),
-            summary
-        });
-        return;
-    }
+        return {
+            id: st.id,
+            nom: st.nom,
+            prenom: st.prenom,
+            classe: st.classe,
+            ppa: st.ppa,
+            codeSecret: st.codeSecret || st.code_secret || '—',
+            activityScores: actScores,
+            stageNote: null,
+            nbActivitiesDone: nbDone
+        };
+    });
 
-    container.innerHTML = `
-        <div style="margin-top:15px; padding:15px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; color:#1e40af;">
-            <p style="margin-bottom:6px; font-weight:600;">⏳ Connexion au serveur backend en cours...</p>
-            <p style="font-size:0.88rem; opacity:0.9;">Si le serveur backend Render était en veille (inactif depuis 15 minutes), son démarrage automatique peut prendre de 30 à 50 secondes. Veuillez patienter...</p>
-        </div>
-    `;
-
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/prof/summary?niveau=${niveau}&classe=${classe}`, {
-            headers: { 'X-Prof-Password': currentProfPassword }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            renderProfSuiviTable(data);
-        } else {
-            renderProfSuiviError(container, "❌ Erreur lors du chargement des données de suivi.");
-        }
-    } catch (e) {
-        renderProfSuiviError(container, "❌ Connexion au serveur backend indisponible.");
-    }
-}
-
-function renderProfSuiviError(container, errorText) {
-    container.innerHTML = `
-        <div style="margin-top:15px; padding:15px; background:#fef2f2; border:1px solid #fecaca; border-radius:8px; color:#991b1b;">
-            <p style="font-weight:700; margin-bottom:8px;">${errorText}</p>
-            <p style="font-size:0.88rem; margin-bottom:12px; color:#7f1d1d;">
-                Le serveur backend distant (Render) n'a pas répondu à temps ou est hors ligne.
-            </p>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button onclick="loadProfSuiviData()" class="btn-primary" style="background:#dc2626; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;">
-                    🔄 Réessayer la connexion
-                </button>
-                <button onclick="switchProfTab('local')" class="btn-secondary" style="background:#4b5563; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer;">
-                    💾 Voir les résultats locaux (navigateur)
-                </button>
-            </div>
-        </div>
-    `;
+    renderProfSuiviTable({
+        niveau,
+        classe,
+        activities: activitiesForLevel.map(a => ({ code: a.code || a.id, titre: a.titre })),
+        summary
+    });
 }
 
 let lastSuiviData = null;
@@ -325,7 +245,7 @@ function renderProfSuiviTable(data) {
     if (!container) return;
 
     if (!data.summary || data.summary.length === 0) {
-        container.innerHTML = '<p style="margin-top:15px; color:var(--text-muted);">Aucun élève trouvé pour cette classe.</p>';
+        container.innerHTML = '<p style="margin-top:15px; color:var(--text-muted);">Aucun élève trouvé dans l\'annuaire pour cette classe.</p>';
         return;
     }
 
@@ -351,9 +271,7 @@ function renderProfSuiviTable(data) {
         return `
             <tr>
                 <td><strong>${st.nom}</strong> ${st.prenom} ${st.ppa ? '🎓' : ''}</td>
-                <td>
-                    <button class="btn-secondary" style="padding:4px 8px; font-size:0.75rem;" onclick="resetStudentPasswordPrompt('${st.id}', '${st.nom}', '${st.prenom}')">🔑 Réinitialiser</button>
-                </td>
+                <td><code>${st.codeSecret}</code></td>
                 ${actCells}
                 ${stageCell}
                 <td><strong>${st.nbActivitiesDone} / ${data.activities.length}</strong></td>
@@ -375,7 +293,7 @@ function renderProfSuiviTable(data) {
 }
 
 // ----------------------------------------------------
-// 3. EXPORT PRONOTE CSV ET CSV SUIVI GENERAL
+// 3. EXPORT CSV
 // ----------------------------------------------------
 function exportSuiviPronoteCSV() {
     if (!lastSuiviData || !lastSuiviData.summary || lastSuiviData.summary.length === 0) {
@@ -392,9 +310,6 @@ function exportSuiviPronoteCSV() {
                 csv += `${st.nom};${st.prenom};${st.classe};${act.titre};${res.score};${res.maxScore};1;${res.date || ''}\n`;
             }
         });
-        if (st.stageNote !== null) {
-            csv += `${st.nom};${st.prenom};${st.classe};Rapport de Stage;${st.stageNote};20;2;${new Date().toLocaleDateString('fr-FR')}\n`;
-        }
     });
 
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
@@ -409,41 +324,9 @@ function exportSuiviPronoteCSV() {
 }
 
 // ----------------------------------------------------
-// 4. RÉINITIALISATION DU CODE SECRET ÉLÈVE
+// 4. MODALE HISTORIQUE DÉTAILLÉ ÉLÈVE
 // ----------------------------------------------------
-async function resetStudentPasswordPrompt(studentId, nom, prenom) {
-    const newCode = prompt(`Entrez le nouveau code secret pour l'élève ${nom} ${prenom} :`, "1234");
-    if (!newCode || !newCode.trim()) return;
-
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/prof/students/reset-password`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Prof-Password': currentProfPassword
-            },
-            body: JSON.stringify({
-                studentId,
-                newCodeSecret: newCode.trim(),
-                motDePasseProf: currentProfPassword
-            })
-        });
-
-        const res = await response.json();
-        if (response.ok) {
-            alert(`✅ ${res.message}`);
-        } else {
-            alert(`❌ Erreur : ${res.error}`);
-        }
-    } catch (e) {
-        alert("❌ Erreur de connexion au serveur.");
-    }
-}
-
-// ----------------------------------------------------
-// 5. MODALE HISTORIQUE DÉTAILLÉ ÉLÈVE
-// ----------------------------------------------------
-async function openStudentDetailModal(studentId, nom, prenom, classe) {
+function openStudentDetailModal(studentId, nom, prenom, classe) {
     let detailModal = document.getElementById('studentDetailModal');
     if (!detailModal) {
         detailModal = document.createElement('div');
@@ -454,51 +337,38 @@ async function openStudentDetailModal(studentId, nom, prenom, classe) {
         detailModal.classList.add('active');
     }
 
+    const results = getStoredResults().filter(r =>
+        r.nom && nom && r.nom.toUpperCase() === nom.toUpperCase() &&
+        r.prenom && prenom && r.prenom.toUpperCase() === prenom.toUpperCase()
+    );
+
+    let rowsHTML = results.length > 0 ? results.map((r, i) => `
+        <tr>
+            <td>#${results.length - i}</td>
+            <td><strong>${r.activityCode || r.quizType || 'QCM'}</strong></td>
+            <td><strong style="color:${(r.percentage || 0) >= 70 ? '#28a745' : '#dc3545'}">${r.score} / ${r.maxScore || 10}</strong></td>
+            <td>${r.dateStr || r.date || '—'}</td>
+        </tr>
+    `).join('') : '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">Aucune tentative enregistrée localement dans le navigateur.</td></tr>';
+
     detailModal.innerHTML = `
         <div class="modal-box" style="max-width: 650px;">
-            <h3>📊 Historique détaillé — ${nom} ${prenom} (${classe})</h3>
+            <h3>📊 Historique de ${nom} ${prenom} (${classe})</h3>
             <div id="studentDetailContent" style="margin-top:15px; max-height:400px; overflow-y:auto;">
-                <p>⏳ Chargement de l'historique...</p>
+                <table class="results-table" style="width:100%; font-size:0.85rem;">
+                    <thead>
+                        <tr><th>N°</th><th>Activité</th><th>Score</th><th>Date</th></tr>
+                    </thead>
+                    <tbody>${rowsHTML}</tbody>
+                </table>
             </div>
             <button class="btn-close-modal" onclick="document.getElementById('studentDetailModal').classList.remove('active')" style="margin-top:15px;">Fermer</button>
         </div>
     `;
-
-    try {
-        const response = await fetch(`${CONFIG.API_BASE_URL}/results/student?studentId=${studentId}&nom=${encodeURIComponent(nom)}&prenom=${encodeURIComponent(prenom)}&classe=${encodeURIComponent(classe)}`);
-        const results = await response.json();
-
-        const content = document.getElementById('studentDetailContent');
-        if (!Array.isArray(results) || results.length === 0) {
-            content.innerHTML = '<p style="color:var(--text-muted);">Aucune tentative enregistrée pour cet élève.</p>';
-            return;
-        }
-
-        let rows = results.map((r, i) => `
-            <tr>
-                <td>#${results.length - i}</td>
-                <td><strong>${r.activityCode}</strong></td>
-                <td><strong style="color:${r.percentage >= 70 ? '#28a745' : '#dc3545'}">${r.score} / ${r.maxScore}</strong> (${r.percentage}%)</td>
-                <td>${r.dureeSec ? Math.round(r.dureeSec/60) + ' min' : '—'}</td>
-                <td>${r.dateStr || new Date(r.createdAt).toLocaleDateString('fr-FR')} ${r.heureStr || ''}</td>
-            </tr>
-        `).join('');
-
-        content.innerHTML = `
-            <table class="results-table" style="width:100%; font-size:0.85rem;">
-                <thead>
-                    <tr><th>N°</th><th>Activité</th><th>Score</th><th>Durée</th><th>Date</th></tr>
-                </thead>
-                <tbody>${rows}</tbody>
-            </table>
-        `;
-    } catch (e) {
-        document.getElementById('studentDetailContent').innerHTML = '<p style="color:var(--danger);">Erreur de chargement de l\'historique.</p>';
-    }
 }
 
 // ----------------------------------------------------
-// 6. RÉSULTATS LOCAUX (STOCKAGE BROWSER)
+// 5. RÉSULTATS LOCAUX (STOCKAGE BROWSER)
 // ----------------------------------------------------
 function getStoredResults() {
     try {
