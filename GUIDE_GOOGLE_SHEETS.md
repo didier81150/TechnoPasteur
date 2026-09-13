@@ -87,31 +87,25 @@ function doPost(e) {
     var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
     var data = JSON.parse(e.postData.contents);
 
-    // Si la ligne d'en-tête est absente, on peut l'ajouter
+    // Vérification / Ajout des en-têtes si la feuille est vide
     if (sheet.getLastRow() === 0) {
       sheet.appendRow([
-        "Date", "Heure", "Classe", "Nom", "Prénom",
-        "Score / 90", "Note / 20", "% Réussite Global",
-        "% Niveau 1", "% Niveau 2", "% Niveau 3",
-        "Détails Niveau 1", "Détails Niveau 2", "Détails Niveau 3"
+        "Nom", "Prenom", "Classe", "Score 90", "Score 20",
+        "pourcentage", "Niveau 1", "Niveau 2", "Niveau 3", "Date"
       ]);
     }
 
     sheet.appendRow([
-      data.dateStr || new Date().toLocaleDateString('fr-FR'),
-      data.heureStr || new Date().toLocaleTimeString('fr-FR'),
-      data.classe || '',
       data.nom || '',
       data.prenom || '',
-      data.score90 !== undefined ? data.score90 : (data.score || ''),
+      data.classe || '',
+      data.score90 !== undefined ? data.score90 : '',
       data.score20 || '',
-      (data.pourcentage !== undefined ? data.pourcentage + '%' : ''),
-      (data.niveau1_pourcentage !== undefined ? data.niveau1_pourcentage + '%' : ''),
-      (data.niveau2_pourcentage !== undefined ? data.niveau2_pourcentage + '%' : ''),
-      (data.niveau3_pourcentage !== undefined ? data.niveau3_pourcentage + '%' : ''),
-      (data.niveau1_correct !== undefined ? data.niveau1_correct + '/' + data.niveau1_total : ''),
-      (data.niveau2_correct !== undefined ? data.niveau2_correct + '/' + data.niveau2_total : ''),
-      (data.niveau3_correct !== undefined ? data.niveau3_correct + '/' + data.niveau3_total : '')
+      data.pourcentage || '',
+      data.niveau1 || '',
+      data.niveau2 || '',
+      data.niveau3 || '',
+      data.date || new Date().toLocaleDateString('fr-FR')
     ]);
 
     return ContentService.createTextOutput(JSON.stringify({"status": "success"}))

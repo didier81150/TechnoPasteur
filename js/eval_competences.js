@@ -432,59 +432,34 @@ async function finishEval3emeQuiz() {
     const stats = eval3emeComputeStats(eval3emeState.answers);
 
     const payload = {
+        type: 'EVAL_3EME',
         nom: eval3emeState.selectedStudent ? eval3emeState.selectedStudent.nom : '',
         prenom: eval3emeState.selectedStudent ? eval3emeState.selectedStudent.prenom : '',
         classe: eval3emeState.selectedStudent ? eval3emeState.selectedStudent.classe : '',
         score90: stats.score,
         score20: stats.score20,
-        pourcentage: stats.pourcentage,
-        niveau1_pourcentage: stats.pourcentageNiveau[1],
-        niveau2_pourcentage: stats.pourcentageNiveau[2],
-        niveau3_pourcentage: stats.pourcentageNiveau[3],
-        niveau1_correct: stats.parNiveau[1].correct,
-        niveau1_total: stats.parNiveau[1].total,
-        niveau2_correct: stats.parNiveau[2].correct,
-        niveau2_total: stats.parNiveau[2].total,
-        niveau3_correct: stats.parNiveau[3].correct,
-        niveau3_total: stats.parNiveau[3].total,
-        dateStr: new Date().toLocaleDateString('fr-FR'),
-        heureStr: new Date().toLocaleTimeString('fr-FR'),
-        timestamp: new Date().toISOString(),
-        targetSheet: "https://docs.google.com/spreadsheets/d/1FNWwGOkrjIP1V6qAobVF9KLfMNyepkEC3tqhlSst1sA/edit"
+        pourcentage: `${stats.pourcentage}%`,
+        niveau1: `${stats.pourcentageNiveau[1]}%`,
+        niveau2: `${stats.pourcentageNiveau[2]}%`,
+        niveau3: `${stats.pourcentageNiveau[3]}%`,
+        date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR')
     };
-
-    // Sauvegarde dans le localStorage du site
-    saveResultLocally({
-        nom: payload.nom,
-        prenom: payload.prenom,
-        classe: payload.classe,
-        quizType: "eval_3eme",
-        score: stats.score,
-        total: stats.total,
-        pourcentage: stats.pourcentage,
-        date: new Date().toLocaleDateString('fr-FR'),
-        heure: new Date().toLocaleTimeString('fr-FR')
-    });
 
     const statusEl = document.getElementById('eval3-send-status');
     let gasSuccess = false;
 
     if (typeof sendDataToGoogleAppsScript === 'function') {
-        const gasPayload = {
-            type: 'EVAL_3EME',
-            ...payload
-        };
-        gasSuccess = await sendDataToGoogleAppsScript(gasPayload);
+        gasSuccess = await sendDataToGoogleAppsScript(payload, CONFIG.EVAL_3EME_WEB_APP_URL);
     }
 
     if (gasSuccess) {
         if (statusEl) {
-            statusEl.textContent = "✅ Vos résultats ont été enregistrés et transmis au professeur avec succès.";
+            statusEl.textContent = "✅ Vos résultats ont été transmis directement au Google Sheet du professeur.";
             statusEl.style.color = "var(--success)";
         }
     } else if (statusEl) {
-        statusEl.textContent = "ℹ️ Vos résultats ont été enregistrés localement sur cet ordinateur.";
-        statusEl.style.color = "var(--secondary)";
+        statusEl.textContent = "⚠️ Échec de la transmission automatique vers le Google Sheet. Vérifiez l'URL de l'Apps Script dans js/config.js.";
+        statusEl.style.color = "var(--danger)";
     }
 }
 
