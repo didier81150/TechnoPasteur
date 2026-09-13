@@ -57,6 +57,23 @@ function switchLevelTab(level) {
     refreshCurrentDashboard();
 }
 
+function isActivityUnlocked(activityId) {
+    const act = ACTIVITIES_DATABASE.find(a => a.id === activityId || a.code === activityId);
+    if (!act) return false;
+
+    // Récupérer le déverrouillage local (localStorage)
+    try {
+        const localUnlocks = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY_UNLOCKS)) || {};
+        if (localUnlocks[activityId] !== undefined) {
+            return localUnlocks[activityId];
+        }
+    } catch (e) {
+        console.warn("Erreur de lecture du stockage des déverrouillages :", e);
+    }
+
+    return act.defaultUnlocked !== undefined ? act.defaultUnlocked : true;
+}
+
 function refreshCurrentDashboard() {
     const grid = document.getElementById('activitiesGrid');
     if (!grid) return;
