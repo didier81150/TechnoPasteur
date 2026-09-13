@@ -463,26 +463,21 @@ async function finishEval3emeQuiz() {
         heure: new Date().toLocaleTimeString('fr-FR')
     });
 
-    const targetUrl = CONFIG.EVAL_3EME_WEB_APP_URL;
     const statusEl = document.getElementById('eval3-send-status');
+    let gasSuccess = false;
 
-    if (targetUrl) {
-        try {
-            await fetch(targetUrl, {
-                method: 'POST',
-                mode: 'no-cors',
-                body: new URLSearchParams(payload)
-            });
-            if (statusEl) {
-                statusEl.textContent = "✅ Vos résultats ont été enregistrés et transmis au professeur avec succès.";
-                statusEl.style.color = "var(--success)";
-            }
-        } catch (e) {
-            console.error("Erreur d'envoi de l'évaluation 3ème:", e);
-            if (statusEl) {
-                statusEl.textContent = "⚠️ Erreur réseau lors de l'envoi en ligne, mais le résultat a été conservé localement.";
-                statusEl.style.color = "var(--danger)";
-            }
+    if (typeof sendDataToGoogleAppsScript === 'function') {
+        const gasPayload = {
+            type: 'EVAL_3EME',
+            ...payload
+        };
+        gasSuccess = await sendDataToGoogleAppsScript(gasPayload);
+    }
+
+    if (gasSuccess) {
+        if (statusEl) {
+            statusEl.textContent = "✅ Vos résultats ont été enregistrés et transmis au professeur avec succès.";
+            statusEl.style.color = "var(--success)";
         }
     } else if (statusEl) {
         statusEl.textContent = "ℹ️ Vos résultats ont été enregistrés localement sur cet ordinateur.";
