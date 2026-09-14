@@ -448,8 +448,10 @@ async function finishEval3emeQuiz() {
     const statusEl = document.getElementById('eval3-send-status');
     let gasSuccess = false;
 
+    const targetUrl = CONFIG.EVAL_3EME_WEB_APP_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL;
+
     if (typeof sendDataToGoogleAppsScript === 'function') {
-        gasSuccess = await sendDataToGoogleAppsScript(payload, CONFIG.EVAL_3EME_WEB_APP_URL);
+        gasSuccess = await sendDataToGoogleAppsScript(payload, targetUrl);
     }
 
     if (gasSuccess) {
@@ -458,8 +460,8 @@ async function finishEval3emeQuiz() {
             statusEl.style.color = "var(--success)";
         }
     } else if (statusEl) {
-        statusEl.textContent = "⚠️ Échec de la transmission automatique vers le Google Sheet. Vérifiez l'URL de l'Apps Script dans js/config.js.";
-        statusEl.style.color = "var(--danger)";
+        statusEl.textContent = "⚠️ Échec de la transmission automatique vers le Google Sheet. Les résultats sont affichés ci-dessus. (Pensez à ajouter l'URL de l'Apps Script dans js/config.js pour activer la transmission auto).";
+        statusEl.style.color = "var(--warning-text, #856404)";
     }
 }
 
