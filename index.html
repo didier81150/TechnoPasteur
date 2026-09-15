@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechnoPasteur – Portail & Évaluations Technologie Collège</title>
+    <title>TechnoPasteur – Portail Pédagogique Technologie Collège</title>
     <!-- Styles unifiés du projet -->
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -11,24 +11,24 @@
             display: flex;
             gap: 10px;
             margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-glow, rgba(76,201,240,0.25));
+            border-bottom: 1px solid var(--border-glow);
             padding-bottom: 10px;
         }
         .prof-tab-btn {
             background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--border-glow, rgba(76,201,240,0.25));
+            border: 1px solid var(--border-glow);
             padding: 8px 16px;
             border-radius: 8px;
             font-weight: 700;
             cursor: pointer;
-            color: var(--text-muted, #a0aec0);
+            color: var(--text-sub);
             transition: all 0.25s ease;
         }
         .prof-tab-btn.active {
-            background: var(--primary-blue, #4361ee);
+            background: var(--accent-purple);
             color: white;
-            border-color: var(--primary-cyan, #4cc9f0);
-            box-shadow: 0 0 10px rgba(67, 97, 238, 0.4);
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(131, 56, 236, 0.4);
         }
     </style>
 </head>
@@ -38,81 +38,194 @@
 <header>
     <div class="header-container">
         <div class="logo" onclick="if(currentStudent) showDashboard();">
-            <span class="logo-icon">⚡</span>
-            <div>
+            <div class="logo-badge">⚡</div>
+            <div class="logo-text">
                 <h1>TechnoPasteur</h1>
-                <p>Portail Technologie Collège – 5ème | 4ème | 3ème</p>
+                <p>Portail Pédagogique Technologie Collège</p>
             </div>
         </div>
         <div class="header-actions">
             <button class="btn-prof" onclick="openStageModuleDirect()">📝 Note rapport de stage</button>
-            <button class="btn-prof" onclick="openProfModal()">🔐 Espace professeur</button>
+            <button class="btn-prof btn-prof-highlight" onclick="openProfModal()">🔐 Espace professeur</button>
         </div>
     </div>
 </header>
 
 <div class="main-container">
 
-    <!-- HERO BANNER -->
-    <div class="hero-banner">
-        <div class="hero-content">
-            <h2>🚀 Espace Apprentissage & Évaluations</h2>
-            <p>Accédez à vos QCM, vidéos, fiches synthèses et suivis de stage en temps réel.</p>
+    <!-- HERO SECTION (MAQUETTE N°2) -->
+    <section class="hero-section">
+        <div>
+            <div class="hero-tag">🛠️ "La technologie, c'est pas sorcier !"</div>
+            <h2 class="hero-title">Explorer • Comprendre • <span>Créer</span></h2>
+            <p class="hero-subtitle">Le Laboratoire Numérique du Collège Cycle 4</p>
+            <p class="hero-desc">Accède à tes cours interactifs, vidéos de synthèses, modélisations 3D, défis chronométrés et bilans de compétences.</p>
+            <button class="hero-cta" onclick="document.getElementById('loginScreen').scrollIntoView({behavior: 'smooth'})">🚀 Prêt(e) à explorer ?</button>
         </div>
-        <div class="hero-badges">
-            <span class="domain-pill">📐 Design & Modélisation</span>
-            <span class="domain-pill">🤖 Robotique & Algo</span>
-            <span class="domain-pill">🌱 Transition Écologique</span>
+
+        <div class="hero-illustration">
+            <div class="lab-badge b-robot">🤖 Mascotte Robot</div>
+            <div class="lab-badge b-swift">🚗 SwiftBot Code</div>
+            <div class="lab-center-icon">⚙️</div>
+            <div class="lab-badge b-3d">📐 Design & Plan 3D</div>
+            <div class="lab-badge b-eco">♻️ Éco-Conception</div>
         </div>
-    </div>
+    </section>
 
     <!-- ============ ÉCRAN 1 : CONNEXION ÉLÈVE ============ -->
     <div id="loginScreen">
-        <h2>🔐 Identification Élève</h2>
-        <p class="subtitle">Sélectionnez vos identifiants pour accéder à vos activités</p>
+        <div class="section-header">
+            <span class="section-header-icon">🔑</span>
+            <h3>Identification Élève</h3>
+        </div>
 
         <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label for="selectNiveau">🎓 Niveau :</label>
-                <select id="selectNiveau" required onchange="onNiveauChange()">
-                    <option value="">-- Choisir le niveau --</option>
-                    <option value="5eme">5ème</option>
-                    <option value="4eme">4ème</option>
-                    <option value="3eme">3ème</option>
-                </select>
-            </div>
+            <div class="login-grid">
+                <div class="form-group">
+                    <label for="selectNiveau">🎓 Niveau :</label>
+                    <select id="selectNiveau" class="form-control" required onchange="onNiveauChange()">
+                        <option value="">-- Niveau --</option>
+                        <option value="5eme">5ème</option>
+                        <option value="4eme">4ème</option>
+                        <option value="3eme">3ème</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="selectClasse">🏫 Classe :</label>
-                <select id="selectClasse" required disabled onchange="onClasseChange()">
-                    <option value="">-- Sélectionnez d'abord le niveau --</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="selectClasse">🏫 Classe :</label>
+                    <select id="selectClasse" class="form-control" required disabled onchange="onClasseChange()">
+                        <option value="">-- Classe --</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="selectEleve">👤 Élève (Nom Prénom) :</label>
-                <select id="selectEleve" required disabled>
-                    <option value="">-- Sélectionnez d'abord la classe --</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="selectEleve">👤 Élève :</label>
+                    <select id="selectEleve" class="form-control" required disabled>
+                        <option value="">-- Élève --</option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-                <label for="codeSecret">🔑 Mot de passe élève :</label>
-                <div style="position: relative; display: flex; align-items: center;">
-                    <input type="password" id="codeSecret" placeholder="Mot de passe transmis par le professeur" required style="width: 100%; padding-right: 40px;">
-                    <button type="button" onclick="togglePasswordVisibility('codeSecret', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--primary-cyan);" title="Afficher/Masquer le mot de passe">👁️</button>
+                <div class="form-group">
+                    <label for="codeSecret">🔒 Mot de passe :</label>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input type="password" id="codeSecret" class="form-control" placeholder="Code secret" required style="width: 100%; padding-right: 36px;">
+                        <button type="button" onclick="togglePasswordVisibility('codeSecret', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 1.1rem; color: var(--accent-cyan);" title="Afficher/Masquer le mot de passe">👁️</button>
+                    </div>
+                </div>
+
+                <div id="loginError" class="error-message"></div>
+
+                <button type="submit" class="btn-submit-login" id="btnLogin">
+                    <span>🚀 SE CONNECTER À MON ESPACE</span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- LES 5 GRANDES RUBRIQUES DU PORTAIL -->
+    <section>
+        <div class="section-header">
+            <span class="section-header-icon">📂</span>
+            <h3>Les 5 Grandes Rubriques du Portail</h3>
+        </div>
+        <div class="rubriques-grid">
+
+            <div class="rubrique-card r-cours" onclick="switchLevelTab('4eme')">
+                <div>
+                    <div class="rubrique-icon">📖</div>
+                    <h4 class="rubrique-title">Les Cours</h4>
+                    <p class="rubrique-desc">Fiches synthèses, leçons interactives & schémas-blocs de chaque séquence.</p>
+                </div>
+                <div class="rubrique-btn">
+                    <span>Découvrir</span>
+                    <span>→</span>
                 </div>
             </div>
 
-            <div id="loginError" class="error-message"></div>
+            <div class="rubrique-card r-projets" onclick="switchLevelTab('4eme')">
+                <div>
+                    <div class="rubrique-icon">⚙️</div>
+                    <h4 class="rubrique-title">Les Projets</h4>
+                    <p class="rubrique-desc">Robotique, conception 3D, modélisation et objets techniques.</p>
+                </div>
+                <div class="rubrique-btn">
+                    <span>Découvrir</span>
+                    <span>→</span>
+                </div>
+            </div>
 
-            <button type="submit" class="btn-login" id="btnLogin">Se connecter</button>
-        </form>
+            <div class="rubrique-card r-ressources" onclick="switchLevelTab('4eme')">
+                <div>
+                    <div class="rubrique-icon">📁</div>
+                    <h4 class="rubrique-title">Les Ressources</h4>
+                    <p class="rubrique-desc">Tutoriels vidéo, fiches guidées, téléchargements et aides de labo.</p>
+                </div>
+                <div class="rubrique-btn">
+                    <span>Découvrir</span>
+                    <span>→</span>
+                </div>
+            </div>
 
-        <p style="margin-top: 22px; font-size: 0.85rem; color: var(--text-muted);">
-            📋 Vos accès et temps d'évaluation sont personnalisés selon votre profil.
-        </p>
-    </div>
+            <div class="rubrique-card r-defis" onclick="switchLevelTab('3eme')">
+                <div>
+                    <div class="rubrique-icon">💡</div>
+                    <h4 class="rubrique-title">Les Défis</h4>
+                    <p class="rubrique-desc">QCM chronométrés (Analyse Fonctionnelle, Évaluations 3ème) et énigmes.</p>
+                </div>
+                <div class="rubrique-btn">
+                    <span>Découvrir</span>
+                    <span>→</span>
+                </div>
+            </div>
+
+            <div class="rubrique-card r-site" onclick="openStageModuleDirect()">
+                <div>
+                    <div class="rubrique-icon">👥</div>
+                    <h4 class="rubrique-title">Le Site & Stage</h4>
+                    <p class="rubrique-desc">Présentation du labo, suivi des stages 3ème et fiches guidées.</p>
+                </div>
+                <div class="rubrique-btn">
+                    <span>Découvrir</span>
+                    <span>→</span>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- LES 6 DOMAINES DE LA TECHNOLOGIE -->
+    <section>
+        <div class="section-header">
+            <span class="section-header-icon">🔬</span>
+            <h3>Les Domaines de la Technologie</h3>
+        </div>
+        <div class="domaines-grid">
+            <div class="domaine-pill">
+                <div class="domaine-icon">⚡</div>
+                <div class="domaine-name">Énergie</div>
+            </div>
+            <div class="domaine-pill">
+                <div class="domaine-icon">🚗</div>
+                <div class="domaine-name">Transport</div>
+            </div>
+            <div class="domaine-pill">
+                <div class="domaine-icon">🏠</div>
+                <div class="domaine-name">Habitat</div>
+            </div>
+            <div class="domaine-pill">
+                <div class="domaine-icon">💻</div>
+                <div class="domaine-name">Numérique</div>
+            </div>
+            <div class="domaine-pill">
+                <div class="domaine-icon">⚙️</div>
+                <div class="domaine-name">Matériaux</div>
+            </div>
+            <div class="domaine-pill">
+                <div class="domaine-icon">♻️</div>
+                <div class="domaine-name">Environnement</div>
+            </div>
+        </div>
+    </section>
 
     <!-- ============ ÉCRAN 2 : TABLEAU DE BORD (DASHBOARD PAR NIVEAU) ============ -->
     <div id="dashboardScreen">
@@ -163,11 +276,11 @@
                 <label for="profPassword">Mot de passe enseignant :</label>
                 <div style="position: relative; display: flex; align-items: center;">
                     <input type="password" id="profPassword" placeholder="Entrez le mot de passe professeur" style="width: 100%; padding-right: 40px;">
-                    <button type="button" onclick="togglePasswordVisibility('profPassword', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--primary-cyan);" title="Afficher/Masquer le mot de passe">👁️</button>
+                    <button type="button" onclick="togglePasswordVisibility('profPassword', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 1.2rem; color: var(--accent-cyan);" title="Afficher/Masquer le mot de passe">👁️</button>
                 </div>
             </div>
             <div id="profError" class="error-message"></div>
-            <button class="btn-login" onclick="checkProfPassword()">Valider</button>
+            <button class="btn-submit-login" onclick="checkProfPassword()">Valider</button>
             <button class="btn-close-modal" onclick="closeProfModal()">Fermer</button>
         </div>
 
@@ -183,21 +296,21 @@
 
             <!-- ONGLET 1 : SUIVI DE CLASSE -->
             <div id="tabPanel_suivi" class="prof-tab-panel">
-                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: rgba(11, 19, 43, 0.6); padding: 14px; border-radius: 8px; margin-bottom: 18px; border: 1px solid var(--border-glow);">
-                    <label style="font-weight: 700; color: var(--primary-cyan);">Niveau :</label>
-                    <select id="profSuiviNiveau" onchange="onProfNiveauChange(); loadProfSuiviData();" style="padding: 8px 14px; border-radius: 6px; background: var(--bg-dark); color: white; border: 1px solid var(--border-glow);">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 8px; margin-bottom: 18px; border: 1px solid var(--border-glow);">
+                    <label style="font-weight: 700; color: var(--accent-cyan);">Niveau :</label>
+                    <select id="profSuiviNiveau" onchange="onProfNiveauChange(); loadProfSuiviData();" style="padding: 8px 14px; border-radius: 6px; background: #0F172A; color: white; border: 1px solid var(--border-glow);">
                         <option value="4eme">4ème</option>
                         <option value="5eme">5ème</option>
                         <option value="3eme">3ème</option>
                     </select>
 
-                    <label style="font-weight: 700; color: var(--primary-cyan); margin-left: 10px;">Classe :</label>
-                    <select id="profSuiviClasse" onchange="loadProfSuiviData()" style="padding: 8px 14px; border-radius: 6px; background: var(--bg-dark); color: white; border: 1px solid var(--border-glow);">
+                    <label style="font-weight: 700; color: var(--accent-cyan); margin-left: 10px;">Classe :</label>
+                    <select id="profSuiviClasse" onchange="loadProfSuiviData()" style="padding: 8px 14px; border-radius: 6px; background: #0F172A; color: white; border: 1px solid var(--border-glow);">
                         <!-- Rempli dynamiquement selon le niveau -->
                     </select>
 
-                    <button class="btn-primary" onclick="loadProfSuiviData()" style="padding: 8px 16px; border:none; background: var(--primary-blue); color:white; border-radius:6px; cursor:pointer; font-weight:700;">🔄 Actualiser</button>
-                    <button class="btn-primary" onclick="exportSuiviPronoteCSV()" style="padding: 8px 16px; border:none; background: var(--neon-green); color:var(--bg-dark); border-radius:6px; cursor:pointer; font-weight:800; margin-left:auto;">📥 Export PRONOTE CSV</button>
+                    <button onclick="loadProfSuiviData()" style="padding: 8px 16px; border:none; background: var(--accent-purple); color:white; border-radius:6px; cursor:pointer; font-weight:700;">🔄 Actualiser</button>
+                    <button onclick="exportSuiviPronoteCSV()" style="padding: 8px 16px; border:none; background: var(--accent-green); color:#0F172A; border-radius:6px; cursor:pointer; font-weight:800; margin-left:auto;">📥 Export PRONOTE CSV</button>
                 </div>
 
                 <div id="profSuiviContent"></div>
@@ -212,12 +325,12 @@
             <div id="tabPanel_local" class="prof-tab-panel" style="display:none;">
                 <div id="profResultsContent"></div>
                 <div style="margin-top: 15px;">
-                    <button class="btn-secondary" onclick="clearAllResults()" style="background: var(--neon-danger); border:none; padding:10px 18px; border-radius:6px; color:white; font-weight:700; cursor:pointer;">🗑️ Effacer résultats locaux</button>
+                    <button onclick="clearAllResults()" style="background: var(--accent-pink); border:none; padding:10px 18px; border-radius:6px; color:white; font-weight:700; cursor:pointer;">🗑️ Effacer résultats locaux</button>
                 </div>
             </div>
 
             <div style="margin-top: 24px; display: flex; gap: 12px; justify-content: flex-end;">
-                <button class="btn-primary" onclick="closeProfModal(); openStageModuleDirect();" style="background: var(--primary-blue); color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer;">📝 Espace Saisie Notes Stage</button>
+                <button onclick="closeProfModal(); openStageModuleDirect();" style="background: var(--accent-blue); color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:700; cursor:pointer;">📝 Espace Saisie Notes Stage</button>
                 <button class="btn-close-modal" onclick="closeProfModal()">Fermer</button>
             </div>
         </div>
