@@ -111,7 +111,7 @@ async function loadAnnuaire() {
                 console.log(`✅ ${annuaireEleves.length} élèves chargés depuis Google Sheets CSV.`);
                 if (btnLogin) {
                     btnLogin.disabled = false;
-                    btnLogin.textContent = 'Se connecter';
+                    btnLogin.textContent = '🟢 Se connecter et accéder aux activités';
                 }
                 return;
             }
@@ -126,7 +126,7 @@ async function loadAnnuaire() {
 
     if (btnLogin) {
         btnLogin.disabled = false;
-        btnLogin.textContent = 'Se connecter';
+        btnLogin.textContent = '🟢 Se connecter et accéder aux activités';
     }
 }
 
@@ -245,7 +245,7 @@ async function handleLogin(event) {
     } finally {
         if (btnLogin) {
             btnLogin.disabled = false;
-            btnLogin.textContent = 'Se connecter';
+            btnLogin.textContent = '🟢 Se connecter et accéder aux activités';
         }
     }
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechnoPasteur – Portail & Évaluations Technologie Collège</title>
+    <title>TechnoPasteur – Laboratoire de Technologie Collège</title>
     <!-- Styles unifiés du projet -->
     <link rel="stylesheet" href="css/style.css">
     <style>
@@ -24,78 +24,214 @@
             color: #4a5568;
         }
         .prof-tab-btn.active {
-            background: var(--primary, #2563eb);
+            background: var(--primary, #0F172A);
             color: white;
         }
     </style>
 </head>
 <body>
 
-<!-- ==================== HEADER UNIFIÉ ==================== -->
+<!-- ==================== HEADER UNIFIÉ & DYNAMIQUE ==================== -->
 <header>
     <div class="header-container">
-        <div class="logo" onclick="if(currentStudent) showDashboard();">
+        <div class="logo" onclick="if(currentStudent) showDashboard(); else showLandingPage();">
             <span class="logo-icon">⚙️</span>
             <div>
                 <h1>TechnoPasteur</h1>
-                <p>Technologie Collège – 5ème | 4ème | 3ème</p>
+                <p>Laboratoire de Technologie • 5ème | 4ème | 3ème</p>
             </div>
         </div>
-        <div class="header-actions">
-            <button class="btn-prof" onclick="openStageModuleDirect()" style="margin-right: 8px; background: #2563eb;">📝 Note rapport de stage</button>
-            <button class="btn-prof" onclick="openProfModal()">🔐 Espace professeur</button>
+
+        <!-- Bouton hamburger mobile -->
+        <button class="menu-toggle" id="menuToggle" aria-label="Menu" onclick="toggleMobileMenu()">
+            ☰
+        </button>
+
+        <div class="header-actions" id="headerActions">
+            <button class="btn-prof btn-stage" onclick="openStageModuleDirect()">📝 Note rapport de stage</button>
+            <button class="btn-prof btn-prof-acc" onclick="openProfModal()">🔐 Espace professeur</button>
         </div>
     </div>
 </header>
 
 <div class="main-container">
 
-    <!-- ============ ÉCRAN 1 : CONNEXION ÉLÈVE ============ -->
+    <!-- ============ ÉCRAN 1 : PAGE D'ACCUEIL & CONNEXION ÉLÈVE ============ -->
     <div id="loginScreen">
-        <h2>🔐 Identification Élève</h2>
-        <p class="subtitle">Sélectionnez vos identifiants pour accéder à vos activités</p>
 
-        <form id="loginForm" onsubmit="handleLogin(event)">
-            <div class="form-group">
-                <label for="selectNiveau">🎓 Niveau :</label>
-                <select id="selectNiveau" required onchange="onNiveauChange()">
-                    <option value="">-- Choisir le niveau --</option>
-                    <option value="5eme">5ème</option>
-                    <option value="4eme">4ème</option>
-                    <option value="3eme">3ème</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="selectClasse">🏫 Classe :</label>
-                <select id="selectClasse" required disabled onchange="onClasseChange()">
-                    <option value="">-- Sélectionnez d'abord le niveau --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="selectEleve">👤 Élève (Nom Prénom) :</label>
-                <select id="selectEleve" required disabled>
-                    <option value="">-- Sélectionnez d'abord la classe --</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="codeSecret">🔑 Mot de passe élève :</label>
-                <div style="position: relative; display: flex; align-items: center;">
-                    <input type="password" id="codeSecret" placeholder="Mot de passe transmis par le professeur" required style="width: 100%; padding-right: 40px;">
-                    <button type="button" onclick="togglePasswordVisibility('codeSecret', this)" style="position: absolute; right: 8px; background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Afficher/Masquer le mot de passe">👁️</button>
+        <!-- HERO SECTION SPECTACULAIRE -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <span class="hero-badge">🚀 PORTAIL DE TECHNOLOGIE</span>
+                <h1 class="hero-title">La technologie,<br><span class="highlight-yellow">c'est pas sorcier !</span></h1>
+                <p class="hero-subtitle">Explorer • Comprendre • Créer</p>
+                <div class="hero-buttons">
+                    <a href="#loginFormCard" class="btn-hero-explore">🚀 Prêt(e) à explorer ?</a>
                 </div>
             </div>
 
-            <div id="loginError" class="error-message"></div>
+            <!-- CARTE DE CONNEXION ÉLÈVE INTÉGRÉE DANS LE HERO -->
+            <div class="hero-login-card" id="loginFormCard">
+                <div class="card-login-header">
+                    <h2>🔐 Connexion Élève</h2>
+                    <p>Accède à tes activités et cours</p>
+                </div>
 
-            <button type="submit" class="btn-login" id="btnLogin">Se connecter</button>
-        </form>
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="selectNiveau">🎓 Niveau :</label>
+                        <select id="selectNiveau" required onchange="onNiveauChange()">
+                            <option value="">-- Choisir le niveau --</option>
+                            <option value="5eme">5ème</option>
+                            <option value="4eme">4ème</option>
+                            <option value="3eme">3ème</option>
+                        </select>
+                    </div>
 
-        <p style="margin-top: 20px; font-size: 0.85rem; color: var(--text-muted);">
-            📋 Vos accès et temps d'évaluation sont personnalisés selon votre profil.
-        </p>
+                    <div class="form-group">
+                        <label for="selectClasse">🏫 Classe :</label>
+                        <select id="selectClasse" required disabled onchange="onClasseChange()">
+                            <option value="">-- Sélectionne d'abord le niveau --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="selectEleve">👤 Élève (Nom Prénom) :</label>
+                        <select id="selectEleve" required disabled>
+                            <option value="">-- Sélectionne d'abord la classe --</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="codeSecret">🔑 Mot de passe élève :</label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="password" id="codeSecret" placeholder="Mot de passe transmis par le prof" required style="width: 100%; padding-right: 42px;">
+                            <button type="button" onclick="togglePasswordVisibility('codeSecret', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Afficher/Masquer le mot de passe">👁️</button>
+                        </div>
+                    </div>
+
+                    <div id="loginError" class="error-message"></div>
+
+                    <button type="submit" class="btn-login" id="btnLogin">🟢 Se connecter et accéder aux activités</button>
+                </form>
+
+                <p class="login-note">
+                    📋 Vos accès et temps d'évaluation sont personnalisés selon votre profil.
+                </p>
+            </div>
+        </section>
+
+        <!-- ILLUSTRATION VISUELLE INTERACTIVE DU LABO TECHNO -->
+        <section class="tech-lab-illustration">
+            <div class="lab-items-wrapper">
+                <div class="lab-item item-robot">🤖 <span>Robotique</span></div>
+                <div class="lab-item item-car">🚗 <span>Automatisme</span></div>
+                <div class="lab-item item-pc">💻 <span>Informatique</span></div>
+                <div class="lab-item item-drone">🛸 <span>Drone</span></div>
+                <div class="lab-item item-gears">⚙️ <span>Mécanique</span></div>
+                <div class="lab-item item-design">📐 <span>Dessin 3D</span></div>
+                <div class="lab-item item-bulb">💡 <span>Innovation</span></div>
+                <div class="lab-item item-energy">⚡ <span>Énergie</span></div>
+                <div class="lab-item item-eco">♻️ <span>Écologie</span></div>
+            </div>
+        </section>
+
+        <!-- 5 GRANDES RUBRIQUES DU SITE -->
+        <section class="rubriques-section">
+            <div class="section-title-container">
+                <h2 class="section-title">📚 Les 5 Grandes Rubriques</h2>
+                <p class="section-subtitle">Tout ce dont tu as besoin pour réussir tes projets de technologie</p>
+            </div>
+
+            <div class="rubriques-grid">
+                <!-- Rubrique 1 -->
+                <div class="rubrique-card card-cours">
+                    <div class="rubrique-icon">📖</div>
+                    <h3>Les cours</h3>
+                    <p>Retrouve tes synthèses, fiches de notions et connaissances de l'année.</p>
+                    <button class="btn-rubrique" onclick="scrollAndAlert('Connecte-toi ci-dessus pour accéder à tes cours !')">Découvrir →</button>
+                </div>
+
+                <!-- Rubrique 2 -->
+                <div class="rubrique-card card-projets">
+                    <div class="rubrique-icon">⚙️</div>
+                    <h3>Les projets</h3>
+                    <p>Conception, modélisation 3D, programmation de robots et défis d'équipe.</p>
+                    <button class="btn-rubrique" onclick="scrollAndAlert('Connecte-toi ci-dessus pour accéder aux projets !')">Découvrir →</button>
+                </div>
+
+                <!-- Rubrique 3 -->
+                <div class="rubrique-card card-ressources">
+                    <div class="rubrique-icon">📁</div>
+                    <h3>Les ressources</h3>
+                    <p>Fiches outils, tutoriels logistiques, guides logiciels et schémas techniques.</p>
+                    <button class="btn-rubrique" onclick="scrollAndAlert('Connecte-toi ci-dessus pour voir les ressources !')">Découvrir →</button>
+                </div>
+
+                <!-- Rubrique 4 -->
+                <div class="rubrique-card card-defis">
+                    <div class="rubrique-icon">💡</div>
+                    <h3>Les défis</h3>
+                    <p>Quiz chrono, évaluations interactives et challenges de logique pour t'entraîner.</p>
+                    <button class="btn-rubrique" onclick="scrollAndAlert('Connecte-toi ci-dessus pour lancer un défi !')">Découvrir →</button>
+                </div>
+
+                <!-- Rubrique 5 -->
+                <div class="rubrique-card card-site">
+                    <div class="rubrique-icon">👥</div>
+                    <h3>Le site</h3>
+                    <p>Présentation du labo de technologie, règles de sécurité et matériel disponible.</p>
+                    <button class="btn-rubrique" onclick="scrollAndAlert('Bienvenue dans le laboratoire de Technologie !')">Découvrir →</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- DOMAINES DE TECHNOLOGIE -->
+        <section class="domaines-section">
+            <div class="section-title-container">
+                <h2 class="section-title">🔬 Les Domaines de la Technologie au Collège</h2>
+                <p class="section-subtitle">Des thématiques concrètes pour comprendre le monde qui t'entoure</p>
+            </div>
+
+            <div class="domaines-grid">
+                <div class="domaine-card dom-energie">
+                    <span class="domaine-badge-icon">⚡</span>
+                    <h4>Énergie</h4>
+                    <p>Chaînes d'énergie, sources, centrales et efficacité énergétique.</p>
+                </div>
+
+                <div class="domaine-card dom-transport">
+                    <span class="domaine-badge-icon">🚗</span>
+                    <h4>Transport</h4>
+                    <p>Systèmes automatisés, véhicules autonomes et mobilités douces.</p>
+                </div>
+
+                <div class="domaine-card dom-habitat">
+                    <span class="domaine-badge-icon">🏠</span>
+                    <h4>Habitat & Ouvrages</h4>
+                    <p>Architecture, structures, domotique et modélisation 3D.</p>
+                </div>
+
+                <div class="domaine-card dom-numerique">
+                    <span class="domaine-badge-icon">💻</span>
+                    <h4>Numérique & Réseaux</h4>
+                    <p>Algorithmes, programmation Scratch, réseaux et objets connectés.</p>
+                </div>
+
+                <div class="domaine-card dom-materiaux">
+                    <span class="domaine-badge-icon">⚙️</span>
+                    <h4>Matériaux</h4>
+                    <p>Propriétés physico-chimiques, familles de matériaux et usinage.</p>
+                </div>
+
+                <div class="domaine-card dom-environnement">
+                    <span class="domaine-badge-icon">♻️</span>
+                    <h4>Environnement</h4>
+                    <p>Cycle de vie des objets, recyclage et éco-conception.</p>
+                </div>
+            </div>
+        </section>
+
     </div>
 
     <!-- ============ ÉCRAN 2 : TABLEAU DE BORD (DASHBOARD PAR NIVEAU) ============ -->
@@ -146,8 +282,8 @@
             <div class="form-group">
                 <label for="profPassword">Mot de passe enseignant :</label>
                 <div style="position: relative; display: flex; align-items: center;">
-                    <input type="password" id="profPassword" placeholder="Entrez le mot de passe professeur" style="width: 100%; padding-right: 40px;">
-                    <button type="button" onclick="togglePasswordVisibility('profPassword', this)" style="position: absolute; right: 8px; background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Afficher/Masquer le mot de passe">👁️</button>
+                    <input type="password" id="profPassword" placeholder="Entrez le mot de passe professeur" style="width: 100%; padding-right: 42px;">
+                    <button type="button" onclick="togglePasswordVisibility('profPassword', this)" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; font-size: 1.2rem;" title="Afficher/Masquer le mot de passe">👁️</button>
                 </div>
             </div>
             <div id="profError" class="error-message"></div>
@@ -210,8 +346,10 @@
 
 <!-- ==================== FOOTER ==================== -->
 <footer>
-    <p>Portail Pédagogique - TechnoPasteur Collège Cycle 4</p>
-    <p style="opacity: 0.75; font-size: 0.82rem;">📊 Données synchronisées avec Google Sheets</p>
+    <div class="footer-container">
+        <p>⚙️ Portail Pédagogique - TechnoPasteur Collège Cycle 4</p>
+        <p style="opacity: 0.8; font-size: 0.85rem;">Explorer • Comprendre • Créer — Technologie 5ème | 4ème | 3ème</p>
+    </div>
 </footer>
 
 <!-- Scripts Javascript Modulaires -->
@@ -224,6 +362,31 @@
 <script src="js/eval_competences.js"></script>
 <script src="js/prof.js"></script>
 <script src="js/app.js"></script>
+
+<script>
+    function toggleMobileMenu() {
+        const actions = document.getElementById('headerActions');
+        if (actions) {
+            actions.classList.toggle('active');
+        }
+    }
+
+    function scrollAndAlert(msg) {
+        const card = document.getElementById('loginFormCard');
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth' });
+            card.classList.add('pulse-highlight');
+            setTimeout(() => card.classList.remove('pulse-highlight'), 1500);
+        }
+    }
+
+    function showLandingPage() {
+        document.getElementById('dashboardScreen').style.display = 'none';
+        document.getElementById('activityScreen').style.display = 'none';
+        document.getElementById('loginScreen').style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
 
 </body>
 </html>
