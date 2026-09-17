@@ -108,37 +108,14 @@ const ACTIVITIES_DATABASE = [
         pdfUrl: "https://drive.google.com"
     },
     {
-        id: "4_qcm_materiaux_1",
+        id: "4_module_objets_materiaux",
         niveau: "4eme",
-        titre: "Score 1 – QCM Type Objets",
-        type: "qcm",
-        badgeText: "QCM",
+        titre: "Module – Objets & Matériaux",
+        type: "objets_materiaux",
+        badgeText: "Module",
         badgeClass: "badge-qcm",
-        description: "Évaluation sur les caractéristiques fondamentales des objets et des alliages.",
-        defaultUnlocked: true,
-        quizId: 1
-    },
-    {
-        id: "4_qcm_materiaux_2",
-        niveau: "4eme",
-        titre: "Score 2 – QCM Objets & Matériaux 1",
-        type: "qcm",
-        badgeText: "QCM",
-        badgeClass: "badge-qcm",
-        description: "Évaluation approfondie : caractéristiques mécaniques et traitements thermiques.",
-        defaultUnlocked: true,
-        quizId: 2
-    },
-    {
-        id: "4_qcm_materiaux_3",
-        niveau: "4eme",
-        titre: "Score 3 – QCM Objets & Matériaux 2",
-        type: "qcm",
-        badgeText: "QCM",
-        badgeClass: "badge-qcm",
-        description: "Évaluation avancée : propriétés des polymères, métaux et résilience.",
-        defaultUnlocked: true,
-        quizId: 3
+        description: "Parcours en 3 étapes : Type d'objet, Objet & Matériaux 1, et Objet & Matériaux 2 avec déverrouillage progressif.",
+        defaultUnlocked: true
     },
     {
         id: "4_pdf_materiaux",

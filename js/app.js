@@ -150,5 +150,7 @@ function launchActivity(activityId) {
         openAnalyseModule(act);
     } else if (act.type === 'eval_competences') {
         openEvalCompetencesModule();
+    } else if (act.type === 'objets_materiaux') {
+        openObjetMateriauxModule();
     }
 }
