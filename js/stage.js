@@ -557,49 +557,116 @@ async function loadStageNotes() {
     const container = document.getElementById('stage-notes-container');
     const classeVal = document.getElementById('stageViewClasse').value;
 
-    container.innerHTML = '⏳ Chargement des notes...';
+    container.innerHTML = '⏳ Chargement des notes et vérification des oublis...';
+
+    let enteredNotes = [];
 
     if (CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV && CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV.trim() !== '') {
         try {
             const resp = await fetch(CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV);
             if (resp.ok) {
                 const text = await resp.text();
-                const rows = typeof parseCSV === 'function' ? parseCSV(text) : [];
-                let filtered = rows;
-                if (classeVal) {
-                    filtered = rows.filter(r => (r.classe || r.class || '') === classeVal);
-                }
-
-                if (filtered.length === 0) {
-                    container.innerHTML = '<p style="color:var(--text-muted); padding:1rem;">Aucune note enregistrée pour cette sélection.</p>';
-                    return;
-                }
-
-                let tableRows = filtered.map(r => `
-                    <tr>
-                        <td><strong>${r.nom || ''}</strong> ${r.prenom || ''}</td>
-                        <td>${r.classe || r.class || '—'}</td>
-                        <td><strong style="color:#2563eb;">${r.note || r.notetotale || '—'} / 20</strong></td>
-                        <td>${r.commentaire || r.appreciation || '—'}</td>
-                        <td>${r.prof || r.enseignant || '—'}</td>
-                        <td>${r.date || r.datestr || '—'}</td>
-                    </tr>
-                `).join('');
-
-                container.innerHTML = `
-                    <table class="results-table" style="width:100%;">
-                        <thead>
-                            <tr><th>Élève</th><th>Classe</th><th>Note</th><th>Commentaire</th><th>Enseignant</th><th>Date</th></tr>
-                        </thead>
-                        <tbody>${tableRows}</tbody>
-                    </table>
-                `;
-                return;
+                enteredNotes = typeof parseCSV === 'function' ? parseCSV(text) : [];
             }
         } catch (e) {
             console.warn("⚠️ Échec du chargement du CSV notes de stage :", e);
         }
     }
 
-    container.innerHTML = '<p style="color:var(--danger); padding:1rem;">⚠️ Erreur ou feuille de notes Google Sheets non configurée.</p>';
+    // Determine target students
+    if (Object.keys(stageElevesMap).length === 0) await loadStageEleves();
+
+    let targetClasses = classeVal ? [classeVal] : Object.keys(stageElevesMap);
+    let allStudentRows = [];
+    let nbOublis = 0;
+
+    targetClasses.forEach(cls => {
+        const students = stageElevesMap[cls] || [];
+        students.forEach(st => {
+            const match = enteredNotes.find(r => {
+                const rNom = (r.nom || '').toString().trim().toUpperCase();
+                const rPrenom = (r.prenom || '').toString().trim().toUpperCase();
+                const rClasse = (r.classe || r.class || '').toString().trim();
+
+                return rNom === st.nom.toUpperCase() &&
+                       (rPrenom === '' || st.prenom === '' || rPrenom === st.prenom.toUpperCase()) &&
+                       (rClasse === '' || rClasse === cls);
+            });
+
+            if (match) {
+                allStudentRows.push({
+                    nom: st.nom,
+                    prenom: st.prenom,
+                    classe: cls,
+                    note: match.note || match.notetotale || '—',
+                    commentaire: match.commentaire || match.appreciation || '—',
+                    prof: match.prof || match.enseignant || '—',
+                    date: match.date || match.datestr || '—',
+                    hasNote: true
+                });
+            } else {
+                nbOublis++;
+                allStudentRows.push({
+                    nom: st.nom,
+                    prenom: st.prenom,
+                    classe: cls,
+                    note: null,
+                    commentaire: '—',
+                    prof: '—',
+                    date: '—',
+                    hasNote: false
+                });
+            }
+        });
+    });
+
+    if (allStudentRows.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted); padding:1rem;">Aucun élève trouvé pour cette sélection.</p>';
+        return;
+    }
+
+    const tableRows = allStudentRows.map(r => {
+        if (r.hasNote) {
+            return `
+                <tr style="background: #F0FDF4;">
+                    <td><strong>${r.nom}</strong> ${r.prenom}</td>
+                    <td>${r.classe}</td>
+                    <td><strong style="color: #16A34A; font-size: 1.05rem;">${r.note} / 20</strong></td>
+                    <td>${r.commentaire}</td>
+                    <td>${r.prof}</td>
+                    <td>${r.date}</td>
+                </tr>
+            `;
+        } else {
+            return `
+                <tr style="background: #FEF2F2; border-left: 4px solid #EF4444;">
+                    <td><strong>${r.nom}</strong> ${r.prenom}</td>
+                    <td>${r.classe}</td>
+                    <td><span style="background: #FEE2E2; color: #DC2626; font-weight: 800; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">⚠️ Note non saisie (Oublié ?)</span></td>
+                    <td style="color: #DC2626; font-style: italic;">Saisie manquante</td>
+                    <td>—</td>
+                    <td>—</td>
+                </tr>
+            `;
+        }
+    }).join('');
+
+    const alertBanner = nbOublis > 0
+        ? `<div style="background: #FEF2F2; border: 1px solid #FCA5A5; color: #991B1B; padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
+            <span>⚠️ Attention : ${nbOublis} élève(s) n'ont pas encore de note de stage saisie !</span>
+            <span style="font-size: 0.85rem; font-weight: normal; opacity: 0.9;">Lignes rouges ci-dessous</span>
+           </div>`
+        : `<div style="background: #ECFDF5; border: 1px solid #6EE7B7; color: #065F46; padding: 12px 16px; border-radius: 8px; margin-bottom: 15px; font-weight: 700;">
+            🎉 Parfait ! Toutes les notes de stage ont été saisies pour la sélection.
+           </div>`;
+
+    container.innerHTML = `
+        ${alertBanner}
+        <table class="results-table" style="width:100%;">
+            <thead>
+                <tr><th>Élève</th><th>Classe</th><th>Note / 20</th><th>Commentaire</th><th>Enseignant évaluateur</th><th>Date</th></tr>
+            </thead>
+            <tbody>${tableRows}</tbody>
+        </table>
+    `;
 }

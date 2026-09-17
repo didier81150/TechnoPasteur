@@ -81,8 +81,7 @@ function onProfNiveauChange() {
 function showProfDashboardView() {
     document.getElementById('profLoginView').style.display = 'none';
     document.getElementById('profResultsView').style.display = 'block';
-    onProfNiveauChange();
-    switchProfTab('suivi');
+    switchProfTab('unlock');
 }
 
 function switchProfTab(tabName) {
@@ -96,8 +95,6 @@ function switchProfTab(tabName) {
     if (panel) panel.style.display = 'block';
 
     if (tabName === 'unlock') renderUnlockManagement();
-    if (tabName === 'suivi') loadProfSuiviData();
-    if (tabName === 'local') renderLocalResultsTable();
 }
 
 // ----------------------------------------------------

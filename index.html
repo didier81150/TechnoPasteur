@@ -293,51 +293,27 @@
 
         <!-- Espace de Gestion Professeur -->
         <div id="profResultsView" style="display:none;">
-            <h3>⚙️ Espace Enseignant & Suivi des Élèves</h3>
+            <h3>⚙️ Espace Enseignant & Déverrouillage des Activités</h3>
 
             <div class="prof-nav-tabs">
-                <button class="prof-tab-btn active" id="tabBtn_suivi" onclick="switchProfTab('suivi')">📊 Suivi de classe</button>
-                <button class="prof-tab-btn" id="tabBtn_unlock" onclick="switchProfTab('unlock')">🔓 Déverrouillage</button>
-                <button class="prof-tab-btn" id="tabBtn_local" onclick="switchProfTab('local')">💾 Résultats locaux</button>
+                <button class="prof-tab-btn active" id="tabBtn_unlock" onclick="switchProfTab('unlock')">🔓 Déverrouillage des activités</button>
             </div>
 
-            <!-- ONGLET 1 : SUIVI DE CLASSE -->
-            <div id="tabPanel_suivi" class="prof-tab-panel">
+            <!-- ONGLET DÉVERROUILLAGE -->
+            <div id="tabPanel_unlock" class="prof-tab-panel">
                 <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center; background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
                     <label style="font-weight: 600;">Niveau :</label>
-                    <select id="profSuiviNiveau" onchange="onProfNiveauChange(); loadProfSuiviData();" style="padding: 6px 12px; border-radius: 6px;">
+                    <select id="profSuiviNiveau" onchange="renderUnlockManagement()" style="padding: 6px 12px; border-radius: 6px;">
                         <option value="4eme">4ème</option>
                         <option value="5eme">5ème</option>
                         <option value="3eme">3ème</option>
                     </select>
-
-                    <label style="font-weight: 600; margin-left: 10px;">Classe :</label>
-                    <select id="profSuiviClasse" onchange="loadProfSuiviData()" style="padding: 6px 12px; border-radius: 6px;">
-                        <!-- Rempli dynamiquement selon le niveau -->
-                    </select>
-
-                    <button class="btn-primary" onclick="loadProfSuiviData()" style="padding: 6px 14px; border:none; background: #2563eb; color:white; border-radius:6px; cursor:pointer;">🔄 Actualiser</button>
-                    <button class="btn-primary" onclick="exportSuiviPronoteCSV()" style="padding: 6px 14px; border:none; background: #16a34a; color:white; border-radius:6px; cursor:pointer; margin-left:auto;">📥 Export PRONOTE CSV</button>
                 </div>
-
-                <div id="profSuiviContent"></div>
-            </div>
-
-            <!-- ONGLET 2 : DÉVERROUILLAGE -->
-            <div id="tabPanel_unlock" class="prof-tab-panel" style="display:none;">
                 <div id="profUnlockContent"></div>
             </div>
 
-            <!-- ONGLET 3 : RÉSULTATS LOCAUX -->
-            <div id="tabPanel_local" class="prof-tab-panel" style="display:none;">
-                <div id="profResultsContent"></div>
-                <div style="margin-top: 15px;">
-                    <button class="btn-secondary" onclick="clearAllResults()" style="background: var(--danger, #dc3545); border:none; padding:8px 14px; border-radius:6px; color:white; font-weight:600; cursor:pointer;">🗑️ Effacer résultats locaux</button>
-                </div>
-            </div>
-
             <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="btn-primary" onclick="closeProfModal(); openStageModuleDirect();" style="background: #2563eb; color:white; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">📝 Espace Saisie Notes Stage</button>
+                <button class="btn-primary" onclick="closeProfModal(); openStageModuleDirect();" style="background: #2563eb; color:white; border:none; padding:10px 18px; border-radius:8px; font-weight:600; cursor:pointer;">📝 Espace Saisie & Consultation Notes Stage</button>
                 <button class="btn-close-modal" onclick="closeProfModal()">Fermer</button>
             </div>
         </div>
