@@ -164,8 +164,8 @@ function renderObjetMateriauxOverview(container) {
                     </div>
                     <div style="text-align: right; min-width: 140px;">
                         ${progress.sub1_done ? `<div style="font-weight: 800; font-size: 1.2rem; color: var(--green); margin-bottom: 8px;">Score : ${progress.sub1_pct}</div>` : ''}
-                        <button class="btn-start-activity" onclick="startObjetMateriauxSubQuiz(1)" style="width: 100%;">
-                            ${progress.sub1_done ? '🔄 Refaire le quiz' : '▶ Commencer étape 1'}
+                        <button class="btn-start-activity" ${progress.sub1_done ? 'disabled style="background: #CBD5E1; cursor: not-allowed;"' : ''} onclick="startObjetMateriauxSubQuiz(1)" style="width: 100%;">
+                            ${progress.sub1_done ? '✅ Terminé (1 seul essai)' : '▶ Commencer étape 1'}
                         </button>
                     </div>
                 </div>
@@ -182,8 +182,8 @@ function renderObjetMateriauxOverview(container) {
                     </div>
                     <div style="text-align: right; min-width: 140px;">
                         ${progress.sub2_done ? `<div style="font-weight: 800; font-size: 1.2rem; color: var(--green); margin-bottom: 8px;">Score : ${progress.sub2_pct}</div>` : ''}
-                        <button class="btn-start-activity" ${sub2Unlocked ? '' : 'disabled'} onclick="startObjetMateriauxSubQuiz(2)" style="width: 100%;">
-                            ${progress.sub2_done ? '🔄 Refaire le quiz' : (sub2Unlocked ? '▶ Commencer étape 2' : '🔒 Verrouillé')}
+                        <button class="btn-start-activity" ${sub2Unlocked && !progress.sub2_done ? '' : 'disabled style="background: #CBD5E1; cursor: not-allowed;"'} onclick="startObjetMateriauxSubQuiz(2)" style="width: 100%;">
+                            ${progress.sub2_done ? '✅ Terminé (1 seul essai)' : (sub2Unlocked ? '▶ Commencer étape 2' : '🔒 Verrouillé')}
                         </button>
                     </div>
                 </div>
@@ -200,8 +200,8 @@ function renderObjetMateriauxOverview(container) {
                     </div>
                     <div style="text-align: right; min-width: 140px;">
                         ${progress.sub3_done ? `<div style="font-weight: 800; font-size: 1.2rem; color: var(--green); margin-bottom: 8px;">Score : ${progress.sub3_pct}</div>` : ''}
-                        <button class="btn-start-activity" ${sub3Unlocked ? '' : 'disabled'} onclick="startObjetMateriauxSubQuiz(3)" style="width: 100%;">
-                            ${progress.sub3_done ? '🔄 Refaire le quiz' : (sub3Unlocked ? '▶ Commencer étape 3' : '🔒 Verrouillé')}
+                        <button class="btn-start-activity" ${sub3Unlocked && !progress.sub3_done ? '' : 'disabled style="background: #CBD5E1; cursor: not-allowed;"'} onclick="startObjetMateriauxSubQuiz(3)" style="width: 100%;">
+                            ${progress.sub3_done ? '✅ Terminé (1 seul essai)' : (sub3Unlocked ? '▶ Commencer étape 3' : '🔒 Verrouillé')}
                         </button>
                     </div>
                 </div>
@@ -217,6 +217,12 @@ function renderObjetMateriauxOverview(container) {
 }
 
 function startObjetMateriauxSubQuiz(subId) {
+    const progress = getObjetMateriauxProgress();
+    if ((subId === 1 && progress.sub1_done) || (subId === 2 && progress.sub2_done) || (subId === 3 && progress.sub3_done)) {
+        alert("Vous avez déjà effectué ce sous-module. Un seul essai est autorisé.");
+        return;
+    }
+
     const subConfig = OBJET_MATERIAUX_SUBMODULES.find(s => s.id === subId);
     if (!subConfig) return;
 
