@@ -362,7 +362,12 @@ function openStudentDetailModal(studentId, nom, prenom, classe) {
                     <tbody>${rowsHTML}</tbody>
                 </table>
             </div>
-            <button class="btn-close-modal" onclick="document.getElementById('studentDetailModal').classList.remove('active')" style="margin-top:15px;">Fermer</button>
+            <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                <button onclick="resetStudentOmProgress('${nom}', '${prenom}', '${classe}')" style="background:#dc3545; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.85rem;">
+                    🗑️ Réinitialiser tentatives Objets & Matériaux
+                </button>
+                <button class="btn-close-modal" onclick="document.getElementById('studentDetailModal').classList.remove('active')" style="margin-top:0;">Fermer</button>
+            </div>
         </div>
     `;
 }
@@ -440,5 +445,22 @@ function clearAllResults() {
     if (confirm('⚠️ Effacer définitivement tous les résultats enregistrés dans ce navigateur ? Cette action est irréversible.')) {
         localStorage.removeItem(CONFIG.STORAGE_KEY_RESULTS);
         renderLocalResultsTable();
+    }
+}
+
+function resetStudentOmProgress(nom, prenom, classe) {
+    if (confirm(`Voulez-vous réinitialiser les tentatives du module Objets & Matériaux pour l'élève ${nom} ${prenom} ?`)) {
+        const key4 = `om_progress_4eme_${classe}_${nom}_${prenom}`.toLowerCase().replace(/\s+/g, '_');
+        const key5 = `om_progress_5eme_${classe}_${nom}_${prenom}`.toLowerCase().replace(/\s+/g, '_');
+        const key3 = `om_progress_3eme_${classe}_${nom}_${prenom}`.toLowerCase().replace(/\s+/g, '_');
+
+        localStorage.removeItem(key4);
+        localStorage.removeItem(key5);
+        localStorage.removeItem(key3);
+
+        alert(`Les tentatives de ${nom} ${prenom} ont été réinitialisées avec succès.`);
+        const modal = document.getElementById('studentDetailModal');
+        if (modal) modal.classList.remove('active');
+        if (typeof loadProfSuiviData === 'function') loadProfSuiviData();
     }
 }

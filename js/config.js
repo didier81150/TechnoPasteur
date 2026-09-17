@@ -13,7 +13,7 @@ const CONFIG = {
     GOOGLE_SHEET_ENSEIGNANTS_CSV: "https://docs.google.com/spreadsheets/d/1cABpA_7xuv1AmTgubnh21MnaV7XuKhM_0OVwSBWqcqI/export?format=csv",
 
     // 3. URL du Web App Google Apps Script pour l'enregistrement automatique des notes/activités/stage/évaluations
-    GOOGLE_APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzb7kMOK4q8RaxMMRBi7gb6ni0no5cx75cxPKulaufgEdxi3RcWSbnz5xJCKQIXcNCSAw/exec",
+    GOOGLE_APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycby9IW4WDgIY-rJTAYwl6JC2Ee0XDzUMfaVDXbyCTR4YgOCrJb0YgdOgnDjGugpZ6EqY/exec",
     EVAL_3EME_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzb7kMOK4q8RaxMMRBi7gb6ni0no5cx75cxPKulaufgEdxi3RcWSbnz5xJCKQIXcNCSAw/exec",
 
     // 4. URL du CSV Google Sheets pour la consultation des Notes de Stage
