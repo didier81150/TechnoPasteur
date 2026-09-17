@@ -122,6 +122,96 @@ function doPost(e) {
 
 ---
 
+## Étape 3.3 : Script Google Apps Script Spécifique pour l'Activité Objets & Matériaux
+
+Pour votre Google Sheet dédié à **Objet et Matériaux** ([Lien Google Sheet](https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/edit?usp=sharing)) :
+
+1. Ouvrez le tableau Google Sheet [1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU](https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/edit?usp=sharing).
+2. Assurez-vous que la première ligne du tableau contient exactement les en-têtes suivants (sensible à la casse) :
+   | Nom | Prenom | Classe | type d'objet | note objet et materiaux 1 | note objet et materiaux 2 | note totale | Date |
+   | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+3. Allez dans **Extensions** ➡️ **Apps Script**.
+4. Effacez le code existant et collez ce script Apps Script :
+
+```javascript
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+
+    // Initialisation des en-têtes si la feuille est vide
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        "Nom", "Prenom", "Classe", "type d'objet",
+        "note objet et materiaux 1", "note objet et materiaux 2",
+        "note totale", "Date"
+      ]);
+    }
+
+    var nom = (data.nom || "").toString().trim();
+    var prenom = (data.prenom || "").toString().trim();
+    var classe = (data.classe || "").toString().trim();
+
+    var typeObjet = data["type d'objet"] || data.typeObjet || "";
+    var noteMat1 = data["note objet et materiaux 1"] || data.noteMateriaux1 || "";
+    var noteMat2 = data["note objet et materiaux 2"] || data.noteMateriaux2 || "";
+    var noteTotale = data["note totale"] || data.noteTotale || "";
+    var dateVal = data.date || new Date().toLocaleDateString('fr-FR');
+
+    // Recherche si l'élève existe déjà dans la feuille (Mise à jour)
+    var lastRow = sheet.getLastRow();
+    var foundRow = -1;
+
+    if (lastRow > 1) {
+      var values = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+      for (var i = 0; i < values.length; i++) {
+        var rNom = values[i][0].toString().trim();
+        var rPrenom = values[i][1].toString().trim();
+        var rClasse = values[i][2].toString().trim();
+
+        if (rNom.toLowerCase() === nom.toLowerCase() &&
+            rPrenom.toLowerCase() === prenom.toLowerCase() &&
+            rClasse.toLowerCase() === classe.toLowerCase()) {
+          foundRow = i + 2; // Ligne dans la feuille (décalage en-tête)
+          break;
+        }
+      }
+    }
+
+    if (foundRow > 0) {
+      // Mise à jour de la ligne existante
+      if (typeObjet !== "") sheet.getRange(foundRow, 4).setValue(typeObjet);
+      if (noteMat1 !== "") sheet.getRange(foundRow, 5).setValue(noteMat1);
+      if (noteMat2 !== "") sheet.getRange(foundRow, 6).setValue(noteMat2);
+      if (noteTotale !== "") sheet.getRange(foundRow, 7).setValue(noteTotale);
+      sheet.getRange(foundRow, 8).setValue(dateVal);
+    } else {
+      // Ajout d'une nouvelle ligne
+      sheet.appendRow([
+        nom, prenom, classe,
+        typeObjet, noteMat1, noteMat2,
+        noteTotale, dateVal
+      ]);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+5. Cliquez sur **Déployer** ➡️ **Nouveau déploiement** (ou **Gérer les déploiements** ➡️ **Modifier** / **Nouvelle version**).
+6. Sélectionnez **Application Web** :
+   - **Exécuter en tant que** : *Moi*
+   - **Qui a accès** : *Tout le monde (Anyone)*
+7. Cliquez sur **Déployer** et autorisez l'accès.
+8. Copiez l'URL Web App générée (ex: `https://script.google.com/macros/s/.../exec`) et collez-la dans `CONFIG.GOOGLE_APPS_SCRIPT_URL` du fichier `js/config.js`.
+
+---
+
 ## Étape 4 : Renseigner les liens dans `js/config.js`
 
 Collez simplement vos liens Google Sheets dans le fichier `js/config.js` de votre site :
