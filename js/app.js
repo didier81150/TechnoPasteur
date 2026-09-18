@@ -152,5 +152,7 @@ function launchActivity(activityId) {
         openEvalCompetencesModule();
     } else if (act.type === 'objets_materiaux') {
         openObjetMateriauxModule();
+    } else if (act.type === 'fiches') {
+        openFichesModule();
     }
 }

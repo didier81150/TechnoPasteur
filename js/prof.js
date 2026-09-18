@@ -95,6 +95,7 @@ function switchProfTab(tabName) {
     if (panel) panel.style.display = 'block';
 
     if (tabName === 'unlock') renderUnlockManagement();
+    if (tabName === 'fiches' && typeof renderProfFichesManagement === 'function') renderProfFichesManagement();
 }
 
 // ----------------------------------------------------
