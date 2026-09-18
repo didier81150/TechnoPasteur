@@ -151,6 +151,16 @@ const ACTIVITIES_DATABASE = [
         pdfUrl: "https://drive.google.com"
     },
     {
+        id: "4_capteurs_actionneurs",
+        niveau: "4eme",
+        titre: "Non, les robots n’ont pas de super-pouvoirs",
+        type: "capteurs_actionneurs",
+        badgeText: "Module",
+        badgeClass: "badge-qcm",
+        description: "Capteurs, détecteurs, actionneurs, interfaces… On explique clairement le rôle de chacun dans la chaîne d’un robot.",
+        defaultUnlocked: false
+    },
+    {
         id: "4_module_objets_materiaux",
         niveau: "4eme",
         titre: "Module – Objets & Matériaux",
