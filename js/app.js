@@ -64,8 +64,25 @@ function isActivityUnlocked(activityId) {
     // Récupérer le déverrouillage local (localStorage)
     try {
         const localUnlocks = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY_UNLOCKS)) || {};
-        if (localUnlocks[activityId] !== undefined) {
-            return localUnlocks[activityId];
+        const actCode = act.code || act.id;
+
+        // Check student class specific unlock first if logged in
+        if (currentStudent && currentStudent.classe) {
+            const classKey = `${actCode}_${currentStudent.classe}`;
+            if (localUnlocks[classKey] !== undefined) {
+                return localUnlocks[classKey];
+            }
+        }
+
+        // Check "ALL" class unlock
+        const allKey = `${actCode}_ALL`;
+        if (localUnlocks[allKey] !== undefined) {
+            return localUnlocks[allKey];
+        }
+
+        // Check global actCode unlock
+        if (localUnlocks[actCode] !== undefined) {
+            return localUnlocks[actCode];
         }
     } catch (e) {
         console.warn("Erreur de lecture du stockage des déverrouillages :", e);
