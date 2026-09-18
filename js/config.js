@@ -24,7 +24,18 @@ const CONFIG = {
     PPA_BONUS_PERCENTAGE: 15,
     STORAGE_KEY_RESULTS: "qcm_materiaux_resultats",
     STORAGE_KEY_UNLOCKS: "site_techno_unlocked_activities",
+    STORAGE_KEY_FICHES: "site_techno_fiches_syntheses",
 };
+
+// Chapitres et catégories pour les Fiches Synthèses & Cartes Mentales
+const FICHES_CATEGORIES = [
+    { id: "cat_1", title: "1. Design, innovation et créativité", icon: "🎨" },
+    { id: "cat_2", title: "2. Objets techniques et changements induits dans la société", icon: "⚙️" },
+    { id: "cat_3", title: "3. Modélisation et simulation des objets et systèmes techniques", icon: "📐" },
+    { id: "cat_4", title: "4. Informatique et programmation", icon: "💻" },
+    { id: "cat_5", title: "5. Éducation aux médias et à l'information", icon: "📰" },
+    { id: "cat_6", title: "6. Toute la technologie en cartes mentales", icon: "🧠" }
+];
 
 // Helper global d'envoi de données vers Google Apps Script Web App
 async function sendDataToGoogleAppsScript(payload, customUrl) {
@@ -60,6 +71,38 @@ async function sendDataToGoogleAppsScript(payload, customUrl) {
 
 // Base de données unifiée des activités par niveau
 const ACTIVITIES_DATABASE = [
+    // --- Common Activities across levels ---
+    {
+        id: "5_fiches_synthese",
+        niveau: "5eme",
+        titre: "Fiches Synthèses & Cartes Mentales",
+        type: "fiches",
+        badgeText: "Fiches",
+        badgeClass: "badge-pdf",
+        description: "Accès aux 5 chapitres de fiches synthèses et à la carte mentale globale du collège.",
+        defaultUnlocked: true
+    },
+    {
+        id: "4_fiches_synthese",
+        niveau: "4eme",
+        titre: "Fiches Synthèses & Cartes Mentales",
+        type: "fiches",
+        badgeText: "Fiches",
+        badgeClass: "badge-pdf",
+        description: "Accès aux 5 chapitres de fiches synthèses et à la carte mentale globale du collège.",
+        defaultUnlocked: true
+    },
+    {
+        id: "3_fiches_synthese",
+        niveau: "3eme",
+        titre: "Fiches Synthèses & Cartes Mentales",
+        type: "fiches",
+        badgeText: "Fiches",
+        badgeClass: "badge-pdf",
+        description: "Accès aux 5 chapitres de fiches synthèses et à la carte mentale globale du collège.",
+        defaultUnlocked: true
+    },
+
     // --- 5ème ---
     {
         id: "5_qcm_besoins",
