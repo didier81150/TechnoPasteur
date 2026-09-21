@@ -188,9 +188,26 @@ const ACTIVITIES_DATABASE = [
         type: "pdf",
         badgeText: "PDF",
         badgeClass: "badge-pdf",
-        description: "Fiche de cours résumant conductivité, masse volumique et tenue mécanique.",
+        description: "Documents et fiches de cours résumant les familles et propriétés des matériaux.",
         defaultUnlocked: true,
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+        pdfList: [
+            { titre: "Document 1 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/18xyaYbOk3_rr_HFoffTTj4g2opWDyzZL/view?usp=sharing" },
+            { titre: "Document 2 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/1J7sQ6a89ZtAoxqcWq6fKucfED_p3EObV/view?usp=drive_link" },
+            { titre: "Document 3 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/1lSx-KIS1Ygt1-7DdxG5k4ZhturMiTPXd/view?usp=drive_link" },
+            { titre: "Document 4 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/1Bjs3WUbM_8uQpoNMKX_ftpb8VjHkHNdh/view?usp=drive_link" },
+            { titre: "Document 5 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/1xjwRWG1xqopa4yf--8UlVb_peGvxUx8F/view?usp=drive_link" },
+            { titre: "Document 6 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/1Ro1BS2vfNQTs1OzN1JnhB0TcgrIdVXZO/view?usp=drive_link" }
+        ]
+    },
+    {
+        id: "4_mbot",
+        niveau: "4eme",
+        titre: "À la découverte du MBOT",
+        type: "mbot",
+        badgeText: "Vidéo",
+        badgeClass: "badge-video",
+        description: "Mais comment ça marche ? Découverte du robot programmable mBot à travers 6 capsules vidéo.",
+        defaultUnlocked: true
     },
 
     // --- 3ème ---
