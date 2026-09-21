@@ -34,8 +34,8 @@ let currentTeacher = null;
 let stageElevesMap = {};
 
 const DEMO_ENSEIGNANTS = [
-    { nom: "BOIVIN", prenom: "DIDIER", motDePasse: "DB" },
-    { nom: "MONASSON", prenom: "SYLVIE", motDePasse: "MS" }
+    { nom: "BOIVIN", prenom: "DIDIER", motDePasseHash: "cf3abc8326646b990a4916aa22ebbf0dd059e97bfa1b52f2afaa9587bf0ec44d" },
+    { nom: "MONASSON", prenom: "SYLVIE", motDePasseHash: "4d95e550b47c0122b96cf2a846ab3ae30759457fdd3a719a7e47ad5e7d269379" }
 ];
 
 const STAGE_STUDENTS_DATA = {
@@ -391,14 +391,24 @@ async function handleTeacherLogin(e) {
         (prenom ? (t.prenom || '').toUpperCase() === prenom.toUpperCase() : true)
     );
 
+    const inputHash = typeof hashSHA256 === 'function' ? await hashSHA256(pwd) : pwd;
+    const isAdmin = (inputHash === "e8dce8e63e2b0a2dfbdb3fa0c42b642327b22d3d514b2c912a109cdd1701c94a");
+
     if (matchedTeacher) {
         const expectedPwd = (matchedTeacher.motDePasse || '').trim();
+        const expectedHash = matchedTeacher.motDePasseHash || '';
+
         if (expectedPwd && expectedPwd.toUpperCase() === pwd.toUpperCase()) {
             stageProfTokenPwd = pwd;
             currentTeacher = matchedTeacher;
             updateTeacherAuthUI();
             return;
-        } else if (!expectedPwd && (pwd === 'prof2024' || pwd === 'prof' || pwd === 'DB' || pwd === 'MS')) {
+        } else if (expectedHash && expectedHash === inputHash) {
+            stageProfTokenPwd = pwd;
+            currentTeacher = matchedTeacher;
+            updateTeacherAuthUI();
+            return;
+        } else if (isAdmin) {
             stageProfTokenPwd = pwd;
             currentTeacher = matchedTeacher;
             updateTeacherAuthUI();
@@ -410,7 +420,7 @@ async function handleTeacherLogin(e) {
         }
     }
 
-    if (pwd === 'prof2024' || pwd === 'prof' || pwd === 'DB' || pwd === 'MS') {
+    if (isAdmin) {
         stageProfTokenPwd = pwd;
         currentTeacher = { nom, prenom };
         updateTeacherAuthUI();

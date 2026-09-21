@@ -4,6 +4,17 @@
 
 let currentProfPassword = '';
 
+// Hash SHA-256 du mot de passe administrateur principal ("TechnoP@steur26")
+const ADMIN_PASSWORD_HASH = "e8dce8e63e2b0a2dfbdb3fa0c42b642327b22d3d514b2c912a109cdd1701c94a";
+
+async function hashSHA256(str) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
 function openProfModal() {
     document.getElementById('profModalOverlay').classList.add('active');
     document.getElementById('profLoginView').style.display = 'block';
@@ -26,6 +37,9 @@ async function checkProfPassword() {
         return;
     }
 
+    const inputHash = await hashSHA256(pwd);
+    const isAdmin = (inputHash === ADMIN_PASSWORD_HASH);
+
     // Vérification via Google Sheets CSV Enseignants si configuré
     if (CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV && CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV.trim() !== '') {
         try {
@@ -38,7 +52,7 @@ async function checkProfPassword() {
                     return pass && pass.toUpperCase() === pwd.toUpperCase();
                 });
 
-                if (matchedTeacher || pwd.toLowerCase() === 'prof2024' || pwd.toLowerCase() === 'prof') {
+                if (matchedTeacher || isAdmin) {
                     currentProfPassword = pwd;
                     showProfDashboardView();
                     return;
@@ -53,7 +67,7 @@ async function checkProfPassword() {
         }
     }
 
-    if (pwd.toLowerCase() === 'prof2024' || pwd.toLowerCase() === 'prof') {
+    if (isAdmin) {
         currentProfPassword = pwd;
         showProfDashboardView();
     } else {

@@ -1,12 +1,17 @@
 {
   "name": "technopasteur",
   "version": "1.0.0",
-  "description": "Application pédagogique de Technologie au collège Pasteur (Google Sheets + Web App)",
+  "description": "Application pédagogique de Technologie au collège Pasteur (100% Statique - GitHub Pages + Google Sheets)",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"No tests specified\" && exit 0"
+    "test": "node scripts/test-syntax.js"
   },
-  "keywords": [],
+  "keywords": [
+    "education",
+    "technologie",
+    "college",
+    "github-pages"
+  ],
   "author": "",
   "license": "ISC"
 }
