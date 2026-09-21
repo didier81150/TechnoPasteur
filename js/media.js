@@ -37,6 +37,36 @@ function openPdfViewer(activity) {
             `;
         }).join('');
 
+        let videoHTML = '';
+        if (activity.youtubeVideo) {
+            const safeVidTitle = escapeHTML(activity.youtubeVideo.title);
+            const safeEmbedUrl = escapeHTML(activity.youtubeVideo.embedUrl);
+            const safeVidUrl = escapeHTML(activity.youtubeVideo.url);
+
+            videoHTML = `
+                <div style="background: white; border-radius: 16px; padding: 22px; margin-bottom: 25px; box-shadow: var(--shadow-md); border: 1px solid var(--border);">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px;">
+                        <h3 style="margin: 0; color: var(--navy); font-size: 1.2rem; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+                            <span style="background: #EF4444; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">🎬 Vidéo YouTube</span>
+                            ${safeVidTitle}
+                        </h3>
+                        <a href="${safeVidUrl}" target="_blank" rel="noopener noreferrer" class="btn-primary" style="text-decoration: none; padding: 8px 16px; border-radius: 20px; font-size: 0.88rem; background: #FF0000; color: white; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
+                            ▶️ Voir la vidéo : ${safeVidTitle}
+                        </a>
+                    </div>
+                    <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: #000;">
+                        <iframe
+                            src="${safeEmbedUrl}"
+                            title="${safeVidTitle}"
+                            style="position: absolute; top:0; left:0; width: 100%; height: 100%; border:0;"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen
+                        ></iframe>
+                    </div>
+                </div>
+            `;
+        }
+
         container.innerHTML = `
             <div class="media-container" style="max-width: 950px; margin: 0 auto;">
                 <div class="media-header" style="margin-bottom: 25px;">
@@ -45,6 +75,7 @@ function openPdfViewer(activity) {
                         <p style="color: var(--text-muted); font-size: 0.95rem; margin-top: 4px;">${safeDesc}</p>
                     </div>
                 </div>
+                ${videoHTML}
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
                     ${cardsHTML}
                 </div>
