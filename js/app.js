@@ -156,5 +156,7 @@ function launchActivity(activityId) {
         openCapteursActionneursModule();
     } else if (act.type === 'fiches') {
         openFichesModule();
+    } else if (act.type === 'mbot') {
+        openMbotModule(act);
     }
 }
