@@ -111,15 +111,15 @@ function refreshCurrentDashboard() {
 
         card.innerHTML = `
             <div>
-                <span class="activity-badge-type ${act.badgeClass}">${act.badgeText}</span>
-                <h3 class="activity-title">${act.titre}</h3>
-                <p class="activity-desc">${act.description}</p>
+                <span class="activity-badge-type ${escapeHTML(act.badgeClass)}">${escapeHTML(act.badgeText)}</span>
+                <h3 class="activity-title">${escapeHTML(act.titre)}</h3>
+                <p class="activity-desc">${escapeHTML(act.description)}</p>
             </div>
             <div class="activity-footer">
                 <span class="activity-status ${accessible ? 'status-unlocked' : 'status-locked'}">
                     ${statusText}
                 </span>
-                <button class="btn-start-activity" ${accessible ? '' : 'disabled'} onclick="launchActivity('${act.id}')">
+                <button class="btn-start-activity" ${accessible ? '' : 'disabled'} onclick="launchActivity('${escapeHTML(act.id)}')">
                     ${accessible ? 'Accéder →' : 'Inaccessible'}
                 </button>
             </div>

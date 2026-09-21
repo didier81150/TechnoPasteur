@@ -4,17 +4,6 @@
 
 let currentProfPassword = '';
 
-// Hash SHA-256 du mot de passe administrateur principal ("TechnoP@steur26")
-const ADMIN_PASSWORD_HASH = "e8dce8e63e2b0a2dfbdb3fa0c42b642327b22d3d514b2c912a109cdd1701c94a";
-
-async function hashSHA256(str) {
-    const encoder = new TextEncoder();
-    const data = encoder.encode(str);
-    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-    const hashArray = Array.from(new Uint8Array(hashBuffer));
-    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 function openProfModal() {
     document.getElementById('profModalOverlay').classList.add('active');
     document.getElementById('profLoginView').style.display = 'block';
@@ -37,10 +26,7 @@ async function checkProfPassword() {
         return;
     }
 
-    const inputHash = await hashSHA256(pwd);
-    const isAdmin = (inputHash === ADMIN_PASSWORD_HASH);
-
-    // Vérification via Google Sheets CSV Enseignants si configuré
+    // Vérification via Google Sheets CSV Enseignants
     if (CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV && CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV.trim() !== '') {
         try {
             const resp = await fetch(CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV);
@@ -52,7 +38,7 @@ async function checkProfPassword() {
                     return pass && pass.toUpperCase() === pwd.toUpperCase();
                 });
 
-                if (matchedTeacher || isAdmin) {
+                if (matchedTeacher) {
                     currentProfPassword = pwd;
                     showProfDashboardView();
                     return;
@@ -61,19 +47,21 @@ async function checkProfPassword() {
                     err.classList.add('active');
                     return;
                 }
+            } else {
+                err.textContent = '❌ Impossible de charger l\'annuaire des enseignants (erreur réseau).';
+                err.classList.add('active');
+                return;
             }
         } catch (e) {
             console.warn("⚠️ Échec de la vérification dans l'annuaire enseignant CSV :", e);
+            err.textContent = '❌ Erreur de connexion lors de la vérification du mot de passe.';
+            err.classList.add('active');
+            return;
         }
     }
 
-    if (isAdmin) {
-        currentProfPassword = pwd;
-        showProfDashboardView();
-    } else {
-        err.textContent = '❌ Mot de passe enseignant incorrect.';
-        err.classList.add('active');
-    }
+    err.textContent = '❌ Aucun annuaire enseignant configuré.';
+    err.classList.add('active');
 }
 
 function onProfNiveauChange() {
@@ -275,20 +263,26 @@ function renderProfSuiviTable(data) {
             const res = st.activityScores[act.code];
             if (!res) return `<td style="color:var(--text-muted);">—</td>`;
             const color = res.percentage >= 70 ? '#28a745' : (res.percentage >= 50 ? '#ffc107' : '#dc3545');
-            return `<td><span style="font-weight:700; color:${color};">${res.score}/${res.maxScore}</span> <small style="display:block; opacity:0.75;">(${res.percentage}%)</small></td>`;
+            return `<td><span style="font-weight:700; color:${color};">${escapeHTML(res.score)}/${escapeHTML(res.maxScore)}</span> <small style="display:block; opacity:0.75;">(${escapeHTML(res.percentage)}%)</small></td>`;
         }).join('');
 
-        let stageCell = is3eme ? `<td>${st.stageNote !== null ? `<strong style="color:#2563eb;">${st.stageNote}/20</strong>` : '—'}</td>` : '';
+        let stageCell = is3eme ? `<td>${st.stageNote !== null ? `<strong style="color:#2563eb;">${escapeHTML(st.stageNote)}/20</strong>` : '—'}</td>` : '';
+
+        const safeNom = escapeHTML(st.nom);
+        const safePrenom = escapeHTML(st.prenom);
+        const safeCodeSecret = escapeHTML(st.codeSecret);
+        const safeClasse = escapeHTML(st.classe);
+        const safeId = escapeHTML(st.id);
 
         return `
             <tr>
-                <td><strong>${st.nom}</strong> ${st.prenom} ${st.ppa ? '🎓' : ''}</td>
-                <td><code>${st.codeSecret}</code></td>
+                <td><strong>${safeNom}</strong> ${safePrenom} ${st.ppa ? '🎓' : ''}</td>
+                <td><code>${safeCodeSecret}</code></td>
                 ${actCells}
                 ${stageCell}
                 <td><strong>${st.nbActivitiesDone} / ${data.activities.length}</strong></td>
                 <td>
-                    <button class="btn-primary" style="padding:4px 10px; font-size:0.8rem; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;" onclick="openStudentDetailModal('${st.id}', '${st.nom}', '${st.prenom}', '${st.classe}')">🔎 Fiche</button>
+                    <button class="btn-primary" style="padding:4px 10px; font-size:0.8rem; background:var(--primary); color:white; border:none; border-radius:6px; cursor:pointer;" onclick="openStudentDetailModal('${safeId}', '${safeNom}', '${safePrenom}', '${safeClasse}')">🔎 Fiche</button>
                 </td>
             </tr>
         `;
@@ -357,15 +351,19 @@ function openStudentDetailModal(studentId, nom, prenom, classe) {
     let rowsHTML = results.length > 0 ? results.map((r, i) => `
         <tr>
             <td>#${results.length - i}</td>
-            <td><strong>${r.activityCode || r.quizType || 'QCM'}</strong></td>
-            <td><strong style="color:${(r.percentage || 0) >= 70 ? '#28a745' : '#dc3545'}">${r.score} / ${r.maxScore || 10}</strong></td>
-            <td>${r.dateStr || r.date || '—'}</td>
+            <td><strong>${escapeHTML(r.activityCode || r.quizType || 'QCM')}</strong></td>
+            <td><strong style="color:${(r.percentage || 0) >= 70 ? '#28a745' : '#dc3545'}">${escapeHTML(r.score)} / ${escapeHTML(r.maxScore || 10)}</strong></td>
+            <td>${escapeHTML(r.dateStr || r.date || '—')}</td>
         </tr>
     `).join('') : '<tr><td colspan="4" style="color:var(--text-muted); text-align:center;">Aucune tentative enregistrée localement dans le navigateur.</td></tr>';
 
+    const safeNom = escapeHTML(nom);
+    const safePrenom = escapeHTML(prenom);
+    const safeClasse = escapeHTML(classe);
+
     detailModal.innerHTML = `
         <div class="modal-box" style="max-width: 650px;">
-            <h3>📊 Historique de ${nom} ${prenom} (${classe})</h3>
+            <h3>📊 Historique de ${safeNom} ${safePrenom} (${safeClasse})</h3>
             <div id="studentDetailContent" style="margin-top:15px; max-height:400px; overflow-y:auto;">
                 <table class="results-table" style="width:100%; font-size:0.85rem;">
                     <thead>
@@ -375,7 +373,7 @@ function openStudentDetailModal(studentId, nom, prenom, classe) {
                 </table>
             </div>
             <div style="margin-top:20px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                <button onclick="resetStudentOmProgress('${nom}', '${prenom}', '${classe}')" style="background:#dc3545; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.85rem;">
+                <button onclick="resetStudentOmProgress('${safeNom}', '${safePrenom}', '${safeClasse}')" style="background:#dc3545; color:white; border:none; padding:8px 14px; border-radius:6px; font-weight:600; cursor:pointer; font-size:0.85rem;">
                     🗑️ Réinitialiser tentatives Objets & Matériaux
                 </button>
                 <button class="btn-close-modal" onclick="document.getElementById('studentDetailModal').classList.remove('active')" style="margin-top:0;">Fermer</button>
@@ -431,14 +429,14 @@ function renderLocalResultsTable() {
 
     let tableRows = rows.map(r => `
         <tr>
-            <td>${r.nom}</td>
-            <td>${r.prenom}</td>
-            <td>${r.classe}</td>
-            <td>${r.score1 !== '' ? r.score1 + '/10' : '—'}</td>
-            <td>${r.score2 !== '' ? r.score2 + '/10' : '—'}</td>
-            <td>${r.score3 !== '' ? r.score3 + '/10' : '—'}</td>
-            <td>${r.pourcentage}%</td>
-            <td>${r.lastDate}</td>
+            <td>${escapeHTML(r.nom)}</td>
+            <td>${escapeHTML(r.prenom)}</td>
+            <td>${escapeHTML(r.classe)}</td>
+            <td>${r.score1 !== '' ? escapeHTML(r.score1) + '/10' : '—'}</td>
+            <td>${r.score2 !== '' ? escapeHTML(r.score2) + '/10' : '—'}</td>
+            <td>${r.score3 !== '' ? escapeHTML(r.score3) + '/10' : '—'}</td>
+            <td>${escapeHTML(r.pourcentage)}%</td>
+            <td>${escapeHTML(r.lastDate)}</td>
         </tr>
     `).join('');
 

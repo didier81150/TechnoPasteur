@@ -305,7 +305,7 @@ function generateQuestions(questions) {
         const optionsHTML = q.options.map((opt, optIndex) => `
             <div class="option" id="opt-${index}-${optIndex}" onclick="selectOption(${index}, ${optIndex})">
                 <input type="radio" name="q${index}" value="${optIndex}">
-                <label>${String.fromCharCode(65 + optIndex)}. ${opt}</label>
+                <label>${String.fromCharCode(65 + optIndex)}. ${escapeHTML(opt)}</label>
             </div>
         `).join('');
 
@@ -313,7 +313,7 @@ function generateQuestions(questions) {
             <div class="question-header">
                 <span class="question-number">Question ${index + 1} / ${questions.length}</span>
             </div>
-            <p class="question-text">${q.question}</p>
+            <p class="question-text">${escapeHTML(q.question)}</p>
             <div class="options">${optionsHTML}</div>
             <div class="explanation" id="explanation-${index}"></div>
             <button class="btn-next" id="btnNext-${index}" onclick="nextQuestion()">

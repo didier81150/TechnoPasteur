@@ -25,7 +25,7 @@ function openAnalyseModule(activity) {
     const durationMinutes = isPapStudent ? 20 : 15;
 
     const studentInfo = currentStudent
-        ? `${currentStudent.nom.toUpperCase()} ${currentStudent.prenom} (${currentStudent.classe})`
+        ? escapeHTML(`${currentStudent.nom.toUpperCase()} ${currentStudent.prenom} (${currentStudent.classe})`)
         : 'Anonyme';
 
     const pdfLink = activity && activity.pdfUrl ? activity.pdfUrl : 'https://drive.google.com';
@@ -437,11 +437,11 @@ function initAnalyseLogic() {
             const data = corrections[currentObject];
             if (correctionText) {
                 correctionText.innerHTML = `
-                    <strong>Produit :</strong> ${data.produit}<br>
-                    <strong>Utilisateur :</strong> ${data.utilisateur}<br>
-                    <strong>Matière d'œuvre :</strong> ${data.matiere}<br>
-                    <strong>Fonction d'usage :</strong> ${data.fonction}<br>
-                    <strong>Phrase :</strong> <em>${data.phrase}</em>
+                    <strong>Produit :</strong> ${escapeHTML(data.produit)}<br>
+                    <strong>Utilisateur :</strong> ${escapeHTML(data.utilisateur)}<br>
+                    <strong>Matière d'œuvre :</strong> ${escapeHTML(data.matiere)}<br>
+                    <strong>Fonction d'usage :</strong> ${escapeHTML(data.fonction)}<br>
+                    <strong>Phrase :</strong> <em>${escapeHTML(data.phrase)}</em>
                 `;
             }
             if (correctionExample) correctionExample.style.display = 'block';
