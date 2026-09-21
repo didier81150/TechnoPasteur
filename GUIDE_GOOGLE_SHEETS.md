@@ -1,6 +1,6 @@
 # 📊 Guide de Configuration Google Sheets — TechnoPasteur
 
-Ce guide vous explique pas à pas comment utiliser **Google Sheets** pour gérer l'annuaire de vos élèves, l'annuaire des enseignants, et la réception automatique des notes sans aucune dépendance à un serveur backend ou à MongoDB.
+Ce guide vous explique pas à pas comment utiliser **Google Sheets** pour gérer l'annuaire de vos élèves, l'annuaire des enseignants, et la réception automatique des notes sans aucune dépendance à un serveur backend.
 
 ---
 

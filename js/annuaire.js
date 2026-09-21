@@ -226,9 +226,7 @@ async function handleLogin(event) {
             const expectedPassword = (eleve.motDePasse || '').trim();
             const inputPassword = codeSecret.trim();
 
-            const isMasterPassword = (inputPassword === '1234' || inputPassword === 'demo' || inputPassword === 'prof2024' || inputPassword === 'prof');
-
-            if ((expectedPassword && inputPassword.toUpperCase() === expectedPassword.toUpperCase()) || isMasterPassword) {
+            if (expectedPassword && inputPassword.toUpperCase() === expectedPassword.toUpperCase()) {
                 currentStudent = eleve;
                 showDashboard(eleve.niveau);
                 return;
