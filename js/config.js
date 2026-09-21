@@ -190,6 +190,11 @@ const ACTIVITIES_DATABASE = [
         badgeClass: "badge-pdf",
         description: "Documents et fiches de cours résumant les familles et propriétés des matériaux.",
         defaultUnlocked: true,
+        youtubeVideo: {
+            title: "Propriétés des matériaux en technologie",
+            url: "https://www.youtube.com/watch?v=cpNMr0cZlRI&t=8s",
+            embedUrl: "https://www.youtube.com/embed/cpNMr0cZlRI?start=8"
+        },
         pdfList: [
             { titre: "Document 1 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/18xyaYbOk3_rr_HFoffTTj4g2opWDyzZL/view?usp=sharing" },
             { titre: "Document 2 – Propriétés des Matériaux", url: "https://drive.google.com/file/d/1J7sQ6a89ZtAoxqcWq6fKucfED_p3EObV/view?usp=drive_link" },
