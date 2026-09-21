@@ -554,7 +554,7 @@ function initCapteursActionneursQuiz() {
         row.className = 'ca-quiz-item';
 
         const label = document.createElement('span');
-        label.innerHTML = `<strong>${i+1}.</strong> ${q.item}`;
+        label.innerHTML = `<strong>${i+1}.</strong> ${escapeHTML(q.item)}`;
         row.appendChild(label);
 
         const btnGroup = document.createElement('div');

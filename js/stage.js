@@ -33,15 +33,13 @@ let enseignantsList = [];
 let currentTeacher = null;
 let stageElevesMap = {};
 
-const DEMO_ENSEIGNANTS = [
-    { nom: "BOIVIN", prenom: "DIDIER", motDePasseHash: "cf3abc8326646b990a4916aa22ebbf0dd059e97bfa1b52f2afaa9587bf0ec44d" },
-    { nom: "MONASSON", prenom: "SYLVIE", motDePasseHash: "4d95e550b47c0122b96cf2a846ab3ae30759457fdd3a719a7e47ad5e7d269379" }
-];
+const DEMO_ENSEIGNANTS = [];
 
+// Données de démonstration anonymisées (sans aucune donnée réelle d'élève)
 const STAGE_STUDENTS_DATA = {
-    "301": ["AMRI Younes","ANAASSOUME Wessal","BEAUCERF Aaron","BEN KALLAL Lina","BONAFOUS--DUBREUIL Lylou","BRUSTET-DUCREUX Sasha","DECAIX Clara","EDDAHBI Karim","FABRIES Malicia","GENCE Atilio","GONCALVES Maély","GUFFROY Thomas","HAMI Salma","HURCET Kais","KAOUANE Samir"],
-    "302": ["KHÉLAÏFIA Oumrane","LE BECACHEL Louane","MAHDAOUI Camilia","MAURIES Charlotte","MAYMOUN YAKOUB Ismail","PEREIRA-AMO Fabio","ROBERT Kenzo","TABOUCHE BENMOKKADEM Idriss"],
-    "303": ["ALEGRE Anaelle","BUSSARD Amaëlys","CAPILLION Leeloo","CARDONA Tom","CORDEIRO Hugo","DA CUNHA Angelo","DAOUDI Lina","DEHU Milo","DRIS Jounaïdi","EL FAKIR Camélia","FAURE Lola","LEMIRRE-JOSSET William","LIGNEUL Damien","MAJDOUBI Wassil","MANSOURI Syrine","NESPOULOUS Izia","PAQUENTIN Davy","PLANCHENAULT FELLER Heather","RAMOS Julia","RICARDO Maéva","TALBOT Apreel","TEFFAHI Hinde","ZAYAN Mohamed"]
+    "301": ["ELEVE Test1", "ELEVE Test2"],
+    "302": ["ELEVE Test3", "ELEVE Test4"],
+    "303": ["ELEVE Test5", "ELEVE Test6"]
 };
 
 async function loadEnseignants() {
@@ -179,12 +177,12 @@ async function openStageModule(activity, isTeacherAccess = false) {
                     <div class="stage-docs-grid">
                         ${STAGE_DOCUMENTS.map(doc => `
                             <div class="stage-doc-card">
-                                <div class="stage-doc-icon">${doc.icon}</div>
+                                <div class="stage-doc-icon">${escapeHTML(doc.icon)}</div>
                                 <div class="stage-doc-info">
-                                    <h4>${doc.titre}</h4>
-                                    <p>${doc.description}</p>
+                                    <h4>${escapeHTML(doc.titre)}</h4>
+                                    <p>${escapeHTML(doc.description)}</p>
                                 </div>
-                                <a href="${doc.url}" target="_blank" download class="btn-download-doc">
+                                <a href="${escapeHTML(doc.url)}" target="_blank" download class="btn-download-doc">
                                     ⬇️ Télécharger
                                 </a>
                             </div>
@@ -359,7 +357,7 @@ function updateTeacherAuthUI() {
     } else {
         authBlock.style.display = 'none';
         const teacherName = currentTeacher.prenom ? `${currentTeacher.nom} ${currentTeacher.prenom}` : currentTeacher.nom;
-        if (bannerText) bannerText.innerHTML = `👨‍🏫 Enseignant identifié : <strong>${teacherName}</strong>`;
+        if (bannerText) bannerText.innerHTML = `👨‍🏫 Enseignant identifié : <strong>${escapeHTML(teacherName)}</strong>`;
         if (profDisplay) profDisplay.value = teacherName;
         if (banner) banner.style.display = 'flex';
         if (saisieContent) saisieContent.style.display = 'block';
@@ -391,24 +389,10 @@ async function handleTeacherLogin(e) {
         (prenom ? (t.prenom || '').toUpperCase() === prenom.toUpperCase() : true)
     );
 
-    const inputHash = typeof hashSHA256 === 'function' ? await hashSHA256(pwd) : pwd;
-    const isAdmin = (inputHash === "e8dce8e63e2b0a2dfbdb3fa0c42b642327b22d3d514b2c912a109cdd1701c94a");
-
     if (matchedTeacher) {
         const expectedPwd = (matchedTeacher.motDePasse || '').trim();
-        const expectedHash = matchedTeacher.motDePasseHash || '';
 
         if (expectedPwd && expectedPwd.toUpperCase() === pwd.toUpperCase()) {
-            stageProfTokenPwd = pwd;
-            currentTeacher = matchedTeacher;
-            updateTeacherAuthUI();
-            return;
-        } else if (expectedHash && expectedHash === inputHash) {
-            stageProfTokenPwd = pwd;
-            currentTeacher = matchedTeacher;
-            updateTeacherAuthUI();
-            return;
-        } else if (isAdmin) {
             stageProfTokenPwd = pwd;
             currentTeacher = matchedTeacher;
             updateTeacherAuthUI();
@@ -418,13 +402,6 @@ async function handleTeacherLogin(e) {
             errDiv.style.display = 'block';
             return;
         }
-    }
-
-    if (isAdmin) {
-        stageProfTokenPwd = pwd;
-        currentTeacher = { nom, prenom };
-        updateTeacherAuthUI();
-        return;
     }
 
     errDiv.textContent = '❌ Enseignant non trouvé ou mot de passe incorrect.';
@@ -553,7 +530,7 @@ async function handleStageNoteSubmit(e) {
         msgDiv.style.display = 'block';
         msgDiv.style.background = '#ecfdf5';
         msgDiv.style.color = '#065f46';
-        msgDiv.innerHTML = `✅ Note de <strong>${noteVal}/20</strong> enregistrée avec succès pour <strong>${eleveObj.nom} ${eleveObj.prenom}</strong> !`;
+        msgDiv.innerHTML = `✅ Note de <strong>${escapeHTML(noteVal)}/20</strong> enregistrée avec succès pour <strong>${escapeHTML(eleveObj.nom)} ${escapeHTML(eleveObj.prenom)}</strong> !`;
         noteInput.value = '';
     } else {
         msgDiv.style.display = 'block';
@@ -636,22 +613,30 @@ async function loadStageNotes() {
     }
 
     const tableRows = allStudentRows.map(r => {
+        const safeNom = escapeHTML(r.nom);
+        const safePrenom = escapeHTML(r.prenom);
+        const safeClasse = escapeHTML(r.classe);
+        const safeNote = escapeHTML(r.note);
+        const safeCommentaire = escapeHTML(r.commentaire);
+        const safeProf = escapeHTML(r.prof);
+        const safeDate = escapeHTML(r.date);
+
         if (r.hasNote) {
             return `
                 <tr style="background: #F0FDF4;">
-                    <td><strong>${r.nom}</strong> ${r.prenom}</td>
-                    <td>${r.classe}</td>
-                    <td><strong style="color: #16A34A; font-size: 1.05rem;">${r.note} / 20</strong></td>
-                    <td>${r.commentaire}</td>
-                    <td>${r.prof}</td>
-                    <td>${r.date}</td>
+                    <td><strong>${safeNom}</strong> ${safePrenom}</td>
+                    <td>${safeClasse}</td>
+                    <td><strong style="color: #16A34A; font-size: 1.05rem;">${safeNote} / 20</strong></td>
+                    <td>${safeCommentaire}</td>
+                    <td>${safeProf}</td>
+                    <td>${safeDate}</td>
                 </tr>
             `;
         } else {
             return `
                 <tr style="background: #FEF2F2; border-left: 4px solid #EF4444;">
-                    <td><strong>${r.nom}</strong> ${r.prenom}</td>
-                    <td>${r.classe}</td>
+                    <td><strong>${safeNom}</strong> ${safePrenom}</td>
+                    <td>${safeClasse}</td>
                     <td><span style="background: #FEE2E2; color: #DC2626; font-weight: 800; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem;">⚠️ Note non saisie (Oublié ?)</span></td>
                     <td style="color: #DC2626; font-style: italic;">Saisie manquante</td>
                     <td>—</td>

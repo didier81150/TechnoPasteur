@@ -127,22 +127,25 @@ function renderStudentFichesView(container) {
         currentList.forEach((item, index) => {
             const previewUrl = formatGoogleDriveUrl(item.url, "preview");
             const viewUrl = formatGoogleDriveUrl(item.url, "view");
-            const downloadUrl = formatGoogleDriveUrl(item.url, "download");
+
+            const safeTitle = escapeHTML(item.title || `Document ${index + 1}`);
+            const safeDesc = escapeHTML(item.description || "Fiche de synthèse consultable en ligne.");
+            const safeViewUrl = escapeHTML(viewUrl);
 
             html += `
                 <div class="fiche-card">
                     <div class="fiche-card-header">
                         <span class="fiche-badge">📄 PDF</span>
-                        <h4 class="fiche-title">${item.title || `Document ${index + 1}`}</h4>
+                        <h4 class="fiche-title">${safeTitle}</h4>
                     </div>
                     <div class="fiche-card-body">
-                        <p class="fiche-desc">${item.description || "Fiche de synthèse consultable en ligne."}</p>
+                        <p class="fiche-desc">${safeDesc}</p>
                     </div>
                     <div class="fiche-card-actions">
-                        <button class="btn-fiche-view" onclick="openFicheViewerModal('${encodeURIComponent(item.title)}', '${encodeURIComponent(previewUrl)}')">
+                        <button class="btn-fiche-view" onclick="openFicheViewerModal('${encodeURIComponent(item.title || '')}', '${encodeURIComponent(previewUrl)}')">
                             👁️ Consulter
                         </button>
-                        <a href="${viewUrl}" target="_blank" class="btn-fiche-external" title="Ouvrir dans Google Drive">
+                        <a href="${safeViewUrl}" target="_blank" class="btn-fiche-external" title="Ouvrir dans Google Drive">
                             ↗️
                         </a>
                     </div>
@@ -264,15 +267,20 @@ function renderProfFichesManagement() {
         html += `<p style="color:#64748b; font-style:italic;">Aucun document ajouté dans cet onglet.</p>`;
     } else {
         currentDocs.forEach((doc, idx) => {
+            const safeTitle = escapeHTML(doc.title || 'Sans titre');
+            const safeUrl = escapeHTML(doc.url);
+            const safeDesc = doc.description ? escapeHTML(doc.description) : '';
+            const safeViewUrl = escapeHTML(formatGoogleDriveUrl(doc.url, "view"));
+
             html += `
                 <div style="display:flex; align-items:center; justify-content:space-between; background:white; padding:12px 16px; border-radius:8px; border:1px solid #e2e8f0;">
                     <div style="flex:1; padding-right:15px;">
-                        <strong style="color:#0f172a; display:block;">📄 ${doc.title || 'Sans titre'}</strong>
-                        <span style="font-size:0.82rem; color:#64748b; word-break:break-all;">${doc.url}</span>
-                        ${doc.description ? `<p style="font-size:0.85rem; color:#475569; margin:4px 0 0 0;">${doc.description}</p>` : ''}
+                        <strong style="color:#0f172a; display:block;">📄 ${safeTitle}</strong>
+                        <span style="font-size:0.82rem; color:#64748b; word-break:break-all;">${safeUrl}</span>
+                        ${safeDesc ? `<p style="font-size:0.85rem; color:#475569; margin:4px 0 0 0;">${safeDesc}</p>` : ''}
                     </div>
                     <div style="display:flex; gap:8px;">
-                        <a href="${formatGoogleDriveUrl(doc.url, "view")}" target="_blank" style="background:#e2e8f0; color:#0f172a; text-decoration:none; padding:6px 10px; border-radius:6px; font-size:0.85rem; font-weight:600;">👁️ Tester</a>
+                        <a href="${safeViewUrl}" target="_blank" style="background:#e2e8f0; color:#0f172a; text-decoration:none; padding:6px 10px; border-radius:6px; font-size:0.85rem; font-weight:600;">👁️ Tester</a>
                         <button onclick="deleteFicheDocument(${idx})" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:0.85rem; font-weight:600; cursor:pointer;">🗑️ Supprimer</button>
                     </div>
                 </div>

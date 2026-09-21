@@ -2,6 +2,17 @@
 // CONFIGURATION GLOBALE & BASE DE DONNÉES DES ACTIVITÉS
 // =====================================================
 
+// Helper universel de sécurisation XSS contre les injections HTML
+function escapeHTML(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 const CONFIG = {
     // Mode de fonctionnement (100% Google Sheets)
     USE_GOOGLE_SHEETS: true,

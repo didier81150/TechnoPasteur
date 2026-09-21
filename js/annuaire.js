@@ -120,23 +120,14 @@ async function loadAnnuaire() {
         }
     }
 
-    // 2. Fallback annuaire de démonstration local
-    console.warn("⚠️ Google Sheets CSV non disponible, chargement de l'annuaire de démonstration local.");
-    loadDemoAnnuaire();
+    // 2. Traitement d'erreur si l'annuaire n'est pas accessible
+    console.warn("⚠️ Google Sheets CSV non disponible.");
+    annuaireEleves = [];
 
     if (btnLogin) {
         btnLogin.disabled = false;
-        btnLogin.textContent = '🟢 Se connecter et accéder aux activités';
+        btnLogin.textContent = '🔴 Annuaire indisponible (Vérifiez la connexion)';
     }
-}
-
-function loadDemoAnnuaire() {
-    annuaireEleves = [
-        { id: "1", nom: "DUPONT", prenom: "Lucas", classe: "401", niveau: "4eme", motDePasse: "A1B2", ppa: false, pap: false },
-        { id: "2", nom: "MARTIN", prenom: "Emma", classe: "402", niveau: "4eme", motDePasse: "C3D4", ppa: true, pap: true },
-        { id: "3", nom: "BERNARD", prenom: "Léo", classe: "501", niveau: "5eme", motDePasse: "E5F6", ppa: false, pap: false },
-        { id: "4", nom: "PETIT", prenom: "Chloé", classe: "301", niveau: "3eme", motDePasse: "G7H8", ppa: false, pap: false }
-    ];
 }
 
 // Remplissage en cascade (Niveau -> Classe -> Élève)
@@ -151,6 +142,13 @@ function onNiveauChange() {
     if (!niveau) {
         selectClasse.innerHTML = '<option value="">-- Sélectionnez d\'abord le niveau --</option>';
         selectClasse.disabled = true;
+        return;
+    }
+
+    if (annuaireEleves.length === 0) {
+        selectClasse.innerHTML = '<option value="">-- Annuaire indisponible (erreur réseau) --</option>';
+        selectClasse.disabled = true;
+        showLoginError("❌ L'annuaire des élèves n'a pas pu être chargé. Veuillez vérifier votre connexion Internet.");
         return;
     }
 

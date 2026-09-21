@@ -331,7 +331,7 @@ function renderEval3emeQuiz(container) {
                 <div>
                     <p style="font-size:0.85rem; color:var(--text-muted);">Élève</p>
                     <p style="font-weight:700; color:var(--primary); font-size:1.1rem;">
-                        ${eval3emeState.selectedStudent.prenom} ${eval3emeState.selectedStudent.nom} (${eval3emeState.selectedStudent.classe})
+                        ${escapeHTML(eval3emeState.selectedStudent.prenom)} ${escapeHTML(eval3emeState.selectedStudent.nom)} (${escapeHTML(eval3emeState.selectedStudent.classe)})
                         ${eval3emeState.pap ? '<span class="ppa-badge" style="margin-left:8px;">🎓 PPA / PAP (+20 min)</span>' : ''}
                     </p>
                 </div>
@@ -360,7 +360,7 @@ function renderEval3emeQuiz(container) {
                     <div style="background:var(--card-bg); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow); border-left:4px solid var(--secondary);">
                         <h3 style="font-size:1.1rem; color:var(--primary); margin-bottom:16px; display:flex; gap:12px; align-items:flex-start;">
                             <span style="background:var(--secondary); color:white; min-width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700; shrink:0;">${qIdx + 1}</span>
-                            <span>${q.q}</span>
+                            <span>${escapeHTML(q.q)}</span>
                         </h3>
                         <div style="display:flex; flex-direction:column; gap:10px;">
                             ${q.o.map((option, optIdx) => {
@@ -370,7 +370,7 @@ function renderEval3emeQuiz(container) {
                                         onclick="eval3emeSelectAnswer(${qIdx}, ${optIdx})"
                                         style="text-align:left; padding:14px 18px; border-radius:10px; border:2px solid ${isSelected ? 'var(--secondary)' : 'var(--border)'}; background:${isSelected ? '#E7F3FF' : '#F8F9FA'}; cursor:pointer; font-size:0.98rem; font-weight:${isSelected ? '600' : '400'}; color:var(--text); transition:all 0.2s;"
                                     >
-                                        <span style="display:inline-block; width:24px; font-weight:700; color:var(--secondary);">${String.fromCharCode(65 + optIdx)}.</span> ${option}
+                                        <span style="display:inline-block; width:24px; font-weight:700; color:var(--secondary);">${String.fromCharCode(65 + optIdx)}.</span> ${escapeHTML(option)}
                                     </button>
                                 `;
                             }).join('')}

@@ -125,7 +125,7 @@ function renderObjetMateriauxOverview(container) {
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                     <div>
                         <span style="font-size: 0.8rem; color: var(--turquoise); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Bilan Actuel</span>
-                        <h3 style="margin: 4px 0; font-size: 1.3rem;">${currentStudent ? `${currentStudent.prenom} ${currentStudent.nom} (${currentStudent.classe})` : 'Élève'}</h3>
+                        <h3 style="margin: 4px 0; font-size: 1.3rem;">${currentStudent ? escapeHTML(`${currentStudent.prenom} ${currentStudent.nom} (${currentStudent.classe})`) : 'Élève'}</h3>
                         <p style="margin: 0; font-size: 0.88rem; opacity: 0.8;">Progression : ${completedCount} / 3 sous-modules validés</p>
                     </div>
                     <div style="background: rgba(255,255,255,0.1); padding: 12px 20px; border-radius: 12px; text-align: center; border: 1px solid rgba(255,255,255,0.15);">
@@ -292,7 +292,7 @@ function generateOmQuestions(questions) {
         const optionsHTML = q.options.map((opt, optIndex) => `
             <div class="option" id="om-opt-${index}-${optIndex}" onclick="selectOmOption(${index}, ${optIndex})">
                 <input type="radio" name="om_q${index}" value="${optIndex}">
-                <label>${String.fromCharCode(65 + optIndex)}. ${opt}</label>
+                <label>${String.fromCharCode(65 + optIndex)}. ${escapeHTML(opt)}</label>
             </div>
         `).join('');
 
@@ -300,7 +300,7 @@ function generateOmQuestions(questions) {
             <div class="question-header">
                 <span class="question-number">Question ${index + 1} / ${questions.length}</span>
             </div>
-            <p class="question-text">${q.question}</p>
+            <p class="question-text">${escapeHTML(q.question)}</p>
             <div class="options">${optionsHTML}</div>
             <div class="explanation" id="om-explanation-${index}"></div>
             <button class="btn-next" id="omBtnNext-${index}" onclick="nextOmQuestion()">
