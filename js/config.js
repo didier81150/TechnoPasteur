@@ -230,13 +230,16 @@ const ACTIVITIES_DATABASE = [
     {
         id: "3_pdf_revisions",
         niveau: "3eme",
-        titre: "Fiche Synthèse – Fiche Brevet Technologie",
+        titre: "Fiches de cours",
         type: "pdf",
         badgeText: "PDF",
         badgeClass: "badge-pdf",
-        description: "Synthèse complète des révisions pour l'épreuve du Brevet des Collèges.",
+        description: "Documents et fiches de cours récapitulatifs pour le niveau 3ème.",
         defaultUnlocked: true,
-        pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+        pdfList: [
+            { titre: "Document 1 – Fiche de cours 3ème", url: "https://drive.google.com/file/d/17s110QLzrUtOj4Jlp_XorY7OFmASmmxV/view?usp=sharing" },
+            { titre: "Document 2 – Fiche de cours 3ème", url: "https://drive.google.com/file/d/1czYJS1h1cBAqJCOo6zajxg1FoLtRBhhB/view?usp=sharing" }
+        ]
     },
     {
         id: "3_video_robotique",
