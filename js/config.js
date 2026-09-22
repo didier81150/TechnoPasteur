@@ -237,8 +237,8 @@ const ACTIVITIES_DATABASE = [
         description: "Documents et fiches de cours récapitulatifs pour le niveau 3ème.",
         defaultUnlocked: true,
         pdfList: [
-            { titre: "Document 1 – Fiche de cours 3ème", url: "https://drive.google.com/file/d/17s110QLzrUtOj4Jlp_XorY7OFmASmmxV/view?usp=sharing" },
-            { titre: "Document 2 – Fiche de cours 3ème", url: "https://drive.google.com/file/d/1czYJS1h1cBAqJCOo6zajxg1FoLtRBhhB/view?usp=sharing" }
+            { titre: "La démarche projet", url: "https://drive.google.com/file/d/17s110QLzrUtOj4Jlp_XorY7OFmASmmxV/view?usp=sharing" },
+            { titre: "Chaîne d’information et chaîne d’énergie d'un OT", url: "https://drive.google.com/file/d/1czYJS1h1cBAqJCOo6zajxg1FoLtRBhhB/view?usp=sharing" }
         ]
     },
     {
