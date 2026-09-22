@@ -349,6 +349,11 @@ function updateTeacherAuthUI() {
 
     if (!authBlock) return;
 
+    if (!currentTeacher && typeof currentProfPassword !== 'undefined' && currentProfPassword.toUpperCase() === 'TECHNOP@STEUR26') {
+        stageProfTokenPwd = currentProfPassword;
+        currentTeacher = { nom: 'ADMINISTRATEUR', prenom: '', motDePasse: currentProfPassword };
+    }
+
     if (!stageProfTokenPwd || !currentTeacher) {
         authBlock.style.display = 'block';
         if (banner) banner.style.display = 'none';
@@ -373,6 +378,18 @@ async function handleTeacherLogin(e) {
     const errDiv = document.getElementById('teacherAuthError');
 
     errDiv.style.display = 'none';
+
+    if (pwd.toUpperCase() === 'TECHNOP@STEUR26') {
+        stageProfTokenPwd = pwd;
+        if (teacherVal) {
+            const [nom, prenom] = teacherVal.split('___');
+            currentTeacher = { nom: nom.toUpperCase(), prenom: prenom || '', motDePasse: pwd };
+        } else {
+            currentTeacher = { nom: 'ADMINISTRATEUR', prenom: '', motDePasse: pwd };
+        }
+        updateTeacherAuthUI();
+        return;
+    }
 
     if (!teacherVal) {
         errDiv.textContent = '⚠️ Veuillez sélectionner votre nom d\'enseignant.';

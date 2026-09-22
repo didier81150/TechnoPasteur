@@ -26,6 +26,13 @@ async function checkProfPassword() {
         return;
     }
 
+    // Vérification du mot de passe administrateur
+    if (pwd.toUpperCase() === 'TECHNOP@STEUR26') {
+        currentProfPassword = pwd;
+        showProfDashboardView();
+        return;
+    }
+
     // Vérification via Google Sheets CSV Enseignants
     if (CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV && CONFIG.GOOGLE_SHEET_ENSEIGNANTS_CSV.trim() !== '') {
         try {
