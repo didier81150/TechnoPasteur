@@ -158,5 +158,7 @@ function launchActivity(activityId) {
         openFichesModule();
     } else if (act.type === 'mbot') {
         openMbotModule(act);
+    } else if (act.type === 'robots') {
+        openRobotsModule(act);
     }
 }
