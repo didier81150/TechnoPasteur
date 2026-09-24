@@ -238,7 +238,8 @@ const ACTIVITIES_DATABASE = [
         defaultUnlocked: true,
         pdfList: [
             { titre: "La démarche projet", url: "https://drive.google.com/file/d/17s110QLzrUtOj4Jlp_XorY7OFmASmmxV/view?usp=sharing" },
-            { titre: "Chaîne d’information et chaîne d’énergie d'un OT", url: "https://drive.google.com/file/d/1czYJS1h1cBAqJCOo6zajxg1FoLtRBhhB/view?usp=sharing" }
+            { titre: "Chaîne d’information et chaîne d’énergie d'un OT", url: "https://drive.google.com/file/d/1czYJS1h1cBAqJCOo6zajxg1FoLtRBhhB/view?usp=sharing" },
+            { titre: "Le diagramme FAST", url: "https://docs.google.com/spreadsheets/d/12WUptiE4s0Xev6BHTKAjgqUIRhIZRv3NJ0Fe_HK7K8w/edit?usp=sharing" }
         ]
     },
     {
