@@ -61,17 +61,38 @@ function isActivityUnlocked(activityId) {
     const act = ACTIVITIES_DATABASE.find(a => a.id === activityId || a.code === activityId);
     if (!act) return false;
 
+    const actCode = act.code || act.id;
+
     // Récupérer le déverrouillage local (localStorage)
     try {
         const localUnlocks = JSON.parse(localStorage.getItem(CONFIG.STORAGE_KEY_UNLOCKS)) || {};
-        if (localUnlocks[activityId] !== undefined) {
-            return localUnlocks[activityId];
+
+        // 1. Vérifier si un déverrouillage spécifique à la classe de l'élève existe
+        if (typeof currentStudent !== 'undefined' && currentStudent && currentStudent.classe) {
+            const classKey = `${actCode}_${currentStudent.classe}`;
+            if (localUnlocks[classKey] !== undefined) {
+                return Boolean(localUnlocks[classKey]);
+            }
+        }
+
+        // 2. Vérifier si un déverrouillage pour "Toutes les classes" (_ALL) existe
+        const allKey = `${actCode}_ALL`;
+        if (localUnlocks[allKey] !== undefined) {
+            return Boolean(localUnlocks[allKey]);
+        }
+
+        // 3. Vérifier la clé simple d'activité
+        if (localUnlocks[actCode] !== undefined) {
+            return Boolean(localUnlocks[actCode]);
+        }
+        if (localUnlocks[act.id] !== undefined) {
+            return Boolean(localUnlocks[act.id]);
         }
     } catch (e) {
         console.warn("Erreur de lecture du stockage des déverrouillages :", e);
     }
 
-    return act.defaultUnlocked !== undefined ? act.defaultUnlocked : true;
+    return act.defaultUnlocked !== undefined ? Boolean(act.defaultUnlocked) : false;
 }
 
 function refreshCurrentDashboard() {

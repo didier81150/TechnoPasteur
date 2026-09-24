@@ -91,7 +91,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "Fiches",
         badgeClass: "badge-pdf",
         description: "Accès aux 5 chapitres de fiches synthèses et à la carte mentale globale du collège.",
-        defaultUnlocked: true
+        defaultUnlocked: false
     },
     {
         id: "4_fiches_synthese",
@@ -101,7 +101,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "Fiches",
         badgeClass: "badge-pdf",
         description: "Accès aux 5 chapitres de fiches synthèses et à la carte mentale globale du collège.",
-        defaultUnlocked: true
+        defaultUnlocked: false
     },
     {
         id: "3_fiches_synthese",
@@ -111,7 +111,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "Fiches",
         badgeClass: "badge-pdf",
         description: "Accès aux 5 chapitres de fiches synthèses et à la carte mentale globale du collège.",
-        defaultUnlocked: true
+        defaultUnlocked: false
     },
 
     // --- 5ème ---
@@ -123,7 +123,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "QCM",
         badgeClass: "badge-qcm",
         description: "Évaluation sur l'analyse du besoin, la fonction d'usage et la fonction d'estime des objets techniques.",
-        defaultUnlocked: true,
+        defaultUnlocked: false,
         quizId: "demo_5"
     },
     {
@@ -134,7 +134,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "PDF",
         badgeClass: "badge-pdf",
         description: "Document de cours récapitulatif sur l'origine et le classement des matériaux.",
-        defaultUnlocked: true,
+        defaultUnlocked: false,
         pdfUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
     },
     {
@@ -179,7 +179,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "Module",
         badgeClass: "badge-qcm",
         description: "Parcours en 3 étapes : Type d'objet, Objet & Matériaux 1, et Objet & Matériaux 2 avec déverrouillage progressif.",
-        defaultUnlocked: true
+        defaultUnlocked: false
     },
     {
         id: "4_pdf_materiaux",
@@ -189,7 +189,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "PDF",
         badgeClass: "badge-pdf",
         description: "Documents et fiches de cours résumant les familles et propriétés des matériaux.",
-        defaultUnlocked: true,
+        defaultUnlocked: false,
         youtubeVideo: {
             title: "Propriétés des matériaux en technologie",
             url: "https://www.youtube.com/watch?v=cpNMr0cZlRI&t=8s",
@@ -212,7 +212,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "Vidéo",
         badgeClass: "badge-video",
         description: "Mais comment ça marche ? Découverte du robot programmable mBot à travers 6 capsules vidéo.",
-        defaultUnlocked: true
+        defaultUnlocked: false
     },
 
     // --- 3ème ---
@@ -224,7 +224,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "QCM",
         badgeClass: "badge-qcm",
         description: "Évaluation sur la chaîne d'information, les capteurs et microcontrôleurs.",
-        defaultUnlocked: true,
+        defaultUnlocked: false,
         quizId: "demo_3"
     },
     {
@@ -235,7 +235,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "PDF",
         badgeClass: "badge-pdf",
         description: "Documents et fiches de cours récapitulatifs pour le niveau 3ème.",
-        defaultUnlocked: true,
+        defaultUnlocked: false,
         pdfList: [
             { titre: "Document 1 – Fiche de cours 3ème", url: "https://drive.google.com/file/d/17s110QLzrUtOj4Jlp_XorY7OFmASmmxV/view?usp=sharing" },
             { titre: "Document 2 – Fiche de cours 3ème", url: "https://drive.google.com/file/d/1czYJS1h1cBAqJCOo6zajxg1FoLtRBhhB/view?usp=sharing" }
@@ -260,7 +260,7 @@ const ACTIVITIES_DATABASE = [
         badgeText: "Stage",
         badgeClass: "badge-stage",
         description: "Espace Rapport de Stage : documents ressource, dépôt du rapport PDF et gestion des évaluations.",
-        defaultUnlocked: true
+        defaultUnlocked: false
     },
     {
         id: "3_eval_competences",

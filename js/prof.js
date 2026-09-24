@@ -123,16 +123,17 @@ function renderUnlockManagement() {
     if (!container) return;
 
     const niveau = document.getElementById('profSuiviNiveau') ? document.getElementById('profSuiviNiveau').value : '4eme';
-    const classe = document.getElementById('profSuiviClasse') ? document.getElementById('profSuiviClasse').value : 'ALL';
+    const currentSelect = document.getElementById('unlockClasseSelect');
+    const selectedClasse = currentSelect ? currentSelect.value : 'ALL';
 
     const localUnlocks = getLocalUnlocks();
     const activities = ACTIVITIES_DATABASE.filter(a => a.niveau === niveau);
 
     const prefix = niveau === '5eme' ? '50' : (niveau === '4eme' ? '40' : '30');
-    let classOptionsHTML = `<option value="ALL">Toutes les classes (${niveau})</option>`;
+    let classOptionsHTML = `<option value="ALL" ${selectedClasse === 'ALL' ? 'selected' : ''}>Toutes les classes (${niveau})</option>`;
     for (let i = 1; i <= 8; i++) {
         const cls = `${prefix}${i}`;
-        classOptionsHTML += `<option value="${cls}">Classe ${cls}</option>`;
+        classOptionsHTML += `<option value="${cls}" ${selectedClasse === cls ? 'selected' : ''}>Classe ${cls}</option>`;
     }
 
     let html = `
@@ -148,8 +149,18 @@ function renderUnlockManagement() {
 
     activities.forEach(act => {
         const actCode = act.code || act.id;
-        const key = `${actCode}_${classe}`;
-        const isUnlocked = localUnlocks[key] !== undefined ? localUnlocks[key] : (localUnlocks[actCode] !== undefined ? localUnlocks[actCode] : act.defaultUnlocked);
+        const key = `${actCode}_${selectedClasse}`;
+        let isUnlocked;
+        if (localUnlocks[key] !== undefined) {
+            isUnlocked = localUnlocks[key];
+        } else if (selectedClasse !== 'ALL' && localUnlocks[`${actCode}_ALL`] !== undefined) {
+            isUnlocked = localUnlocks[`${actCode}_ALL`];
+        } else if (localUnlocks[actCode] !== undefined) {
+            isUnlocked = localUnlocks[actCode];
+        } else {
+            isUnlocked = Boolean(act.defaultUnlocked);
+        }
+
         const levelLabel = act.niveau === '5eme' ? '5ème' : (act.niveau === '4eme' ? '4ème' : '3ème');
         html += `
             <div class="unlock-item">
@@ -174,7 +185,9 @@ function toggleActivityUnlockLocal(activityCode, isChecked) {
     const localUnlocks = getLocalUnlocks();
     const key = `${activityCode}_${targetClasse}`;
     localUnlocks[key] = isChecked;
-    localUnlocks[activityCode] = isChecked;
+    if (targetClasse === 'ALL') {
+        localUnlocks[activityCode] = isChecked;
+    }
     localStorage.setItem(CONFIG.STORAGE_KEY_UNLOCKS, JSON.stringify(localUnlocks));
 
     if (typeof refreshCurrentDashboard === 'function') {
