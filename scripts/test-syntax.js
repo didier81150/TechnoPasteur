@@ -18,6 +18,7 @@ const requiredFiles = [
     'js/quiz.js',
     'js/analyse.js',
     'js/capteurs_actionneurs.js',
+    'js/systemes_automatiques.js',
     'js/objets_materiaux.js',
     'js/eval_competences.js',
     'js/fiches.js'
