@@ -221,11 +221,21 @@ const ACTIVITIES_DATABASE = [
         niveau: "3eme",
         titre: "Les Robots",
         type: "robots",
-        badgeText: "Séquence",
+        badgeText: "Module",
         badgeClass: "badge-qcm",
         description: "Découverte, histoire, impact sociétal et environnemental.",
         defaultUnlocked: false,
         pdfUrl: "https://drive.google.com/file/d/1JeJeG6JOY9ldXYv0LYj0q7NtgPHpw0Ra/view?usp=sharing"
+    },
+    {
+        id: "3_diagramme_fast",
+        niveau: "3eme",
+        titre: "Analyse Fonctionnelle & Diagramme FAST",
+        type: "fast",
+        badgeText: "Module",
+        badgeClass: "badge-quiz",
+        description: "10 exercices corrigés pour maîtriser la Bête à cornes, le Diagramme Pieuvre et le Diagramme FAST.",
+        defaultUnlocked: false
     },
     {
         id: "3_qcm_automatismes",

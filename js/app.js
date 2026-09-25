@@ -181,5 +181,7 @@ function launchActivity(activityId) {
         openMbotModule(act);
     } else if (act.type === 'robots') {
         openRobotsModule(act);
+    } else if (act.type === 'fast') {
+        openFastModule(act);
     }
 }

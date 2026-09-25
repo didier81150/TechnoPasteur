@@ -234,8 +234,7 @@ function openRobotsModule(activity) {
 
             <!-- En-tête de la séquence -->
             <div style="background: linear-gradient(135deg, #0F172A, #1E293B); color: white; padding: 35px 25px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: var(--shadow-md);">
-                <span style="background: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.4); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Séquence 1 — 3ème</span>
-                <h1 style="margin: 12px 0 6px 0; font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif;">🤖 Les Robots</h1>
+                <h1 style="margin: 0 0 6px 0; font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif;">🤖 Les Robots</h1>
                 <p style="margin: 0; opacity: 0.9; font-size: 1.05rem;">Découverte, histoire, impact sociétal et environnemental</p>
             </div>
 
@@ -370,6 +369,237 @@ function openRobotsModule(activity) {
 
     document.getElementById('activityScreen').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function openFastModule(activity) {
+    document.getElementById('dashboardScreen').style.display = 'none';
+    const container = document.getElementById('activityContent');
+
+    container.innerHTML = `
+        <div class="media-container" style="max-width: 900px; margin: 0 auto; padding: 25px 15px; font-family: 'Plus Jakarta Sans', sans-serif;">
+
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #0F172A, #1E293B); color: white; padding: 35px 25px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-md);">
+                <h1 style="margin: 0 0 6px 0; font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif;">📐 Analyse Fonctionnelle & Diagramme FAST</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.05rem;">10 exercices corrigés pour maîtriser la Bête à cornes, le Diagramme Pieuvre et le Diagramme FAST.</p>
+            </div>
+
+            <!-- Barre de progression sticky/fixe -->
+            <div style="position: sticky; top: 10px; z-index: 100; background: white; border: 1px solid var(--border); border-radius: 12px; padding: 12px 20px; margin-bottom: 25px; text-align: center; font-weight: 700; color: var(--navy); box-shadow: var(--shadow-md); display: flex; align-items: center; justify-content: center; gap: 8px;">
+                <span>📊 Exercices consultés :</span>
+                <span id="fastCompteur" style="color: #2563EB; font-size: 1.1rem;">0</span>
+                <span>/ 10</span>
+            </div>
+
+            <!-- Rappel des notions clés -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 30px; border: 1px solid var(--border); box-shadow: var(--shadow-sm);">
+                <h2 style="margin-top: 0; color: #1E4FB8; font-family: 'Outfit', sans-serif; font-size: 1.3rem; display: flex; align-items: center; gap: 8px;">
+                    🧭 Rappel des notions clés
+                </h2>
+                <div style="margin-bottom: 12px; line-height: 1.6; color: var(--text-dark);">
+                    <strong style="color: var(--navy);">La Bête à cornes</strong> — sert à exprimer le besoin auquel répond un produit, en répondant à trois questions : <em>à qui rend-il service ? sur quoi agit-il ? dans quel but ?</em>
+                </div>
+                <div style="margin-bottom: 12px; line-height: 1.6; color: var(--text-dark);">
+                    <strong style="color: var(--navy);">Le Diagramme Pieuvre</strong> — représente les relations entre le produit et les éléments de son milieu extérieur (utilisateur, énergie, normes...). On distingue les <em>fonctions principales</em> (FP), qui relient deux éléments extérieurs entre eux via le produit, et les <em>fonctions contraintes</em> (FC), qui adaptent le produit à un seul élément extérieur.
+                </div>
+                <div style="line-height: 1.6; color: var(--text-dark);">
+                    <strong style="color: var(--navy);">Le Diagramme FAST</strong> — permet de passer d'une fonction de service à des solutions techniques concrètes, en répondant à <em>"Comment ?"</em> (vers la droite) et <em>"Pourquoi ?"</em> (vers la gauche).
+                </div>
+            </div>
+
+            <!-- NIVEAU FACILE -->
+            <div style="display: flex; align-items: center; gap: 10px; margin: 30px 0 15px 0;">
+                <span style="background: #10B981; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">Facile</span>
+                <h2 style="margin: 0; font-size: 1.3rem; font-family: 'Outfit', sans-serif; color: var(--navy);">Exercices 1 à 3</h2>
+            </div>
+
+            <!-- EXO 1 -->
+            <div class="fast-exo" data-n="1" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 1 —</strong> Applique la Bête à cornes à une trottinette électrique. Identifie les trois éléments du diagramme.
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700; transition: background 0.2s;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;">• À qui rend-elle service ? <strong style="color: #10B981;">À l'utilisateur.</strong></p>
+                    <p style="margin: 4px 0;">• Sur quoi agit-elle ? <strong style="color: #10B981;">Sur les déplacements de l'utilisateur.</strong></p>
+                    <p style="margin: 4px 0;">• Dans quel but ? <strong style="color: #10B981;">Permettre un déplacement rapide et autonome sur de courtes distances.</strong></p>
+                </div>
+            </div>
+
+            <!-- EXO 2 -->
+            <div class="fast-exo" data-n="2" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 2 —</strong> Pour un distributeur automatique de croquettes pour animaux, cite 5 éléments du milieu extérieur qui apparaîtraient sur un diagramme pieuvre.
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">1. L'animal</strong> (destinataire des croquettes) — <strong style="color: #10B981;">2. L'utilisateur</strong> (qui programme l'appareil) — <strong style="color: #10B981;">3. L'énergie</strong> (secteur ou piles) — <strong style="color: #10B981;">4. Les croquettes</strong> (contenu à distribuer) — <strong style="color: #10B981;">5. Le smartphone</strong> (application de pilotage à distance).</p>
+                </div>
+            </div>
+
+            <!-- EXO 3 -->
+            <div class="fast-exo" data-n="3" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 3 —</strong> Quelle est la différence entre une fonction principale (FP) et une fonction contrainte (FC) ? Illustre avec un casque audio sans fil.
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;">Une <strong style="color: #10B981;">FP</strong> relie deux éléments du milieu extérieur par l'intermédiaire du produit (ex : permettre à l'utilisateur d'écouter une musique diffusée par un smartphone).</p>
+                    <p style="margin: 4px 0;">Une <strong style="color: #10B981;">FC</strong> relie le produit à un seul élément extérieur, souvent une contrainte à respecter (ex : s'adapter à la forme de la tête de l'utilisateur, ou respecter les normes d'exposition aux ondes).</p>
+                </div>
+            </div>
+
+            <!-- NIVEAU MOYEN -->
+            <div style="display: flex; align-items: center; gap: 10px; margin: 35px 0 15px 0;">
+                <span style="background: #F59E0B; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">Moyen</span>
+                <h2 style="margin: 0; font-size: 1.3rem; font-family: 'Outfit', sans-serif; color: var(--navy);">Exercices 4 à 6</h2>
+            </div>
+
+            <!-- EXO 4 -->
+            <div class="fast-exo" data-n="4" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 4 —</strong> Décris le diagramme pieuvre d'un aspirateur robot en donnant une FP1, une FC1 (liée à l'énergie) et une FC2 (liée à l'esthétique).
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">FP1 :</strong> Permettre à l'utilisateur de nettoyer le sol sans intervention manuelle.</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">FC1 :</strong> Se recharger automatiquement sur sa base électrique.</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">FC2 :</strong> S'intégrer discrètement dans le décor d'un intérieur.</p>
+                </div>
+            </div>
+
+            <!-- EXO 5 -->
+            <div class="fast-exo" data-n="5" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 5 —</strong> Pour la fonction technique "Convertir l'énergie électrique en mouvement de rotation", propose deux solutions techniques différentes.
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">Solution 1 :</strong> Moteur électrique à courant continu.</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">Solution 2 :</strong> Servomoteur.</p>
+                    <p style="margin: 4px 0; font-style: italic; color: var(--text-muted);">Le choix dépend de la précision de mouvement recherchée et de la charge à entraîner.</p>
+                </div>
+            </div>
+
+            <!-- EXO 6 -->
+            <div class="fast-exo" data-n="6" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 6 —</strong> Pour un portail automatique, complète la chaîne FAST : [ ? ] → Transmettre le mouvement → [ ? ].
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;">Premier bloc (fonction technique) : <strong style="color: #10B981;">Convertir l'énergie électrique en mouvement.</strong></p>
+                    <p style="margin: 4px 0;">Dernier bloc (solution technique) : <strong style="color: #10B981;">Vérin ou bras articulé du portail.</strong></p>
+                </div>
+            </div>
+
+            <!-- NIVEAU DIFFICILE -->
+            <div style="display: flex; align-items: center; gap: 10px; margin: 35px 0 15px 0;">
+                <span style="background: #EF4444; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">Difficile</span>
+                <h2 style="margin: 0; font-size: 1.3rem; font-family: 'Outfit', sans-serif; color: var(--navy);">Exercices 7 à 10</h2>
+            </div>
+
+            <!-- EXO 7 -->
+            <div class="fast-exo" data-n="7" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 7 —</strong> Explique pourquoi on réalise la Bête à cornes avant le diagramme FAST lors de la conception d'un produit.
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;">La Bête à cornes exprime le besoin de façon <strong style="color: #10B981;">abstraite</strong>, sans imposer de solution technique, ce qui laisse toute latitude pour imaginer différentes réponses possibles.</p>
+                    <p style="margin: 4px 0;">Le FAST intervient ensuite pour organiser des solutions <strong style="color: #10B981;">concrètes</strong>. Commencer directement par le FAST risquerait d'orienter la conception vers une solution technique sans avoir vérifié qu'elle répond réellement au besoin.</p>
+                </div>
+            </div>
+
+            <!-- EXO 8 -->
+            <div class="fast-exo" data-n="8" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 8 —</strong> Pour la fonction contrainte "Résister aux chocs", propose un critère d'appréciation et un niveau chiffré.
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">Critère :</strong> Indice de résistance aux chocs (norme IK).</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">Niveau :</strong> IK08 (résistance à un choc de 5 joules).</p>
+                    <p style="margin: 4px 0; font-style: italic; color: var(--text-muted);">Cette caractérisation rend la fonction mesurable et testable lors de la validation du produit.</p>
+                </div>
+            </div>
+
+            <!-- EXO 9 -->
+            <div class="fast-exo" data-n="9" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 16px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 9 —</strong> Sur un vélo à assistance électrique, la fonction "Réguler la vitesse" se décompose en trois sous-fonctions techniques. Lesquelles ?
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">1. Acquérir la vitesse</strong> (capteur de rotation de roue).</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">2. Traiter l'information</strong> (carte électronique comparant la vitesse mesurée à la consigne).</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">3. Agir sur le moteur</strong> (réduction ou augmentation de l'assistance électrique).</p>
+                </div>
+            </div>
+
+            <!-- EXO 10 -->
+            <div class="fast-exo" data-n="10" style="background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 30px; overflow: hidden; box-shadow: var(--shadow-sm);">
+                <div style="padding: 18px 20px; background: #EEF3FD; border-bottom: 1px solid var(--border);">
+                    <strong style="color: #1E4FB8;">Exercice 10 —</strong> Un client souhaite un système pour "éclairer automatiquement une allée la nuit". Rédige la FP1 puis liste 3 FC en lien avec le milieu extérieur.
+                </div>
+                <button onclick="toggleFastCorrection(this)" style="width: 100%; text-align: left; background: none; border: none; padding: 12px 20px; font-size: 0.95rem; color: #2563EB; cursor: pointer; font-weight: 700;">
+                    Afficher la correction ▾
+                </button>
+                <div class="fast-correction" style="display: none; padding: 16px 20px; background: #EAFAF3; border-top: 1px dashed #B6E3CD;">
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">FP1 :</strong> Permettre à l'utilisateur de bénéficier d'un éclairage automatique en fonction de la luminosité ambiante.</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">FC1 :</strong> Résister aux intempéries (pluie, gel).</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">FC2 :</strong> Fonctionner de façon autonome en énergie (panneau solaire ou pile).</p>
+                    <p style="margin: 4px 0;"><strong style="color: #10B981;">FC3 :</strong> S'installer facilement sans câblage complexe.</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn-menu" onclick="showDashboard(currentStudent ? currentStudent.niveau : '3eme')" style="padding: 12px 28px; border-radius: 20px; background: #64748B; color: white; border: none; font-weight: 700; cursor: pointer; font-size: 0.95rem; box-shadow: var(--shadow-sm);">
+                    ↩️ Retour au tableau de bord
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('activityScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleFastCorrection(btn) {
+    const corr = btn.nextElementSibling;
+    if (!corr) return;
+    const isHidden = corr.style.display === 'none';
+    corr.style.display = isHidden ? 'block' : 'none';
+    btn.textContent = isHidden ? 'Masquer la correction ▴' : 'Afficher la correction ▾';
+
+    if (isHidden) {
+        const exo = btn.closest('.fast-exo');
+        if (exo && !exo.dataset.seen) {
+            exo.dataset.seen = "1";
+            const c = document.getElementById('fastCompteur');
+            if (c) {
+                c.textContent = parseInt(c.textContent, 10) + 1;
+            }
+        }
+    }
 }
 
 function openVideoPlayer(activity) {
