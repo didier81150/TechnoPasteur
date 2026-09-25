@@ -628,15 +628,20 @@ async function submitSystemesEval() {
             Nom: currentStudent.nom || '',
             Prenom: currentStudent.prenom || '',
             Classe: currentStudent.classe || '',
+            nom: currentStudent.nom || '',
+            prenom: currentStudent.prenom || '',
+            classe: currentStudent.classe || '',
             "note /20": score20,
             score20: score20,
             score: score,
             total: totalQ,
             pourcentage: percentage,
-            Date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR')
+            Date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR'),
+            date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR')
         };
 
-        sendDataToGoogleAppsScript(payload);
+        const targetUrl = CONFIG.SYSTEMES_AUTOMATIQUES_WEB_APP_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL;
+        await sendDataToGoogleAppsScript(payload, targetUrl);
     }
 
     const container = document.getElementById('activityContent');
