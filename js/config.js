@@ -217,6 +217,16 @@ const ACTIVITIES_DATABASE = [
 
     // --- 3ème ---
     {
+        id: "3_systemes_automatiques",
+        niveau: "3eme",
+        titre: "Les Systèmes Automatiques",
+        type: "systemes_automatiques",
+        badgeText: "Module",
+        badgeClass: "badge-qcm",
+        description: "Cours interactif & Évaluation — Composition, échanges et modes de commande ( cycle ouvert / fermé ).",
+        defaultUnlocked: false
+    },
+    {
         id: "3_robots",
         niveau: "3eme",
         titre: "Les Robots",

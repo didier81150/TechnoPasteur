@@ -175,6 +175,8 @@ function launchActivity(activityId) {
         openObjetMateriauxModule();
     } else if (act.type === 'capteurs_actionneurs') {
         openCapteursActionneursModule();
+    } else if (act.type === 'systemes_automatiques') {
+        openSystemesAutomatiquesModule(act);
     } else if (act.type === 'fiches') {
         openFichesModule();
     } else if (act.type === 'mbot') {
