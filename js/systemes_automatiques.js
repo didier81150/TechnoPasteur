@@ -300,12 +300,6 @@ function renderSystemesAutomatiquesView(container) {
             <div id="systemesTabContent">
                 ${systemesActiveTab === 'cours' ? renderSystemesCoursHTML() : renderSystemesEvalHTML()}
             </div>
-
-            <div style="margin-top: 35px; text-align: center;">
-                <button class="btn-menu" onclick="showDashboard(currentStudent ? currentStudent.niveau : '3eme')" style="padding: 12px 28px; border-radius: 20px; background: #64748B; color: white; border: none; font-weight: 700; cursor: pointer; font-size: 0.95rem; box-shadow: var(--shadow-sm);">
-                    ↩️ Retour au tableau de bord
-                </button>
-            </div>
         </div>
     `;
 }
@@ -589,12 +583,12 @@ function renderSystemesEvalHTML() {
         <div style="display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; margin-top: 30px;">
             ${!systemesSubmitted ? `
                 <button onclick="submitSystemesEval()" style="background: #10B981; color: white; border: none; padding: 14px 32px; border-radius: 30px; font-weight: 800; font-size: 1.05rem; cursor: pointer; box-shadow: var(--shadow-sm); transition: transform 0.2s;">
-                    🎯 Évaluer mes réponses
+                    ✅ Valider et envoyer
                 </button>
             ` : `
-                <button onclick="resetSystemesEval()" style="background: #2563EB; color: white; border: none; padding: 14px 32px; border-radius: 30px; font-weight: 800; font-size: 1.05rem; cursor: pointer; box-shadow: var(--shadow-sm);">
-                    ↩ Recommencer l'évaluation
-                </button>
+                <div style="background: #DCFCE7; border: 2px solid #16A34A; color: #14532D; padding: 14px 28px; border-radius: 30px; font-weight: 800; font-size: 1.05rem;">
+                    ✅ Évaluation validée et résultats enregistrés
+                </div>
             `}
         </div>
     `;
@@ -631,18 +625,23 @@ async function submitSystemesEval() {
     if (typeof currentStudent !== 'undefined' && currentStudent) {
         const payload = {
             type: "systemes_automatiques",
+            Nom: currentStudent.nom || '',
+            Prenom: currentStudent.prenom || '',
+            Classe: currentStudent.classe || '',
             nom: currentStudent.nom || '',
             prenom: currentStudent.prenom || '',
             classe: currentStudent.classe || '',
-            niveau: currentStudent.niveau || '3eme',
+            "note /20": score20,
+            score20: score20,
             score: score,
             total: totalQ,
-            score20: score20,
             pourcentage: percentage,
-            date: new Date().toISOString()
+            Date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR'),
+            date: new Date().toLocaleDateString('fr-FR') + ' ' + new Date().toLocaleTimeString('fr-FR')
         };
 
-        sendDataToGoogleAppsScript(payload);
+        const targetUrl = CONFIG.SYSTEMES_AUTOMATIQUES_WEB_APP_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL;
+        await sendDataToGoogleAppsScript(payload, targetUrl);
     }
 
     const container = document.getElementById('activityContent');

@@ -122,6 +122,77 @@ function doPost(e) {
 
 ---
 
+## Étape 3.4 : Script Google Apps Script Spécifique pour Les Systèmes Automatiques 3ème
+
+Pour votre Google Sheet dédié au module **Resultats Les Systèmes Automatiques** ([Lien Google Sheet](https://docs.google.com/spreadsheets/d/1UDRPvXAzzGtxPSw1rbAl8I42U-TMj7xFOEhCu_pg0NU/edit?usp=sharing)) :
+
+1. Ouvrez le tableau Google Sheet [1UDRPvXAzzGtxPSw1rbAl8I42U-TMj7xFOEhCu_pg0NU](https://docs.google.com/spreadsheets/d/1UDRPvXAzzGtxPSw1rbAl8I42U-TMj7xFOEhCu_pg0NU/edit?usp=sharing).
+2. Assurez-vous que la première ligne du tableau contient exactement les en-têtes suivants :
+   | Nom | Prenom | Classe | note /20 | Date |
+   | :--- | :--- | :--- | :--- | :--- |
+3. Allez dans **Extensions** ➡️ **Apps Script**.
+4. Effacez le code existant et collez ce script Apps Script (qui fusionne automatiquement les résultats d'un même élève) :
+
+```javascript
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+
+    // Initialisation des en-têtes si la feuille est vide
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Nom", "Prenom", "Classe", "note /20", "Date"]);
+    }
+
+    var nom = (data.Nom || data.nom || "").toString().trim();
+    var prenom = (data.Prenom || data.prenom || "").toString().trim();
+    var classe = (data.Classe || data.classe || "").toString().trim();
+    var note20 = (data["note /20"] || data.score20 || "").toString().trim();
+    var dateVal = data.Date || data.date || new Date().toLocaleDateString('fr-FR');
+
+    var lastRow = sheet.getLastRow();
+    var foundRow = -1;
+
+    // Recherche d'un élève existant pour la fusion automatique
+    if (lastRow > 1) {
+      var values = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+      for (var i = 0; i < values.length; i++) {
+        var rNom = values[i][0].toString().trim();
+        var rPrenom = values[i][1].toString().trim();
+        var rClasse = values[i][2].toString().trim();
+
+        if (rNom.toLowerCase() === nom.toLowerCase() &&
+            rPrenom.toLowerCase() === prenom.toLowerCase() &&
+            rClasse.toLowerCase() === classe.toLowerCase()) {
+          foundRow = i + 2;
+          break;
+        }
+      }
+    }
+
+    if (foundRow > 0) {
+      // Mise à jour de la note et de la date (fusion)
+      sheet.getRange(foundRow, 4).setValue(note20);
+      sheet.getRange(foundRow, 5).setValue(dateVal);
+    } else {
+      // Ajout d'une nouvelle ligne
+      sheet.appendRow([nom, prenom, classe, note20, dateVal]);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({"status": "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({"status": "error", "message": err.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+5. Cliquez sur **Déployer** ➡️ **Nouveau déploiement** ➡️ **Application Web** (accès : *Tout le monde* / *Anyone*).
+6. Copiez l'URL Web App générée et renseignez-la dans `CONFIG.SYSTEMES_AUTOMATIQUES_WEB_APP_URL` ou `CONFIG.GOOGLE_APPS_SCRIPT_URL` du fichier `js/config.js`.
+
+---
+
 ## Étape 3.3 : Script Google Apps Script Spécifique pour l'Activité Objets & Matériaux
 
 Pour votre Google Sheet dédié à **Objet et Matériaux** ([Lien Google Sheet](https://docs.google.com/spreadsheets/d/1mjbyJjB3hlp6hg-uw6IzV5W6c3kZXTT7jW5EWA9pRBU/edit?usp=sharing)) :
