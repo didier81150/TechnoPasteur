@@ -223,6 +223,155 @@ function selectMbotVideo(index) {
     renderMbotModuleView(container);
 }
 
+function openRobotsModule(activity) {
+    document.getElementById('dashboardScreen').style.display = 'none';
+    const container = document.getElementById('activityContent');
+
+    const pdfUrl = activity.pdfUrl || "https://drive.google.com/file/d/1JeJeG6JOY9ldXYv0LYj0q7NtgPHpw0Ra/view?usp=sharing";
+
+    container.innerHTML = `
+        <div class="media-container" style="max-width: 950px; margin: 0 auto; padding: 25px 15px; font-family: 'Plus Jakarta Sans', sans-serif;">
+
+            <!-- En-tête de la séquence -->
+            <div style="background: linear-gradient(135deg, #0F172A, #1E293B); color: white; padding: 35px 25px; border-radius: 16px; text-align: center; margin-bottom: 25px; box-shadow: var(--shadow-md);">
+                <span style="background: rgba(245, 158, 11, 0.2); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.4); padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Séquence 1 — 3ème</span>
+                <h1 style="margin: 12px 0 6px 0; font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif;">🤖 Les Robots</h1>
+                <p style="margin: 0; opacity: 0.9; font-size: 1.05rem;">Découverte, histoire, impact sociétal et environnemental</p>
+            </div>
+
+            <!-- Bannières Ressource et Fiche Élève -->
+            <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; margin-bottom: 30px;">
+                <a href="${escapeHTML(pdfUrl)}" target="_blank" rel="noopener noreferrer" style="background: var(--accent, #F97316); color: white; text-decoration: none; padding: 12px 24px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm); transition: transform 0.2s, opacity 0.2s;">
+                    📄 Télécharger la Fiche Élève (PDF)
+                </a>
+            </div>
+
+            <!-- Introduction -->
+            <div style="background: white; border-left: 5px solid var(--accent, #F97316); padding: 20px 24px; margin-bottom: 30px; border-radius: 12px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <p style="margin: 0; color: var(--navy); line-height: 1.7; font-size: 1rem;">
+                    Aujourd'hui, les robots sont partout : dans les champs, les usines, l'espace, les fonds marins, nos jardins et même nos salons. Leur importance scientifique, industrielle et sociétale ne cesse de grandir. Certains pensent qu'au XXIe siècle, le robot occupera une place comparable à celle qu'a tenue l'automobile au siècle dernier.
+                </p>
+            </div>
+
+            <!-- ACTIVITÉ 1 -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary, #0F172A); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0;">1</span>
+                    Qu'est-ce qu'un robot ?
+                </h2>
+                <p style="margin: 10px 0;">✏️ Complète le tableau (page 1 de la fiche élève) afin d'identifier les différents types de robots et les tâches qu'ils sont capables d'accomplir.</p>
+                <p style="margin: 10px 0 6px 0; font-weight: 700; color: var(--navy);">Robots à découvrir <small style="font-weight: 400; color: var(--text-muted);">(clique sur un nom pour ouvrir l'article)</small> :</p>
+                <ul style="margin: 8px 0 0 20px; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 10px; list-style: none;">
+                    <li><a href="https://www.usinenouvelle.com/article/asimo-le-coureur.N1855052" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🤖 Asimo, le coureur</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/bios-de-robots-unimate-le-premier-ouvrier-mecanique.N276769" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🏭 Unimate, le premier ouvrier mécanique</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/qui-est-rosa-one-le-robot-qui-repare-les-colonnes-vertebrales.N603558" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🏥 Rosa One, le réparateur de colonnes vertébrales</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/nao-la-mascotte.N1855082" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🤖 Nao, la mascotte</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/hulc-le-gi.N1855182" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🎖️ HULC, le G.I.</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/big-dog-le-mulet.N1855202" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🐕 Big Dog, le mulet</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/pepper-l-accompagnant.N1855067" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🤝 Pepper, l'accompagnant</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/kodomoroid-plus-vrai-que-nature.N1854887" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">👤 Kodomoroid, plus vrai que nature</a></li>
+                    <li><a href="https://www.usinenouvelle.com/article/curiosity-le-scientifique.N1855127" target="_blank" rel="noopener noreferrer" style="color: var(--primary); text-decoration: none; font-weight: 600;">🚀 Curiosity, le scientifique</a></li>
+                </ul>
+            </div>
+
+            <!-- ACTIVITÉ 2 -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary, #0F172A); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0;">2</span>
+                    La robotique hier et aujourd'hui
+                </h2>
+                <p style="margin: 10px 0;">✏️ Complète <a href="https://learningapps.org/watch?v=phyrdcknn20" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 700; text-decoration: underline;">ce texte à trous en ligne</a>, puis recopie-le une fois corrigé (page 1 de la fiche élève).</p>
+            </div>
+
+            <!-- ACTIVITÉ 3 -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary, #0F172A); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0;">3</span>
+                    Frise chronologique de l'évolution des robots
+                </h2>
+                <p style="margin: 10px 0;">✏️ Réalise une frise chronologique présentant l'évolution des robots à l'aide des vignettes distribuées par ton professeur.</p>
+                <ul style="margin: 10px 0 0 20px; padding: 0;">
+                    <li style="margin-bottom: 6px;">Commence par compléter les vignettes à l'aide de <a href="https://www.gotronic.fr/blog/articles/histoire-de-la-robotique" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600; text-decoration: underline;">l'histoire de la robotique</a>.</li>
+                    <li style="margin-bottom: 6px;">Réalise la frise (attention au calcul de l'échelle).</li>
+                    <li style="margin-bottom: 6px;">Place sur la frise 3 <a href="https://drive.google.com/file/d/1xaRUQEXyg5c8JRXusNPeBil1sXLe6SLQ/view?usp=sharing" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600; text-decoration: underline;">inventions majeures</a> qui ont permis l'évolution de la robotique.</li>
+                </ul>
+            </div>
+
+            <!-- ACTIVITÉ 4 -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary, #0F172A); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0;">4</span>
+                    Impacts de la robotisation sur la société
+                </h2>
+                <p style="margin: 10px 0;">✏️ Rappelle quelles sont <a href="https://www.youtube.com/watch?v=SJq7i_3UODM" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 700; text-decoration: underline;">les étapes du cycle de vie d'un produit</a>.</p>
+            </div>
+
+            <!-- ACTIVITÉ 5 -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary, #0F172A); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0;">5</span>
+                    Pourquoi remplacer un objet ?
+                </h2>
+                <p style="margin: 10px 0;">✏️ Donne au moins deux raisons qui expliquent pourquoi on remplace un objet.</p>
+            </div>
+
+            <!-- ACTIVITÉ 6 -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary, #0F172A); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0;">6</span>
+                    Réduire les impacts environnementaux
+                </h2>
+                <p style="margin: 10px 0;">✏️ Comment peut-on réduire les impacts d'un objet technique sur l'environnement ?</p>
+            </div>
+
+            <!-- ACTIVITÉ 7 -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 30px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; display: flex; align-items: center; gap: 10px;">
+                    <span style="background: var(--primary, #0F172A); color: white; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 800; flex-shrink: 0;">7</span>
+                    Le cas du lithium
+                </h2>
+                <p style="margin: 10px 0; font-style: italic; color: var(--text-muted);">
+                    Comme la plupart des appareils mobiles, les robots Pepper et Nao fonctionnent grâce à une batterie au lithium — un métal disponible en grande quantité, mais dont l'extraction est source de tensions.
+                </p>
+                <p style="margin: 10px 0;">✏️ Résume en quelques lignes l'impact sur l'environnement et sur la société bolivienne de <a href="https://vivredemain.fr/2019/01/10/le-lithium-un-fleau-pour-lenvironnement/" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 700; text-decoration: underline;">l'extraction du lithium</a>.</p>
+            </div>
+
+            <!-- TEST DE CONNAISSANCES -->
+            <div style="background: linear-gradient(135deg, #1E1B4B, #312E81); color: white; border-radius: 16px; padding: 28px; text-align: center; margin-bottom: 30px; box-shadow: var(--shadow-md);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 800; margin-top: 0; margin-bottom: 12px; color: #38BDF8;">🧠 Je teste mes connaissances</h2>
+                <p style="margin: 0 0 20px 0; opacity: 0.9;">Entraîne-toi avec le QCM interactif en ligne :</p>
+                <a href="https://learningapps.org/watch?v=pdj6h9dz521" target="_blank" rel="noopener noreferrer" style="background: #10B981; color: white; text-decoration: none; padding: 12px 28px; border-radius: 25px; font-weight: 800; font-size: 1.05rem; display: inline-flex; align-items: center; gap: 8px; box-shadow: var(--shadow-sm);">
+                    ▶️ Faire le QCM interactif
+                </a>
+            </div>
+
+            <!-- POUR ALLER PLUS LOIN -->
+            <div style="background: white; border-radius: 14px; padding: 24px; margin-bottom: 30px; box-shadow: var(--shadow-sm); border: 1px solid var(--border);">
+                <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); margin-top: 0; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;">
+                    🚀 Pour aller plus loin
+                </h2>
+                <ul style="margin: 0; padding-left: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
+                    <li><a href="https://www.youtube.com/watch?v=BbwfTex0hk8" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600;">🎬 L'histoire des robots en 4 minutes</a></li>
+                    <li><a href="https://ladigitale.dev/digiview/#/v/02b985e7a3b2f33f" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600;">💻 Robotique (Digiview)</a></li>
+                    <li><a href="https://www.francetvinfo.fr/sciences/high-tech/technologie-faut-il-avoir-peur-des-robots_2660458.html" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600;">📰 Faut-il avoir peur des robots ?</a></li>
+                    <li><a href="https://www.youtube.com/watch?v=tF4DML7FIWk" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600;">🤖 Atlas, le robot de Boston Dynamics</a></li>
+                    <li><a href="https://www.lumni.fr/video/c-est-quoi-le-developpement-durable" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600;">🌱 C'est quoi le développement durable ?</a></li>
+                    <li><a href="https://www.lumni.fr/jeu/histoires-d-inventions" target="_blank" rel="noopener noreferrer" style="color: #2563EB; font-weight: 600;">🎮 Histoires d'inventions</a></li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 30px; text-align: center;">
+                <button class="btn-menu" onclick="showDashboard(currentStudent ? currentStudent.niveau : '3eme')" style="padding: 12px 28px; border-radius: 20px; background: #64748B; color: white; border: none; font-weight: 700; cursor: pointer; font-size: 0.95rem; box-shadow: var(--shadow-sm);">
+                    ↩️ Retour au tableau de bord
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('activityScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 function openVideoPlayer(activity) {
     document.getElementById('dashboardScreen').style.display = 'none';
     const container = document.getElementById('activityContent');
