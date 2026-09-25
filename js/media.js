@@ -380,8 +380,7 @@ function openFastModule(activity) {
 
             <!-- Header -->
             <div style="background: linear-gradient(135deg, #0F172A, #1E293B); color: white; padding: 35px 25px; border-radius: 16px; text-align: center; margin-bottom: 20px; box-shadow: var(--shadow-md);">
-                <span style="background: rgba(6, 182, 212, 0.2); color: #38BDF8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 4px 14px; border-radius: 20px; font-size: 0.85rem; font-weight: 700; letter-spacing: 0.5px;">Sciences de l'Ingénieur / Technologie — 3ème</span>
-                <h1 style="margin: 12px 0 6px 0; font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif;">📐 Analyse Fonctionnelle & Diagramme FAST</h1>
+                <h1 style="margin: 0 0 6px 0; font-size: 2.2rem; font-weight: 800; font-family: 'Outfit', sans-serif;">📐 Analyse Fonctionnelle & Diagramme FAST</h1>
                 <p style="margin: 0; opacity: 0.9; font-size: 1.05rem;">10 exercices corrigés pour maîtriser la Bête à cornes, le Diagramme Pieuvre et le Diagramme FAST.</p>
             </div>
 
