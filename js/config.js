@@ -217,6 +217,17 @@ const ACTIVITIES_DATABASE = [
 
     // --- 3ème ---
     {
+        id: "3_robots",
+        niveau: "3eme",
+        titre: "Les Robots",
+        type: "robots",
+        badgeText: "Séquence",
+        badgeClass: "badge-qcm",
+        description: "Découverte, histoire, impact sociétal et environnemental.",
+        defaultUnlocked: false,
+        pdfUrl: "https://drive.google.com/file/d/1JeJeG6JOY9ldXYv0LYj0q7NtgPHpw0Ra/view?usp=sharing"
+    },
+    {
         id: "3_qcm_automatismes",
         niveau: "3eme",
         titre: "QCM – Automatismes & Prototypage",
