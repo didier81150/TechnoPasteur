@@ -232,6 +232,10 @@ async function handleLogin(event) {
                 try {
                     localStorage.setItem("currentStudent", JSON.stringify(currentStudent));
                 } catch(e) {}
+
+                // Envoi asynchrone non-bloquant des logs de connexion vers le Google Sheet dédié
+                logStudentConnection(eleve);
+
                 if (typeof fetchRemoteUnlocks === 'function') {
                     await fetchRemoteUnlocks();
                 }
@@ -252,6 +256,41 @@ async function handleLogin(event) {
             btnLogin.disabled = false;
             btnLogin.textContent = '🟢 Se connecter et accéder aux activités';
         }
+    }
+}
+
+// Enregistrement asynchrone et non-bloquant de la connexion élève vers Google Sheets
+async function logStudentConnection(eleve) {
+    if (!eleve) return;
+    try {
+        const now = new Date();
+        const dateFr = now.toLocaleDateString('fr-FR');
+        const heureFr = now.toLocaleTimeString('fr-FR');
+
+        const payload = {
+            type: 'CONNEXION_ELEVE',
+            nom: (eleve.nom || '').trim(),
+            prenom: (eleve.prenom || '').trim(),
+            classe: (eleve.classe || '').trim(),
+            date: dateFr,
+            heure: heureFr,
+            Date: dateFr,
+            Heure: heureFr,
+            Nom: (eleve.nom || '').trim(),
+            Prenom: (eleve.prenom || '').trim(),
+            Classe: (eleve.classe || '').trim()
+        };
+
+        const targetUrl = (CONFIG.LOG_CONNEXIONS_WEB_APP_URL && CONFIG.LOG_CONNEXIONS_WEB_APP_URL.trim() !== '')
+            ? CONFIG.LOG_CONNEXIONS_WEB_APP_URL
+            : CONFIG.GOOGLE_APPS_SCRIPT_URL;
+
+        if (typeof sendDataToGoogleAppsScript === 'function') {
+            await sendDataToGoogleAppsScript(payload, targetUrl);
+        }
+    } catch (e) {
+        // Journalisation silencieuse pour ne jamais bloquer l'élève
+        console.warn("⚠️ Échec d'envoi du log de connexion élève :", e);
     }
 }
 
