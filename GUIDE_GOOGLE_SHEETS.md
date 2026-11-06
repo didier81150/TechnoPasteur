@@ -359,8 +359,34 @@ function doPost(e) {
     var dateVal = (data.Date || data.date || Utilities.formatDate(now, "Europe/Paris", "dd/MM/yyyy")).toString().trim();
     var heureVal = (data.Heure || data.heure || Utilities.formatDate(now, "Europe/Paris", "HH:mm:ss")).toString().trim();
 
-    // Ajout d'une nouvelle ligne d'historique de connexion
-    sheet.appendRow([nom, prenom, classe, dateVal, heureVal]);
+    var lastRow = sheet.getLastRow();
+    var foundRow = -1;
+
+    // Recherche si l'élève existe déjà (Fusion / Mise à jour de sa dernière connexion)
+    if (lastRow > 1) {
+      var values = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+      for (var i = 0; i < values.length; i++) {
+        var rNom = values[i][0].toString().trim();
+        var rPrenom = values[i][1].toString().trim();
+        var rClasse = values[i][2].toString().trim();
+
+        if (rNom.toLowerCase() === nom.toLowerCase() &&
+            rPrenom.toLowerCase() === prenom.toLowerCase() &&
+            rClasse.toLowerCase() === classe.toLowerCase()) {
+          foundRow = i + 2; // Ligne trouvée dans la feuille
+          break;
+        }
+      }
+    }
+
+    if (foundRow > 0) {
+      // Met à jour la date et l'heure de la dernière connexion de l'élève (fusion)
+      sheet.getRange(foundRow, 4).setValue(dateVal);
+      sheet.getRange(foundRow, 5).setValue(heureVal);
+    } else {
+      // Première connexion de l'élève : ajout d'une nouvelle ligne
+      sheet.appendRow([nom, prenom, classe, dateVal, heureVal]);
+    }
 
     return ContentService.createTextOutput(JSON.stringify({
       "status": "success",
