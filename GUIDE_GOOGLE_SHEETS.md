@@ -330,6 +330,91 @@ function doPost(e) {
 
 ---
 
+## Étape 3.6 : Script Google Apps Script Spécifique pour le Suivi des Connexions Élèves
+
+Pour votre Google Sheet dédié au **Suivi des Connexions Élèves** :
+
+1. Créez un nouveau classeur Google Sheets intitulé par exemple **"TechnoPasteur - Connexions Élèves"**.
+2. Dans la première feuille, assurez-vous que la première ligne (ligne 1) contient exactement ces 5 colonnes :
+   | Nom | Prenom | Classe | Date | Heure |
+   | :--- | :--- | :--- | :--- | :--- |
+3. Allez dans le menu **Extensions** ➡️ **Apps Script**.
+4. Effacez le code existant et collez le script Google Apps Script suivant :
+
+```javascript
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+
+    // Initialisation automatique des en-têtes si la feuille est vide
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow(["Nom", "Prenom", "Classe", "Date", "Heure"]);
+    }
+
+    var now = new Date();
+    var nom = (data.Nom || data.nom || "").toString().trim();
+    var prenom = (data.Prenom || data.prenom || "").toString().trim();
+    var classe = (data.Classe || data.classe || "").toString().trim();
+    var dateVal = (data.Date || data.date || Utilities.formatDate(now, "Europe/Paris", "dd/MM/yyyy")).toString().trim();
+    var heureVal = (data.Heure || data.heure || Utilities.formatDate(now, "Europe/Paris", "HH:mm:ss")).toString().trim();
+
+    var lastRow = sheet.getLastRow();
+    var foundRow = -1;
+
+    // Recherche si l'élève existe déjà (Fusion / Mise à jour de sa dernière connexion)
+    if (lastRow > 1) {
+      var values = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
+      for (var i = 0; i < values.length; i++) {
+        var rNom = values[i][0].toString().trim();
+        var rPrenom = values[i][1].toString().trim();
+        var rClasse = values[i][2].toString().trim();
+
+        if (rNom.toLowerCase() === nom.toLowerCase() &&
+            rPrenom.toLowerCase() === prenom.toLowerCase() &&
+            rClasse.toLowerCase() === classe.toLowerCase()) {
+          foundRow = i + 2; // Ligne trouvée dans la feuille
+          break;
+        }
+      }
+    }
+
+    if (foundRow > 0) {
+      // Met à jour la date et l'heure de la dernière connexion de l'élève (fusion)
+      sheet.getRange(foundRow, 4).setValue(dateVal);
+      sheet.getRange(foundRow, 5).setValue(heureVal);
+    } else {
+      // Première connexion de l'élève : ajout d'une nouvelle ligne
+      sheet.appendRow([nom, prenom, classe, dateVal, heureVal]);
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "success",
+      "message": "Connexion enregistrée avec succès"
+    })).setMimeType(ContentService.MimeType.JSON);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({
+      "status": "error",
+      "message": err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+```
+
+5. Cliquez sur **Déployer** (bouton bleu en haut à droite) ➡️ **Nouveau déploiement**.
+6. Cliquez sur l'icône d'engrenage ⚙️ à côté de *Sélectionner un type* et choisissez **Application Web** :
+   - **Description** : `Suivi Connexions Élèves`
+   - **Exécuter en tant que** : `Moi` (votre compte Google)
+   - **Qui a accès** : `Tout le monde` (Anyone) *(très important pour que les postes élèves puissent envoyer leurs logs sans compte Google)*
+7. Cliquez sur **Déployer** et autorisez l'accès si Google le demande.
+8. Copiez l'**URL de l'application Web** générée (qui se termine par `/exec`).
+9. Ouvrez le fichier `js/config.js` et collez cette URL dans :
+   ```javascript
+   LOG_CONNEXIONS_WEB_APP_URL: "https://script.google.com/macros/s/.../exec",
+   ```
+
+---
+
 ## Étape 3.5 : Script Google Apps Script Spécifique pour le Module "Les Robots" (Fiche interactive 3ème)
 
 Pour votre Google Sheet dédié aux résultats du module **Les Robots** ([Lien Google Sheet 12WUptiE4s0Xev6BHTKAjgqUIRhIZRv3NJ0Fe_HK7K8w](https://docs.google.com/spreadsheets/d/12WUptiE4s0Xev6BHTKAjgqUIRhIZRv3NJ0Fe_HK7K8w/edit?usp=sharing)) :
@@ -418,6 +503,7 @@ const CONFIG = {
     // 3. URL du Web App Google Apps Script
     GOOGLE_APPS_SCRIPT_URL: "https://script.google.com/macros/s/.../exec",
     OBJET_MATERIAUX_WEB_APP_URL: "https://script.google.com/macros/s/.../exec",
+    LOG_CONNEXIONS_WEB_APP_URL: "https://script.google.com/macros/s/.../exec",
 
     // 4. URL du CSV Consultation des Notes de Stage
     GOOGLE_SHEET_STAGE_NOTES_CSV: "https://docs.google.com/spreadsheets/d/e/.../pub?output=csv",
