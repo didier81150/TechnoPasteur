@@ -208,8 +208,9 @@ function renderObjetMateriauxOverview(container) {
             </div>
 
             <div style="margin-top: 25px; text-align: center;">
-                <button class="btn-menu" onclick="showDashboard('4eme')" style="padding: 10px 24px; border-radius: 20px; background: #64748B; color: white; border: none; font-weight: 700; cursor: pointer;">
-                    ↩️ Retour au tableau de bord
+<button class="btn-menu" onclick="resendObjetMateriauxScore()" style="padding: 10px 20px; border-radius: 20px; background: #0EA5E9; color: white; border: none; font-weight: 700; cursor: pointer; margin-right: 10px;">
+                    📤 Renvoyer mes notes au professeur
+                </button>                    ↩️ Retour au tableau de bord
                 </button>
             </div>
         </div>
