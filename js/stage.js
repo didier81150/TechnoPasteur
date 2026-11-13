@@ -498,79 +498,96 @@ function validatePdfUpload(input) {
     }
 }
 
-function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify({
-    status: "ok",
-    message: "Web App Objets & Matériaux actif"
-  })).setMimeType(ContentService.MimeType.JSON);
-}
+async function handleStageNoteSubmit(e) {
+    e.preventDefault();
+    const classeSelect = document.getElementById('stageClasse');
+    const eleveSelect = document.getElementById('stageEleve');
+    const noteInput = document.getElementById('stageNote');
+    const commentInput = document.getElementById('stageCommentaire');
+    const submitBtn = document.getElementById('stageSubmitBtn');
+    const msgDiv = document.getElementById('stageMessage');
 
-function doPost(e) {
-  try {
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    var data = JSON.parse(e.postData.contents);
-
-    if (data.type && data.type !== "MODULE_OBJETS_MATERIAUX") {
-      return ContentService.createTextOutput(JSON.stringify({ status: "ignored" }))
-        .setMimeType(ContentService.MimeType.JSON);
+    let eleveObj = { nom: '', prenom: '' };
+    try {
+        eleveObj = JSON.parse(eleveSelect.value);
+    } catch (err) {
+        eleveObj = { nom: eleveSelect.value, prenom: '' };
     }
 
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "Nom", "Prenom", "Classe", "type d'objet",
-        "note objet et materiaux 1", "note objet et materiaux 2",
-        "note totale", "Date"
-      ]);
+    const noteVal = parseFloat(noteInput.value);
+    submitBtn.disabled = true;
+
+    const teacherName = currentTeacher ? (currentTeacher.prenom ? `${currentTeacher.nom} ${currentTeacher.prenom}` : currentTeacher.nom) : 'Enseignant';
+
+    const payload = {
+        type: 'NOTE_STAGE',
+        nom: eleveObj.nom,
+        prenom: eleveObj.prenom,
+        classe: classeSelect.value,
+        note: noteVal,
+        commentaire: commentInput ? commentInput.value : '',
+        prof: teacherName,
+        dateStr: new Date().toLocaleDateString('fr-FR')
+    };
+
+    const targetUrl = CONFIG.STAGE_WEB_APP_URL || CONFIG.GOOGLE_APPS_SCRIPT_URL;
+    let gasSuccess = false;
+    if (typeof sendDataToGoogleAppsScript === 'function') {
+        gasSuccess = await sendDataToGoogleAppsScript(payload, targetUrl);
     }
 
-    var nom = (data.nom || data.Nom || "").toString().trim();
-    var prenom = (data.prenom || data.Prenom || "").toString().trim();
-    var classe = (data.classe || data.Classe || "").toString().trim();
+    submitBtn.disabled = false;
 
-    if (!nom) {
-      return ContentService.createTextOutput(JSON.stringify({ status: "error", message: "Nom manquant" }))
-        .setMimeType(ContentService.MimeType.JSON);
-    }
-
-    var typeObjet = data["type d'objet"] !== undefined ? data["type d'objet"] : (data.typeObjet || "");
-    var noteMat1 = data["note objet et materiaux 1"] !== undefined ? data["note objet et materiaux 1"] : (data.noteMateriaux1 || "");
-    var noteMat2 = data["note objet et materiaux 2"] !== undefined ? data["note objet et materiaux 2"] : (data.noteMateriaux2 || "");
-    var noteTotale = data["note totale"] !== undefined ? data["note totale"] : (data.noteTotale || "");
-    var dateVal = (data.date || data.Date || new Date().toLocaleDateString("fr-FR")).toString().trim();
-
-    var lastRow = sheet.getLastRow();
-    var foundRow = -1;
-    if (lastRow > 1) {
-      var values = sheet.getRange(2, 1, lastRow - 1, 3).getValues();
-      for (var i = 0; i < values.length; i++) {
-        if (
-          values[i][0].toString().trim().toLowerCase() === nom.toLowerCase() &&
-          values[i][1].toString().trim().toLowerCase() === prenom.toLowerCase() &&
-          values[i][2].toString().trim().toLowerCase() === classe.toLowerCase()
-        ) {
-          foundRow = i + 2;
-          break;
-        }
-      }
-    }
-
-    if (foundRow > 0) {
-      if (typeObjet !== "") sheet.getRange(foundRow, 4).setValue(typeObjet);
-      if (noteMat1 !== "") sheet.getRange(foundRow, 5).setValue(noteMat1);
-      if (noteMat2 !== "") sheet.getRange(foundRow, 6).setValue(noteMat2);
-      if (noteTotale !== "") sheet.getRange(foundRow, 7).setValue(noteTotale);
-      sheet.getRange(foundRow, 8).setValue(dateVal);
+    if (gasSuccess) {
+        msgDiv.style.display = 'block';
+        msgDiv.style.background = '#ecfdf5';
+        msgDiv.style.color = '#065f46';
+        msgDiv.innerHTML = `✅ Note de <strong>${escapeHTML(noteVal)}/20</strong> enregistrée avec succès pour <strong>${escapeHTML(eleveObj.nom)} ${escapeHTML(eleveObj.prenom)}</strong> !`;
+        noteInput.value = '';
+        if (commentInput) commentInput.value = '';
+        setTimeout(() => { loadStageNotes(); }, 800);
     } else {
-      sheet.appendRow([nom, prenom, classe, typeObjet, noteMat1, noteMat2, noteTotale, dateVal]);
+        msgDiv.style.display = 'block';
+        msgDiv.style.background = '#fef3c7';
+        msgDiv.style.color = '#92400e';
+        msgDiv.innerHTML = `⚠️ Impossible d'enregistrer la note sur Google Sheets. Vérifiez CONFIG.STAGE_WEB_APP_URL.`;
+    }
+}
+
+async function loadStageNotes() {
+    const container = document.getElementById('stage-notes-container');
+    const classeVal = document.getElementById('stageViewClasse').value;
+    container.innerHTML = '⏳ Chargement des notes et vérification des oublis...';
+
+    let enteredNotes = [];
+
+    if (CONFIG.STAGE_WEB_APP_URL && CONFIG.STAGE_WEB_APP_URL.trim() !== '') {
+        try {
+            const sep = CONFIG.STAGE_WEB_APP_URL.includes('?') ? '&' : '?';
+            const resp = await fetch(`${CONFIG.STAGE_WEB_APP_URL}${sep}action=getStageNotes&t=${Date.now()}`);
+            if (resp.ok) {
+                const json = await resp.json();
+                if (json && Array.isArray(json.notes)) {
+                    enteredNotes = json.notes;
+                }
+            }
+        } catch (e) {
+            console.warn("⚠️ Échec lecture temps réel Web App Stage, repli sur CSV :", e);
+        }
     }
 
-    return ContentService.createTextOutput(JSON.stringify({ status: "success" }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", message: err.toString() }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+    if (enteredNotes.length === 0 && CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV && CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV.trim() !== '') {
+        try {
+            const sep = CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV.includes('?') ? '&' : '?';
+            const resp = await fetch(`${CONFIG.GOOGLE_SHEET_STAGE_NOTES_CSV}${sep}t=${Date.now()}`);
+            if (resp.ok) {
+                const text = await resp.text();
+                enteredNotes = typeof parseCSV === 'function' ? parseCSV(text) : [];
+            }
+        } catch (e) {
+            console.warn("⚠️ Échec du chargement du CSV notes de stage :", e);
+        }
+    }
 
     // Determine target students
     if (Object.keys(stageElevesMap).length === 0) await loadStageEleves();
