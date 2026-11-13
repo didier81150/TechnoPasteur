@@ -481,21 +481,24 @@ async function finishOmQuiz() {
         saveStatus.textContent = '📤 Envoi des résultats vers le Google Sheet en cours...';
         saveStatus.style.color = '#6C757D';
     }
+let studentObj = (typeof currentStudent !== 'undefined' && currentStudent) ? currentStudent : null;
+    if (!studentObj) {
+        try { studentObj = JSON.parse(localStorage.getItem('currentStudent')); } catch (e) {}
+    }
 
     const payload = {
         type: 'MODULE_OBJETS_MATERIAUX',
-        nom: currentStudent ? currentStudent.nom : '',
-        prenom: currentStudent ? currentStudent.prenom : '',
-        classe: currentStudent ? currentStudent.classe : '',
-        Nom: currentStudent ? currentStudent.nom : '',
-        Prenom: currentStudent ? currentStudent.prenom : '',
-        Classe: currentStudent ? currentStudent.classe : '',
-        niveau: currentStudent ? currentStudent.niveau : '4eme',
+        nom: studentObj ? (studentObj.nom || '').trim() : '',
+        prenom: studentObj ? (studentObj.prenom || '').trim() : '',
+        classe: studentObj ? (studentObj.classe || '').trim() : '',
+        Nom: studentObj ? (studentObj.nom || '').trim() : '',
+        Prenom: studentObj ? (studentObj.prenom || '').trim() : '',
+        Classe: studentObj ? (studentObj.classe || '').trim() : '',
+        niveau: studentObj ? (studentObj.niveau || '4eme') : '4eme',
         "type d'objet": progress.sub1_pct !== null ? progress.sub1_pct : "",
         "note objet et materiaux 1": progress.sub2_pct !== null ? progress.sub2_pct : "",
         "note objet et materiaux 2": progress.sub3_pct !== null ? progress.sub3_pct : "",
         "note totale": progress.note_totale !== null ? progress.note_totale : "",
-        // Alias de clés standards pour compatibilité avec tous les scripts Apps Script
         typeObjet: progress.sub1_pct !== null ? progress.sub1_pct : "",
         noteMateriaux1: progress.sub2_pct !== null ? progress.sub2_pct : "",
         noteMateriaux2: progress.sub3_pct !== null ? progress.sub3_pct : "",
@@ -507,12 +510,15 @@ async function finishOmQuiz() {
     };
 
     let gasSuccess = false;
-    if (typeof sendDataToGoogleAppsScript === 'function') {
+    if (payload.nom && typeof sendDataToGoogleAppsScript === 'function') {
         gasSuccess = await sendDataToGoogleAppsScript(payload, CONFIG.OBJET_MATERIAUX_WEB_APP_URL);
     }
 
     if (saveStatus) {
-        if (gasSuccess) {
+        if (!payload.nom) {
+            saveStatus.textContent = '⚠️ Élève non identifié : reconnectez-vous puis renvoyez la note.';
+            saveStatus.style.color = '#DC3545';
+        } else if (gasSuccess) {
             saveStatus.textContent = '✅ Résultats enregistrés sur Google Sheets et localement.';
             saveStatus.style.color = '#28A745';
         } else {
@@ -521,3 +527,29 @@ async function finishOmQuiz() {
         }
     }
 }
+
+async function resendObjetMateriauxScore() {
+    const progress = getObjetMateriauxProgress();
+    let studentObj = (typeof currentStudent !== 'undefined' && currentStudent) ? currentStudent : null;
+    if (!studentObj) {
+        try { studentObj = JSON.parse(localStorage.getItem('currentStudent')); } catch (e) {}
+    }
+    if (!studentObj || !studentObj.nom) {
+        alert("Veuillez vous connecter en tant qu'élève avant de renvoyer la note.");
+        return;
+    }
+    const payload = {
+        type: 'MODULE_OBJETS_MATERIAUX',
+        nom: studentObj.nom.trim(),
+        prenom: (studentObj.prenom || '').trim(),
+        classe: (studentObj.classe || '').trim(),
+        "type d'objet": progress.sub1_pct !== null ? progress.sub1_pct : "",
+        "note objet et materiaux 1": progress.sub2_pct !== null ? progress.sub2_pct : "",
+        "note objet et materiaux 2": progress.sub3_pct !== null ? progress.sub3_pct : "",
+        "note totale": progress.note_totale !== null ? progress.note_totale : "",
+        date: new Date().toLocaleDateString('fr-FR')
+    };
+    const ok = await sendDataToGoogleAppsScript(payload, CONFIG.OBJET_MATERIAUX_WEB_APP_URL);
+    alert(ok ? "✅ Note renvoyée vers le Google Sheet Objets & Matériaux !" : "❌ Échec de l'envoi.");
+}
+  
