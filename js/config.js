@@ -27,7 +27,7 @@ const CONFIG = {
     GOOGLE_APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbzTGvs1knYuA7TO_dcraclbDEQ3G4Zb9yuK47pxwVtv8AG-o77wK2ZUtReNJGQI5Bo3/exec",
     OBJET_MATERIAUX_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbxUYQRmyAveVS-GCFKxzFDrrpan7-PoJVoXzSDD1yh1jfKRvtZHu9g4wkf7blSzEcWN/exec",
     EVAL_3EME_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzb7kMOK4q8RaxMMRBi7gb6ni0no5cx75cxPKulaufgEdxi3RcWSbnz5xJCKQIXcNCSAw/exec",
-    DEPOT_STAGE_WEB_APP_URL: "COLLE_ICI_URL_DEPOT_DRIVE_ETAPE_2",
+    DEPOT_STAGE_WEB_APP_URL: "https://script.google.com/macros/s/AKfycby1QPHr_nIy6XirMLDFuLa8mprUBDR1JeBfJuR7TXln8UFAq53EyFMHWCH41mImqn1nvA/exec",
     SYSTEMES_AUTOMATIQUES_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbz1xNzsv7CsFi2KYOMHk0wTXgZfV9UpSqLfGtqruWqrCljJC1UuMY_ExOuXiFcR-GD6/exec",
     ROBOTS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzTGvs1knYuA7TO_dcraclbDEQ3G4Zb9yuK47pxwVtv8AG-o77wK2ZUtReNJGQI5Bo3/exec",
     LOG_CONNEXIONS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyyTPx4nNggrj7SqVaYZBA2x7Aa0GxrmxBxQvnGeLc7SXzfOukqsJK4WE45IwEciwe1Sw/exec",
