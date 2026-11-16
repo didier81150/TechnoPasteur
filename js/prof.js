@@ -265,6 +265,7 @@ async function toggleActivityUnlockLocal(activityCode, isChecked) {
 
     // Synchronisation vers tous les endpoints Google Apps Script configurés
     const endpoints = [
+        CONFIG.OBJET_MATERIAUX_WEB_APP_URL,
         CONFIG.GOOGLE_APPS_SCRIPT_URL,
         CONFIG.ROBOTS_WEB_APP_URL,
         CONFIG.SYSTEMES_AUTOMATIQUES_WEB_APP_URL,
