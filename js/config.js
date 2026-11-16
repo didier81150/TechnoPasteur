@@ -30,7 +30,7 @@ const CONFIG = {
     DEPOT_STAGE_WEB_APP_URL: "https://script.google.com/macros/s/AKfycby1QPHr_nIy6XirMLDFuLa8mprUBDR1JeBfJuR7TXln8UFAq53EyFMHWCH41mImqn1nvA/exec",
     SYSTEMES_AUTOMATIQUES_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbz1xNzsv7CsFi2KYOMHk0wTXgZfV9UpSqLfGtqruWqrCljJC1UuMY_ExOuXiFcR-GD6/exec",
     ROBOTS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbzTGvs1knYuA7TO_dcraclbDEQ3G4Zb9yuK47pxwVtv8AG-o77wK2ZUtReNJGQI5Bo3/exec",
-    LOG_CONNEXIONS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyyTPx4nNggrj7SqVaYZBA2x7Aa0GxrmxBxQvnGeLc7SXzfOukqsJK4WE45IwEciwe1Sw/exec",
+    LOG_CONNEXIONS_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbycKqk6qmPRqnC3WRTfvPJcVu6gfRzF9vt0r9ypM57TnYZR8GdUKWRetFgN_IuBo7Rx/exec",
     STAGE_WEB_APP_URL: "https://script.google.com/macros/s/AKfycbyyTPx4nNggrj7SqVaYZBA2x7Aa0GxrmxBxQvnGeLc7SXzfOukqsJK4WE45IwEciwe1Sw/exec",
     // 4. URL du CSV Google Sheets pour la consultation des Notes de Stage
     GOOGLE_SHEET_STAGE_NOTES_CSV: "https://docs.google.com/spreadsheets/d/1hVYXc11P_UCaindsid74sjz_m68ElHRLvETqhNtzV4c/export?format=csv",
