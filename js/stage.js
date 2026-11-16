@@ -498,6 +498,87 @@ function validatePdfUpload(input) {
     }
 }
 
+async function handleDepotSubmit(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('depotFile');
+    const submitBtn = document.getElementById('btnDepotSubmit');
+    const msgDiv = document.getElementById('depotMessage');
+
+    if (!fileInput || !fileInput.files || !fileInput.files[0]) {
+        alert("⚠️ Veuillez sélectionner votre rapport au format PDF.");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    if (!file.name.toLowerCase().endsWith('.pdf')) {
+        alert("⚠️ Seuls les fichiers PDF sont acceptés.");
+        return;
+    }
+    if (file.size > 15 * 1024 * 1024) {
+        alert("⚠️ Le fichier PDF dépasse 15 Mo. Merci de le compresser avant l'envoi.");
+        return;
+    }
+
+    const targetUrl = CONFIG.DEPOT_STAGE_WEB_APP_URL || CONFIG.STAGE_WEB_APP_URL;
+    if (!targetUrl) {
+        alert("⚠️ L'URL de dépôt Google Drive n'est pas configurée.");
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "⏳ Envoi vers Google Drive en cours...";
+    msgDiv.style.display = 'block';
+    msgDiv.style.background = '#e0f2fe';
+    msgDiv.style.color = '#0369a1';
+    msgDiv.textContent = "⏳ Transfert du fichier PDF en cours, merci de patienter...";
+
+    try {
+        const base64Data = await new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+            reader.onerror = () => reject(new Error("Erreur de lecture du fichier."));
+            reader.readAsDataURL(file);
+        });
+
+        const student = (typeof currentStudent !== 'undefined' && currentStudent) ? currentStudent : null;
+        const cleanPart = (s) => (s || '').toString().trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+        const finalFileName = student
+            ? `${cleanPart(student.nom)}-${cleanPart(student.prenom)}-${cleanPart(student.classe)}.pdf`
+            : file.name;
+
+        const payload = {
+            type: 'DEPOT_RAPPORT_STAGE',
+            nom: student ? student.nom : '',
+            prenom: student ? student.prenom : '',
+            classe: student ? student.classe : '',
+            fileName: finalFileName,
+            fileBase64: base64Data
+        };
+
+        const resp = await fetch(targetUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(payload)
+        });
+        const result = await resp.json();
+
+        if (result && result.status === 'success') {
+            msgDiv.style.background = '#ecfdf5';
+            msgDiv.style.color = '#065f46';
+            msgDiv.innerHTML = `✅ Rapport <strong>${escapeHTML(result.fileName || finalFileName)}</strong> envoyé avec succès dans le dossier Google Drive du professeur !`;
+            fileInput.value = '';
+        } else {
+            throw new Error((result && result.message) || "Réponse inattendue du serveur.");
+        }
+    } catch (err) {
+        msgDiv.style.background = '#fef2f2';
+        msgDiv.style.color = '#991b1b';
+        msgDiv.textContent = "❌ Erreur lors de l'envoi du rapport : " + err.message;
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "🚀 Soumettre le Rapport PDF";
+    }
+}
 async function handleStageNoteSubmit(e) {
     e.preventDefault();
     const classeSelect = document.getElementById('stageClasse');
